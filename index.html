@@ -1588,7 +1588,7 @@ function bootApp(){
 }
 
 /* ---------- backend: sign-in, roles, shared archive, administration (Supabase) ---------- */
-const SUPA_URL = '__SUPABASE_URL__', SUPA_KEY = '__SUPABASE_ANON__';
+const SUPA_URL = 'https://qkquhrpqcydbvpjhsczf.supabase.co', SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcXVocnBxY3lkYnZwamhzY3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3OTExMDIsImV4cCI6MjEwOTM2NzEwMn0.dwsvVvJIlDAnLkCdZzB94RQQk3YgfWRlqSsEdMZc7p0';
 const EMAIL_DOMAIN = 'libyanexpress-ops.github.io';
 const sb = (window.supabase && !SUPA_URL.startsWith('__')) ? window.supabase.createClient(SUPA_URL, SUPA_KEY, {auth:{persistSession:true, autoRefreshToken:true}}) : null;
 let ME = null, SETTINGS = {language:'en', session_minutes:30}, AC_ROW = null;
