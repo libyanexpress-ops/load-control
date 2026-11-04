@@ -314,6 +314,7 @@ body::before{background:var(--navy)}
 
 /* ---- messages: shown on a white page in both themes ---- */
 pre.tx{background:#FFFFFF;color:#111111;border:1px solid var(--line);box-shadow:0 4px 14px rgba(11,26,63,.08);padding:20px 18px;font-size:12.5px;line-height:1.6}
+pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;padding:12px;font-size:12px;line-height:1.5}
 .msg-actions{display:flex;gap:6px;flex-wrap:wrap}
 .sheet-actions{display:flex;gap:6px;flex-wrap:wrap}
 .pg-msg img{object-fit:contain;object-position:top center;background:#fff}
@@ -647,7 +648,7 @@ pre.tx{background:#FFFFFF;color:#111111;border:1px solid var(--line);box-shadow:
     <div class="msg">
       <div class="sec">
         <h2><span dir="ltr">LDM · AHM 583</span> <span class="msg-actions"><button class="btn sm" data-copy="ldmText" data-t="copy">Copy</button><button class="btn sm" data-msgimg="ldm" data-t="saveImg">Save image</button><button class="btn sm" data-msgprint="ldm" data-t="print">Print</button></span></h2>
-        <pre class="tx" id="ldmText" dir="ltr"></pre>
+        <pre class="tx plain" id="ldmText" dir="ltr"></pre>
       </div>
       <div class="sec">
         <h2><span dir="ltr">EDP loadsheet · AHM 517</span> <span class="msg-actions"><button class="btn sm" data-copy="edpText" data-t="copy">Copy</button><button class="btn sm" data-msgimg="edp" data-t="saveImg">Save image</button><button class="btn sm" data-msgprint="edp" data-t="print">Print</button></span></h2>
