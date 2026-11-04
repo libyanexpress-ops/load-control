@@ -1,0 +1,1856 @@
+<meta charset="utf-8">
+<title>LXX Load Control</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: ops console. Inputs on the left, live weight & balance column on the right (sticky on desktop, a dock on phones). Printable A4 sheet lives in its own tab. */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --sunk:#E9EDF3; --ink:#14203A; --muted:#5A6882; --line:#D5DBE5;
+  --accent:#1C3C8E; --accent-ink:#FFFFFF; --accent-soft:#E4EAF7; --gold:#A87A22;
+  --ok:#1D7A51; --warn:#9C6410; --bad:#B02B2B;
+  --ok-bg:#E2F2EA; --warn-bg:#FAEFD9; --bad-bg:#F8E1DF;
+  --zfw:#1C3C8E; --tow:#A87A22; --law:#1D7A51; --env-zfw:rgba(28,60,142,.10); --env-tow:rgba(168,122,34,.10);
+  --paper:#FFFFFF; --paper-ink:#101010; --paper-soft:#F1F1F1;
+  --f-ui:"IBM Plex Sans","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-head:"IBM Plex Sans Condensed","IBM Plex Sans Arabic","Arial Narrow",Arial,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D131E; --surface:#151D2B; --sunk:#1C2636; --ink:#E5EBF4; --muted:#93A0B7; --line:#2A3548;
+    --accent:#86A6FF; --accent-ink:#0D131E; --accent-soft:#1E2B47; --gold:#E0B25A;
+    --ok:#4CC28A; --warn:#E5A84A; --bad:#F07068;
+    --ok-bg:#15301F; --warn-bg:#33270F; --bad-bg:#3A1A1A;
+    --zfw:#86A6FF; --tow:#E0B25A; --law:#4CC28A; --env-zfw:rgba(134,166,255,.13); --env-tow:rgba(224,178,90,.12);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D131E; --surface:#151D2B; --sunk:#1C2636; --ink:#E5EBF4; --muted:#93A0B7; --line:#2A3548;
+  --accent:#86A6FF; --accent-ink:#0D131E; --accent-soft:#1E2B47; --gold:#E0B25A;
+  --ok:#4CC28A; --warn:#E5A84A; --bad:#F07068;
+  --ok-bg:#15301F; --warn-bg:#33270F; --bad-bg:#3A1A1A;
+  --zfw:#86A6FF; --tow:#E0B25A; --law:#4CC28A; --env-zfw:rgba(134,166,255,.13); --env-tow:rgba(224,178,90,.12);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+[dir="rtl"] body{font-size:14.5px}
+[dir="rtl"] .sec h2,[dir="rtl"] .f label,[dir="rtl"] table.h th,[dir="rtl"] table.w th{letter-spacing:0;text-transform:none}
+[dir="rtl"] .f label{font-size:12px}
+[dir="rtl"] .sec h2 .aux,[dir="rtl"] input::placeholder{font-family:var(--f-ui);letter-spacing:0}
+.chart svg,.ov,pre.tx{direction:ltr}
+.btn.lang{font-family:"IBM Plex Sans Arabic",var(--f-ui)}
+b[id^="o-"],.kv b,.mono,.num,table.h td,table.w td,.dock span{unicode-bidi:plaintext}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.45;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+.num,.mono{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.top-in{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.brand{display:flex;align-items:baseline;gap:8px;font-family:var(--f-head);letter-spacing:.04em}
+.brand b{font-size:17px;color:var(--accent);font-weight:700}
+.brand span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.acchip{font-family:var(--f-num);font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:4px;color:var(--muted)}
+.tabs{display:flex;gap:2px;background:var(--sunk);border-radius:6px;padding:3px;margin-inline-start:auto}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:500;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.actions{display:flex;gap:6px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:6px 12px;border-radius:5px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:3px 8px;font-size:12px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 90px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:18px;align-items:start}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.results{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
+
+.banner{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--line);border-radius:6px;padding:8px 12px;font-size:13px}
+
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.sec h2{font-family:var(--f-head);font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted)}
+.sec h2 .aux{font-family:var(--f-num);letter-spacing:0;text-transform:none;font-size:12px;color:var(--ink);font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px 12px}
+.f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.f label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.f input,.f select,.f textarea,.cell input,.cell select{width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:4px;padding:6px 8px}
+.f input.num,.cell input{text-align:right}
+.f input:disabled{opacity:.6}
+.f .hint{font-size:11px;color:var(--muted)}
+.f textarea{resize:vertical;min-height:52px;font-family:var(--f-num);text-transform:uppercase}
+.uc{text-transform:uppercase}
+.kv{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:10px;font-size:13px;color:var(--muted)}
+.kv b{font-family:var(--f-num);color:var(--ink);font-weight:600}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer}
+
+/* holds table */
+.tw{overflow-x:auto}
+table.h{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+table.h th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;text-align:end;padding:4px 6px;border-bottom:1px solid var(--line)}
+table.h th:first-child,table.h td:first-child{text-align:start}
+table.h td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:end;font-family:var(--f-num)}
+table.h td.lbl{font-family:var(--f-ui);font-weight:500}
+table.h .cell input{width:84px;padding:4px 6px}
+table.h tfoot td{font-weight:600;border-bottom:0}
+.meter{display:inline-block;width:56px;height:6px;background:var(--sunk);border-radius:3px;vertical-align:middle;margin-inline-start:6px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+.meter.over i{background:var(--bad)}
+
+/* LMC */
+.lmc-row{display:grid;grid-template-columns:52px repeat(5,minmax(0,1fr)) 32px;gap:6px;align-items:end;padding:8px 0;border-bottom:1px dashed var(--line)}
+.lmc-row .f label{font-size:10px}
+.lmc-row .x{border:1px solid var(--line);background:transparent;border-radius:4px;height:32px;cursor:pointer;color:var(--bad)}
+.empty{font-size:13px;color:var(--muted);padding:6px 0}
+
+/* results */
+.status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:6px;font-family:var(--f-head);font-weight:700;letter-spacing:.08em;font-size:15px}
+.status.ok{background:var(--ok-bg);color:var(--ok)}
+.status.bad{background:var(--bad-bg);color:var(--bad)}
+.status .dot{width:10px;height:10px;border-radius:50%;background:currentColor}
+.status small{font-family:var(--f-ui);font-weight:500;letter-spacing:0;font-size:12px;margin-inline-start:auto}
+table.w{width:100%;border-collapse:collapse;font-size:13px}
+table.w th{font-size:11px;color:var(--muted);text-align:end;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:3px 4px}
+table.w th:first-child{text-align:start}
+table.w td{padding:5px 4px;text-align:end;font-family:var(--f-num);border-top:1px solid var(--line)}
+table.w td:first-child{text-align:start;font-family:var(--f-ui);font-weight:600}
+td.neg{color:var(--bad)} td.pos{color:var(--ok)}
+.lim{display:inline-block;font-size:10px;font-weight:700;color:var(--gold);border:1px solid var(--gold);border-radius:3px;padding:0 3px;margin-inline-start:4px;font-family:var(--f-ui)}
+.bal{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:stretch}
+.trim{border:1px solid var(--line);border-radius:6px;padding:8px 14px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.trim .v{font-family:var(--f-num);font-size:30px;font-weight:600;line-height:1.1;color:var(--accent)}
+.trim .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:var(--f-num);font-size:10px;fill:var(--muted)}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .macl{stroke:var(--muted);stroke-width:.6;stroke-dasharray:3 3;opacity:.7}
+.chart .ptow{fill:var(--env-tow);stroke:var(--tow);stroke-width:1.4}
+.chart .pzfw{fill:var(--env-zfw);stroke:var(--zfw);stroke-width:1.4}
+.chart .dz{fill:var(--zfw)} .chart .dt{fill:var(--tow)} .chart .dl{fill:var(--law)}
+.chart .lab{font-family:var(--f-ui);font-weight:600;font-size:11px;fill:var(--ink)}
+.chart .axis{fill:var(--ink);font-family:var(--f-ui);font-size:10px;font-weight:600}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.checks li{font-size:13px;padding:6px 10px;border-radius:4px;border-inline-start:3px solid}
+.checks li.bad{background:var(--bad-bg);border-color:var(--bad)}
+.checks li.warn{background:var(--warn-bg);border-color:var(--warn)}
+.checks li.ok{background:var(--ok-bg);border-color:var(--ok)}
+
+/* phone dock */
+.dock{display:none}
+@media (max-width:980px){
+  .top{position:static}
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .results{position:static}
+  .tabs{margin-inline-start:0;order:3;width:100%}
+  .tabs button{flex:1}
+  .dock{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:25;gap:12px;align-items:center;justify-content:space-between;
+    background:var(--surface);border-top:1px solid var(--line);
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+    padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));font-family:var(--f-num);font-size:12px}
+  .dock .s{font-family:var(--f-head);font-weight:700;letter-spacing:.06em}
+  .dock .s.ok{color:var(--ok)} .dock .s.bad{color:var(--bad)}
+}
+@media (max-width:560px){
+  .lmc-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .lmc-row .x{grid-column:3}
+  .bal{grid-template-columns:1fr}
+}
+
+/* messages + archive */
+.msg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px}
+pre.tx{margin:0;background:var(--sunk);border-radius:4px;padding:12px;font-family:var(--f-num);font-size:12px;line-height:1.5;overflow-x:auto;white-space:pre}
+.arch{width:100%;border-collapse:collapse;font-size:13px}
+.arch th,.arch td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:start}
+.arch td.mono{font-size:12px}
+
+/* filled company form: original page as background, values drawn on top in pen-blue */
+.paperwrap{overflow-x:auto;padding:8px 0}
+.pg{position:relative;width:100%;max-width:210mm;aspect-ratio:595.276/841.89;margin:0 auto 18px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.pg img{position:absolute;inset:0;width:100%;height:100%;max-width:none;display:block}
+.pg svg.ov{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+@font-face{font-family:"LXX Pen";src:url(data:font/woff2;base64,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) format("woff2");font-weight:400;font-display:block}
+.ov text{stroke:none;white-space:pre;font-weight:400;font-family:"LXX Pen","Nanum Pen Script","Segoe Print","Bradley Hand","Comic Sans MS",cursive;fill:#1E2C6E}
+.ov text.red{fill:#A3151B}
+.ov text.halo{stroke:none}
+.ov .tr{stroke:#1E2C6E;stroke-width:.75;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ov .tr.dash{stroke-dasharray:3 2}
+.ov .ah,.ov .pt{fill:#1E2C6E}
+#printRoot{display:none}
+
+@media print{
+  @page{size:A4;margin:0}
+  :root{padding:0!important}
+  html,body{background:#fff!important;margin:0}
+  body > *:not(#printRoot){display:none!important}
+  body::before{display:none}
+  #printRoot{display:block!important}
+  .pg{width:210mm;height:297mm;max-width:none;aspect-ratio:auto;margin:0;box-shadow:none;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pg:last-child{break-after:auto;page-break-after:auto}
+}
+/* ---- formal shell: navy header, gold rule ---- */
+:root{ --navy:#0B1A3F; --navy-2:#12275C; --navy-line:#2F447A; --navy-ink:#9FAACB; --brass:#C9A24F; }
+.top{background:var(--navy);color:#fff;border-bottom:0}
+body::before{background:var(--navy)}
+.brand b{color:#fff;letter-spacing:.12em}
+.brand span{color:var(--brass);letter-spacing:.28em}
+.top .tabs{background:transparent;padding:0;gap:0}
+.top .tabs button{color:var(--navy-ink);border-radius:0;border-bottom:2px solid transparent;padding:10px 12px;transition:color .2s ease,border-color .2s ease}
+.top .tabs button:hover{color:#fff}
+.top .tabs button[aria-selected="true"]{background:transparent;color:#fff;box-shadow:none;border-bottom-color:var(--brass);font-weight:600}
+.top .btn{background:transparent;color:#fff;border-color:var(--navy-line)}
+.top .btn:hover{border-color:var(--brass)}
+.top .btn.primary{background:var(--brass);border-color:var(--brass);color:var(--navy);font-weight:600}
+.who{display:flex;flex-direction:column;line-height:1.15;padding:0 6px;border-inline-start:1px solid var(--navy-line);margin-inline-start:4px}
+.who b{font-family:var(--f-num);font-size:12.5px;font-weight:500}
+.who small{font-size:10px;letter-spacing:.1em;color:var(--brass);text-transform:uppercase}
+.who small.ops{color:#9FB6F0}
+@media (max-width:980px){ .top .tabs button{flex:1} }
+
+/* ---- motion ---- */
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes draw{from{stroke-dashoffset:900}to{stroke-dashoffset:0}}
+@keyframes trace{0%{offset-distance:0%;opacity:0}8%{opacity:1}92%{opacity:1}100%{offset-distance:100%;opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.rise{animation:rise .65s cubic-bezier(.2,.7,.2,1) both}
+.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.42s}.d5{animation-delay:.54s}
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#3CC48A;animation:blink 2s ease-in-out infinite;vertical-align:1px}
+.pulse.dark{background:var(--ok)}
+.sec,.status{transition:box-shadow .2s ease}
+.status{animation:rise .45s ease both}
+@media (prefers-reduced-motion:reduce){.rise,.env,.envz,.g-dot,.pulse,.status,.btn-auth::after,.meter2 i{animation:none!important}}
+
+/* ---- sign-in gate (brand panel keeps its navy in both themes) ---- */
+.gate{min-height:100%;display:flex;flex-direction:column;background:var(--bg)}
+.strip{background:var(--navy);color:#AEB9D6;font-size:12px;letter-spacing:.08em;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));padding-block:8px}
+.strip-org{color:#fff;font-weight:600}
+.strip-r{margin-inline-start:auto;display:flex;align-items:center;gap:8px}
+.strip-clock{color:#fff}
+.gate-body{flex:1 1 auto;display:flex;flex-wrap:wrap}
+.gate-brand{flex:1 1 520px;min-width:0;background:var(--navy-2);color:#fff;display:flex;flex-direction:column;justify-content:space-between;gap:32px;
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));padding-block:48px}
+@media (min-width:700px){.gate-brand{padding-inline:56px}}
+.g-logo{font-family:var(--f-head);font-weight:700;font-size:26px;letter-spacing:.12em}
+.g-sub{display:flex;align-items:center;gap:12px;margin-top:6px}
+.g-sub i{width:36px;height:1px;background:var(--brass)}
+.g-sub span{font-size:12px;letter-spacing:.32em;color:var(--brass)}
+.g-mid{display:flex;flex-wrap:wrap;gap:36px;align-items:center}
+.g-copy{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.g-copy h1{margin:0;font-family:var(--f-head);font-size:clamp(30px,4vw,44px);line-height:1.1;font-weight:600;text-wrap:balance}
+.g-copy p{margin:0;font-size:16px;line-height:1.7;color:#C3CDE6;max-width:420px}
+.g-copy dl{margin:6px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 24px;font-size:13px}
+.g-copy dt{color:#8FA0C9;letter-spacing:.08em;font-size:11px}
+.g-copy dd{margin:4px 0 0}
+.g-env{width:240px;max-width:100%;height:auto;flex:0 0 auto}
+.env{stroke-dasharray:900;animation:draw 2.4s .3s ease-out both}
+.envz{stroke-dasharray:900;animation:draw 2.4s .9s ease-out both}
+.g-dot{offset-path:path('M150 40 L150 120 L128 120 L128 170 L182 170 L182 330');animation:trace 6s 1.6s ease-in-out infinite}
+.g-foot{font-size:12px;color:#8FA0C9;display:flex;gap:18px;flex-wrap:wrap}
+.gate-form{flex:1 1 420px;min-width:0;display:flex;align-items:center;justify-content:center;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px}
+.gate-simple{align-items:center;justify-content:center;padding:40px 16px}
+.card-auth{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--brass);border-radius:6px;
+  padding:34px 30px;display:flex;flex-direction:column;gap:20px;box-shadow:0 18px 40px rgba(11,26,63,.08)}
+.ca-head{display:flex;flex-direction:column;gap:8px}
+.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--muted);font-weight:600}
+.card-auth h2{margin:0;font-family:var(--f-head);font-size:28px;font-weight:600}
+.card-auth p,.ca-note{margin:0;font-size:14px;color:var(--muted);line-height:1.6}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+.fld input{font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);transition:border-color .2s ease,box-shadow .2s ease}
+.fld input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.pw{display:flex;gap:8px}.pw input{flex:1 1 auto;min-width:0}
+.btn-auth{position:relative;overflow:hidden;font:inherit;font-size:15px;font-weight:600;letter-spacing:.04em;padding:14px;border:0;border-radius:4px;background:var(--navy-2);color:#fff;cursor:pointer;transition:background .2s ease,transform .15s ease}
+.btn-auth:hover{background:var(--navy)}
+.btn-auth:active{transform:translateY(1px)}
+.btn-auth:disabled{opacity:.6;cursor:progress}
+.btn-auth::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:translateX(-100%)}
+.btn-auth:hover::after{animation:sweep .9s ease}
+.ca-rule{height:1px;background:var(--line)}
+.auth-err{font-size:13px;color:var(--bad);background:var(--bad-bg);border-radius:4px;padding:10px 12px}
+.meter2{height:4px;border-radius:2px;background:var(--sunk);overflow:hidden;margin-top:-10px}
+.meter2 i{display:block;height:100%;width:0;background:var(--bad);transition:width .3s ease,background .3s ease}
+[dir="rtl"] .g-copy dl,[dir="rtl"] .strip,[dir="rtl"] .brand span,[dir="rtl"] .who small,[dir="rtl"] .eyebrow,[dir="rtl"] .fld label{letter-spacing:0}
+
+/* ---- administration ---- */
+.adm-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.adm-title{margin:4px 0 0;font-family:var(--f-head);font-size:26px;font-weight:600}
+.subnav{margin-inline-start:auto;display:flex;gap:4px;flex-wrap:wrap}
+.subnav button{border:0;background:transparent;padding:8px 12px;border-radius:4px;color:var(--muted);cursor:pointer;font:inherit;transition:background .2s ease,color .2s ease}
+.subnav button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.adm-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);gap:18px;align-items:start}
+@media (max-width:980px){.adm-grid{grid-template-columns:minmax(0,1fr)}}
+.accent-top{border-top:3px solid var(--accent)}
+#pwForm{display:flex;flex-direction:column;gap:12px}
+.hint-s{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.6}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:10px}
+.chip.on{background:var(--ok-bg);color:var(--ok)} .chip.off{background:var(--bad-bg);color:var(--bad)} .chip.idle{background:var(--sunk);color:var(--muted)}
+.perm td:not(:first-child),.perm th:not(:first-child){text-align:center}
+.yes{color:var(--ok);font-weight:600} .no{color:var(--muted)}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:3px;background:var(--sunk);border-radius:5px;max-width:320px}
+.seg button{border:0;background:transparent;padding:9px;border-radius:4px;font:inherit;color:var(--muted);cursor:pointer;transition:background .25s ease,color .25s ease}
+.seg button[lang="ar"]{font-family:"IBM Plex Sans Arabic",var(--f-ui)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(11,26,63,.12)}
+.arch tr{transition:background .2s ease}
+.arch tbody tr:hover{background:var(--sunk)}
+.kpi-grow{transform-origin:left;animation:grow 1s .3s cubic-bezier(.2,.7,.2,1) both}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<!-- SIGN IN -->
+<div id="login" class="gate" hidden>
+  <div class="strip">
+    <span class="strip-org">LIBYAN EXPRESS AIRLINES · FLIGHT OPERATIONS</span>
+    <span class="strip-r"><span class="pulse"></span><span data-t="restricted">RESTRICTED SYSTEM</span></span>
+    <span class="strip-clock mono" id="utcClock">—</span>
+  </div>
+  <div class="gate-body">
+    <section class="gate-brand">
+      <div class="rise">
+        <div class="g-logo">LIBYAN EXPRESS</div>
+        <div class="g-sub"><i></i><span>LOAD CONTROL</span></div>
+      </div>
+      <div class="g-mid">
+        <div class="g-copy">
+          <h1 class="rise d1" data-th="gTitle">Weight &amp; Balance<br>Control System</h1>
+          <p class="rise d2" data-t="gLead">Loadsheet, balance chart and last-minute changes for the company fleet, prepared on the approved Load &amp; Trim form.</p>
+          <dl class="rise d3">
+            <div><dt data-t="gAircraft">AIRCRAFT</dt><dd class="mono">B737-400 · 5A-WAC</dd></div>
+            <div><dt data-t="gConfig">CONFIGURATION</dt><dd class="mono">162Y</dd></div>
+            <div><dt data-t="gStd">STANDARDS</dt><dd class="mono">IATA AHM 517 · 583</dd></div>
+            <div><dt data-t="gTime">TIME REFERENCE</dt><dd class="mono">UTC</dd></div>
+          </dl>
+        </div>
+        <svg class="g-env" viewBox="0 0 300 360" aria-hidden="true">
+          <g stroke="#2A4383" stroke-width="1">
+            <line x1="20" y1="40" x2="280" y2="40"/><line x1="20" y1="100" x2="280" y2="100"/><line x1="20" y1="160" x2="280" y2="160"/><line x1="20" y1="220" x2="280" y2="220"/><line x1="20" y1="280" x2="280" y2="280"/><line x1="20" y1="340" x2="280" y2="340"/>
+            <line x1="60" y1="30" x2="60" y2="345"/><line x1="120" y1="30" x2="120" y2="345"/><line x1="180" y1="30" x2="180" y2="345"/><line x1="240" y1="30" x2="240" y2="345"/>
+          </g>
+          <polygon class="env" points="96,330 70,260 64,200 52,190 52,150 64,140 66,90 230,90 222,190 214,250 196,300 168,330" fill="rgba(201,162,79,0.07)" stroke="#C9A24F" stroke-width="1.6"/>
+          <polyline class="envz" points="96,330 70,260 66,215 210,215 214,250 196,300 168,330" fill="none" stroke="#8FA0C9" stroke-width="1.2" stroke-dasharray="4 3"/>
+          <circle class="g-dot" r="5" fill="#FFFFFF"/>
+          <text x="236" y="84" fill="#C9A24F" font-family="IBM Plex Mono, monospace" font-size="10">MTOW</text>
+          <text x="216" y="210" fill="#8FA0C9" font-family="IBM Plex Mono, monospace" font-size="10">MZFW</text>
+        </svg>
+      </div>
+      <div class="g-foot rise d4"><span>© Libyan Express Airlines</span><span>Load Control v1.0</span><span data-t="gInternal">For internal use only</span></div>
+    </section>
+
+    <section class="gate-form">
+      <form id="loginForm" class="card-auth rise d2" autocomplete="on">
+        <div class="ca-head">
+          <span class="eyebrow" data-t="secure">SECURE ACCESS</span>
+          <h2 data-t="signIn">Sign in</h2>
+          <p data-t="signInLead">Authorized personnel only. Every session is recorded in the activity log.</p>
+        </div>
+        <div class="fld rise d3">
+          <label for="lu" data-t="username">USERNAME</label>
+          <input id="lu" name="username" class="mono" dir="ltr" autocomplete="username" autocapitalize="characters" spellcheck="false" required>
+        </div>
+        <div class="fld rise d4">
+          <label for="lp" data-t="password">PASSWORD</label>
+          <div class="pw">
+            <input id="lp" name="password" type="password" dir="ltr" autocomplete="current-password" required>
+            <button type="button" class="btn" id="lpShow" data-t="show">Show</button>
+          </div>
+        </div>
+        <div class="auth-err" id="loginErr" role="alert" hidden></div>
+        <button type="submit" class="btn-auth rise d5" id="loginBtn" data-t="signIn">Sign in</button>
+        <div class="ca-rule"></div>
+        <p class="ca-note" data-t="forgot">Forgot your password? Contact the system administrator.</p>
+      </form>
+    </section>
+  </div>
+</div>
+
+<!-- FIRST SIGN-IN: NEW PASSWORD -->
+<div id="mustChange" class="gate gate-simple" hidden>
+  <form id="mcForm" class="card-auth rise">
+    <div class="ca-head">
+      <span class="eyebrow" data-t="secure">SECURE ACCESS</span>
+      <h2 data-t="mcTitle">Set a new password</h2>
+      <p data-t="mcLead">Your administrator asked you to choose a new password before you continue.</p>
+    </div>
+    <div class="fld"><label for="mc1" data-t="newPw">NEW PASSWORD</label><input id="mc1" type="password" dir="ltr" autocomplete="new-password" required></div>
+    <div class="meter2"><i id="mcBar"></i></div>
+    <div class="fld"><label for="mc2" data-t="confirmPw">CONFIRM PASSWORD</label><input id="mc2" type="password" dir="ltr" autocomplete="new-password" required></div>
+    <p class="ca-note" data-t="pwRule">At least 8 characters, with letters and numbers.</p>
+    <div class="auth-err" id="mcErr" role="alert" hidden></div>
+    <button type="submit" class="btn-auth" data-t="savePw">Save password and continue</button>
+  </form>
+</div>
+
+<div id="app" hidden>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><b>LIBYAN EXPRESS</b><span data-t="brandSub">Load Control</span></div>
+        <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="build" aria-selected="true" data-t="tab.build">Build</button>
+      <button role="tab" data-tab="sheet" aria-selected="false" data-t="tab.sheet">Loadsheet</button>
+      <button role="tab" data-tab="msgs" aria-selected="false" data-t="tab.msgs">Messages</button>
+      <button role="tab" data-tab="arch" aria-selected="false" data-t="tab.arch">Archive</button>
+      <button role="tab" data-tab="admin" aria-selected="false" data-t="tab.admin" id="tabAdmin" hidden>Administration</button>
+    </nav>
+    <div class="actions">
+      <button class="btn" id="btnNew" data-t="newFlight">New flight</button>
+      <button class="btn" id="btnSave" data-t="save">Save</button>
+      <button class="btn primary" id="btnPrint" data-t="print">Print</button>
+      <span class="who"><b id="whoUser">—</b><small id="whoRole"></small></span>
+      <button class="btn" id="btnOut" data-t="signOut">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- BUILD -->
+  <section id="tab-build">
+    <div class="banner" id="sampleBanner" hidden style="margin-bottom:14px">
+      <span data-th="sample"></span>
+      <button class="btn sm" id="btnClearSample" data-t="startBlank">Start blank</button>
+    </div>
+    <div class="banner" id="confirmBar" hidden style="margin-bottom:14px">
+      <span id="confirmText"></span>
+      <span style="display:flex;gap:6px"><button class="btn sm danger" id="confirmYes" data-t="confirm">Confirm</button><button class="btn sm" id="confirmNo" data-t="cancel">Cancel</button></span>
+    </div>
+    <div class="layout">
+      <div class="col">
+
+        <div class="sec">
+          <h2><span data-t="secFlight">Flight</span></h2>
+          <div class="grid">
+            <div class="f"><label for="i-no" data-t="flightNo">Flight no</label><input id="i-no" class="uc" dir="ltr" data-k="flt.no"></div>
+            <div class="f"><label for="i-date" data-t="date">Date (UTC)</label><input id="i-date" type="date" dir="ltr" data-k="flt.date"></div>
+            <div class="f"><label for="i-time" data-t="time">Time UTC</label><input id="i-time" class="num" dir="ltr" inputmode="numeric" maxlength="4" placeholder="HHMM" data-k="flt.time"></div>
+            <div class="f"><label for="i-from" data-t="from">From</label><input id="i-from" class="uc" dir="ltr" maxlength="4" data-k="flt.from"></div>
+            <div class="f"><label for="i-to" data-t="to">To</label><input id="i-to" class="uc" dir="ltr" maxlength="4" data-k="flt.to"></div>
+            <div class="f"><label for="i-sno" data-t="sno">Sheet no</label><input id="i-sno" class="num" dir="ltr" data-k="flt.sno"></div>
+            <div class="f"><label for="i-ed" data-t="ed">Edition</label><input id="i-ed" class="num" dir="ltr" type="number" min="1" data-k="flt.ed"></div>
+            <div class="f"><label for="i-cpt" data-t="captain">Captain</label><input id="i-cpt" class="uc" dir="ltr" data-k="flt.captain"></div>
+            <div class="f"><label for="i-prep" data-t="prep">Prepared by</label><input id="i-prep" class="uc" dir="ltr" data-k="flt.prep"></div>
+            <div class="f"><label for="i-appr" data-t="appr">Approved by</label><input id="i-appr" class="uc" dir="ltr" data-k="flt.appr"></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2><span data-t="secCrew">Crew &amp; dry operating weight</span> <span class="aux" id="o-crew">2/1</span></h2>
+          <div class="grid">
+            <div class="f"><label for="i-xc" data-t="xc">Extra cockpit</label><input id="i-xc" class="num" dir="ltr" type="number" min="0" max="1" data-k="crew.xCockpit"><span class="hint" data-t="each80">80 kg each</span></div>
+            <div class="f"><label for="i-xf" data-t="xf">Extra cabin FWD</label><input id="i-xf" class="num" dir="ltr" type="number" min="0" data-k="crew.xFwd"><span class="hint" data-t="each80">80 kg each</span></div>
+            <div class="f"><label for="i-xa" data-t="xa">Extra cabin AFT</label><input id="i-xa" class="num" dir="ltr" type="number" min="0" data-k="crew.xAft"><span class="hint" data-t="each80">80 kg each</span></div>
+            <div class="f"><label for="i-g1" data-t="g1">Galley G1 ±kg</label><input id="i-g1" class="num" dir="ltr" type="number" data-k="galley.G1"></div>
+            <div class="f"><label for="i-g2" data-t="g2">Galley G2 ±kg</label><input id="i-g2" class="num" dir="ltr" type="number" data-k="galley.G2"></div>
+            <div class="f"><label for="i-g4" data-t="g4">Galley G4B ±kg</label><input id="i-g4" class="num" dir="ltr" type="number" data-k="galley.G4B"></div>
+          </div>
+          <div class="kv">
+            <span><span data-t="basic">Basic (2/1 incl.)</span> <b dir="ltr" id="o-basic">—</b></span>
+            <span><span data-t="cdow">Corrected DOW</span> <b id="o-dow">—</b></span>
+            <span><span data-t="cdoi">Corrected DOI</span> <b id="o-doi">—</b></span>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2><span data-t="secPax">Passengers</span> <span class="aux" id="o-paxsum">—</span></h2>
+          <div class="grid">
+            <div class="f"><label for="i-ad" data-t="adult">Adult · 80 kg</label><input id="i-ad" class="num" dir="ltr" type="number" min="0" data-k="pax.adult"></div>
+            <div class="f"><label for="i-ch" data-t="child">Child · 30 kg</label><input id="i-ch" class="num" dir="ltr" type="number" min="0" data-k="pax.child"></div>
+            <div class="f"><label for="i-in" data-t="infant">Infant · 0 kg</label><input id="i-in" class="num" dir="ltr" type="number" min="0" data-k="pax.infant"></div>
+          </div>
+          <div style="margin:14px 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="f"><label data-t="cabinDist">Cabin distribution (seated pax)</label></span>
+            <label class="toggle"><input type="checkbox" id="i-auto" data-k="pax.auto"> <span data-t="uniform">Uniform distribution rule</span></label>
+          </div>
+          <div class="grid">
+            <div class="f"><label for="i-oa" data-t="secOA">Section OA · max 48</label><input id="i-oa" class="num" dir="ltr" type="number" min="0" max="48" data-k="pax.OA"></div>
+            <div class="f"><label for="i-ob" data-t="secOB">Section OB · max 54</label><input id="i-ob" class="num" dir="ltr" type="number" min="0" max="54" data-k="pax.OB"></div>
+            <div class="f"><label for="i-oc" data-t="secOC">Section OC · max 60</label><input id="i-oc" class="num" dir="ltr" type="number" min="0" max="60" data-k="pax.OC"></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2><span data-t="secHolds">Holds</span> <span class="aux" data-t="holdsAux">Counter weights from flight supervisor</span></h2>
+          <div class="tw">
+            <table class="h">
+              <thead><tr><th data-t="thCpt">Compartment</th><th data-t="thPcs">Bag pcs</th><th data-t="thBag">Baggage kg</th><th data-t="thCgo">Cargo kg</th><th data-t="thMail">Mail kg</th><th data-t="thTot">Total / max</th></tr></thead>
+              <tbody id="holdBody"></tbody>
+              <tfoot><tr><td class="lbl" data-t="totDead">Total deadload</td><td id="o-pcs">0</td><td id="o-bag">0</td><td id="o-cgo">0</td><td id="o-mail">0</td><td id="o-dead">0</td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2><span data-t="secFuel">Fuel</span> <span class="aux" id="o-fuelsum">—</span></h2>
+          <div class="grid">
+            <div class="f"><label for="i-tof" data-t="tof">Takeoff fuel</label><input id="i-tof" class="num" dir="ltr" type="number" min="0" data-k="fuel.tof"></div>
+            <div class="f"><label for="i-trip" data-t="trip">Trip fuel</label><input id="i-trip" class="num" dir="ltr" type="number" min="0" data-k="fuel.trip"></div>
+            <div class="f"><label for="i-taxi" data-t="taxi">Taxi fuel</label><input id="i-taxi" class="num" dir="ltr" type="number" min="0" data-k="fuel.taxi"></div>
+            <div class="f"><label for="i-rtow" data-t="rtow">Perf. limited TOW</label><input id="i-rtow" class="num" dir="ltr" type="number" min="0" placeholder="optional" data-tp="optional" data-k="fuel.rtow"><span class="hint" data-t="rtowHint">Runway / climb limit</span></div>
+          </div>
+          <div class="kv">
+            <span><span data-t="wings">Wings</span> <b id="o-wing">—</b></span>
+            <span><span data-t="center">Center</span> <b id="o-ctr">—</b></span>
+            <span><span data-t="fiTO">Fuel index TO</span> <b id="o-fito" dir="ltr">—</b></span>
+            <span><span data-t="fiLW">Fuel index LDG</span> <b id="o-filw" dir="ltr">—</b></span>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2><span data-t="secLmc">Last minute changes</span> <span class="aux" id="o-lmcsum">—</span></h2>
+          <div id="lmcList"></div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn sm" id="addLmcPax" data-t="addPax">+ Passenger</button>
+            <button class="btn sm" id="addLmcLoad" data-t="addLoad">+ Baggage / cargo / mail</button>
+          </div>
+          <p class="hint" style="font-size:11px;color:var(--muted);margin:10px 0 0" data-t="lmcNote"></p>
+        </div>
+
+        <div class="sec">
+          <h2><span data-t="secSi">SI / Notes</span></h2>
+          <div class="f"><label for="i-si" data-t="siLabel">Supplementary information</label><textarea id="i-si" dir="ltr" data-k="flt.si" rows="2"></textarea></div>
+        </div>
+      </div>
+
+      <aside class="col results" id="results"></aside>
+    </div>
+  </section>
+
+  <!-- SHEET -->
+  <section id="tab-sheet" hidden>
+    <div class="banner" style="margin-bottom:12px">
+      <span data-th="sheetBanner"></span>
+      <button class="btn sm primary" id="btnPrint2" data-t="print">Print</button>
+    </div>
+    <div class="paperwrap" id="sheetView" dir="ltr"></div>
+  </section>
+
+  <!-- MESSAGES -->
+  <section id="tab-msgs" hidden>
+    <div class="msg">
+      <div class="sec">
+        <h2><span dir="ltr">LDM · AHM 583</span> <button class="btn sm" data-copy="ldmText" data-t="copy">Copy</button></h2>
+        <pre class="tx" id="ldmText" dir="ltr"></pre>
+      </div>
+      <div class="sec">
+        <h2><span dir="ltr">EDP loadsheet · AHM 517</span> <button class="btn sm" data-copy="edpText" data-t="copy">Copy</button></h2>
+        <pre class="tx" id="edpText" dir="ltr"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHIVE -->
+  <section id="tab-arch" hidden>
+    <div class="sec">
+      <h2><span data-t="secArch">Saved flights</span> <span class="aux" data-t="archAux">Stored in this browser</span></h2>
+      <div class="tw"><table class="arch"><thead><tr><th data-t="aFlight">Flight</th><th data-t="aDate">Date</th><th data-t="aRoute">Route</th><th data-t="aPax">Pax</th><th>ZFW</th><th>TOW</th><th>MAC TOW</th><th data-t="aSaved">Saved</th><th></th></tr></thead><tbody id="archBody"></tbody></table></div>
+    </div>
+  </section>
+  <!-- ADMINISTRATION (admin only) -->
+  <section id="tab-admin" hidden>
+    <div class="adm-head">
+      <div>
+        <span class="eyebrow" data-t="admCrumb">ADMINISTRATION</span>
+        <h1 class="adm-title" id="admTitle">Users &amp; access</h1>
+      </div>
+      <nav class="subnav" role="tablist">
+        <button data-sub="users" aria-selected="true" data-t="subUsers">Users</button>
+        <button data-sub="aircraft" aria-selected="false" data-t="subAircraft">Aircraft data</button>
+        <button data-sub="activity" aria-selected="false" data-t="subActivity">Activity log</button>
+        <button data-sub="settings" aria-selected="false" data-t="subSettings">System settings</button>
+      </nav>
+    </div>
+    <div class="banner" id="admMsg" hidden style="margin-bottom:14px"></div>
+
+    <div id="sub-users" class="adm-grid">
+      <div class="col">
+        <div class="sec rise d1">
+          <h2><span data-t="accounts">Accounts</span></h2>
+          <div class="tw"><table class="arch"><thead><tr><th data-t="thUser">Username</th><th data-t="thRole">Role</th><th data-t="thStatus">Status</th><th data-t="thLast">Last sign-in</th><th></th></tr></thead><tbody id="usrBody"></tbody></table></div>
+        </div>
+        <div class="sec rise d2">
+          <h2><span data-t="permissions">Permissions</span></h2>
+          <div class="tw"><table class="arch perm"><thead><tr><th data-t="thCap">Capability</th><th data-t="rAdmin">Administrator</th><th data-t="rOps">Air Operations</th></tr></thead><tbody id="permBody"></tbody></table></div>
+        </div>
+      </div>
+      <aside class="col">
+        <form class="sec accent-top rise d2" id="pwForm">
+          <h2><span data-t="changePw">Change password</span></h2>
+          <div class="f"><label for="pwUser" data-t="account">Account</label><select id="pwUser" dir="ltr"></select></div>
+          <div class="f"><label for="pw1" data-t="newPw">New password</label><input id="pw1" type="password" dir="ltr" autocomplete="new-password"></div>
+          <div class="meter2"><i id="pwBar"></i></div>
+          <div class="f"><label for="pw2" data-t="confirmPw">Confirm password</label><input id="pw2" type="password" dir="ltr" autocomplete="new-password"></div>
+          <label class="toggle"><input type="checkbox" id="pwMust" checked> <span data-t="mustNext">Require a new password at next sign-in</span></label>
+          <button class="btn primary" type="submit" data-t="updatePw">Update password</button>
+          <p class="hint-s" data-t="pwStored">Passwords are stored encrypted. Nobody can read them, the administrator included.</p>
+        </form>
+      </aside>
+    </div>
+
+    <div id="sub-aircraft" hidden>
+      <div class="sec rise">
+        <h2><span data-t="acTitle">Aircraft data</span> <span class="aux" id="acStamp">—</span></h2>
+        <div class="grid" id="acFields"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <button class="btn primary" id="acSave" data-t="acSave">Save aircraft data</button>
+          <label class="btn" for="acFile" data-t="acImport">Import aircraft file</label>
+          <input type="file" id="acFile" accept=".json,application/json" hidden>
+          <button class="btn" id="acExport" data-t="acExport">Export aircraft file</button>
+        </div>
+        <p class="hint-s" data-t="acNote">Values from the AHM / weight schedule. Every change is recorded in the activity log.</p>
+      </div>
+    </div>
+
+    <div id="sub-activity" hidden>
+      <div class="sec rise">
+        <h2><span data-t="subActivity">Activity log</span> <span class="aux"><span class="pulse dark"></span> Live</span></h2>
+        <div class="tw"><table class="arch"><thead><tr><th data-t="thTime">Time (UTC)</th><th data-t="thUser">Username</th><th data-t="thAction">Action</th><th data-t="thDetail">Detail</th></tr></thead><tbody id="actBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="sub-settings" hidden>
+      <div class="sec rise" style="max-width:560px">
+        <h2><span data-t="subSettings">System settings</span></h2>
+        <div class="f"><label data-t="ifLang">Interface language</label>
+          <div class="seg" role="group" aria-label="Interface language">
+            <button type="button" data-lang="en">English</button>
+            <button type="button" data-lang="ar" lang="ar">العربية</button>
+          </div>
+          <span class="hint-s" data-t="ifLangNote">Applies to every account. The printed Load &amp; Trim form always stays in English.</span>
+        </div>
+        <div class="f" style="margin-top:16px"><label for="setTimeout" data-t="sessTimeout">Session timeout</label>
+          <select id="setTimeout" style="max-width:200px"><option value="15">15 min</option><option value="30">30 min</option><option value="60">60 min</option><option value="120">120 min</option></select>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="dock" id="dock"></div>
+</div>
+<div id="printRoot"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/*CALC-START*/
+let AC = {};   // loaded after sign-in from the aircraft table (never shipped in this public file)
+
+
+function num(v){ const n = parseFloat(v); return isFinite(n) ? n : 0; }
+function ixOf(w, arm){ return w * (arm - AC.ref) / AC.C; }
+function macOf(I, W){ if (!W) return 0; return ((AC.C * (I - AC.K) / W) + AC.ref - AC.lemac) / (AC.mac / 100); }
+function armAt(tbl, w){
+  if (w <= tbl[0][0]) return tbl[0][1];
+  for (let i = 0; i < tbl.length - 1; i++){
+    const [w1,a1] = tbl[i], [w2,a2] = tbl[i+1];
+    if (w >= w1 && w <= w2) return a1 + (a2 - a1) * (w - w1) / (w2 - w1);
+  }
+  return tbl[tbl.length-1][1];
+}
+function fuelSplit(f){
+  f = Math.max(0, f);
+  const wing = Math.min(f, AC.wingMax);
+  const ctr = Math.max(0, f - AC.wingMax);
+  return {wing, ctr};
+}
+function fuelIndex(f){
+  const {wing, ctr} = fuelSplit(f);
+  let ix = 0;
+  if (wing > 0) ix += ixOf(wing, armAt(AC.wing, wing));
+  if (ctr > 0) ix += ixOf(Math.min(ctr, AC.ctrMax), armAt(AC.ctr, Math.min(ctr, AC.ctrMax)));
+  return ix;
+}
+function uniform(n){
+  n = Math.max(0, Math.min(Math.round(n), AC.seats));
+  const T = AC.dist.tot, A = AC.dist.OA, B = AC.dist.OB;
+  let i = T.findIndex(t => t >= n), a, b;
+  if (T[i] === n){ a = A[i]; b = B[i]; }
+  else {
+    const t = (n - T[i-1]) / (T[i] - T[i-1]);
+    a = Math.round(A[i-1] + t * (A[i] - A[i-1]));
+    b = Math.round(B[i-1] + t * (B[i] - B[i-1]));
+  }
+  let c = n - a - b;
+  if (c > 60){ const x = c - 60; c = 60; b += x; }
+  if (b > 54){ const x = b - 54; b = 54; a += x; }
+  if (c < 0){ b += c; c = 0; }
+  return {OA:a, OB:b, OC:c};
+}
+function limitAt(pts, w){
+  if (w <= pts[0][0]) return pts[0][1];
+  for (let i = 0; i < pts.length - 1; i++){
+    const [w1,v1] = pts[i], [w2,v2] = pts[i+1];
+    if (w2 > w1 && w >= w1 && w <= w2) return v1 + (v2 - v1) * (w - w1) / (w2 - w1);
+  }
+  return pts[pts.length-1][1];
+}
+function trimAt(W, m){
+  if (!(m >= 5 && m <= 30) || !W) return null;
+  const band = (AC.trim.bands.find(b => W <= b[0]) || AC.trim.bands[2])[1];
+  const xs = AC.trim.mac;
+  for (let i = 0; i < xs.length - 1; i++){
+    if (m >= xs[i] && m <= xs[i+1]){
+      const v1 = band[i], v2 = band[i+1];
+      if (v1 == null) return m === xs[i+1] ? v2 : null;
+      return v1 + (v2 - v1) * (m - xs[i]) / (xs[i+1] - xs[i]);
+    }
+  }
+  return null;
+}
+function envCheck(kind, W, I){
+  const fwd = limitAt(kind === 'zfw' ? AC.env.zfwFwd : AC.env.towFwd, W);
+  const aft = limitAt(kind === 'zfw' ? AC.env.zfwAft : AC.env.towAft, W);
+  return {fwd, aft, ok: I >= fwd && I <= aft};
+}
+
+function calc(S){
+  const r = {checks:[]};
+  const chk = (lvl, key, ...args) => r.checks.push({lvl, key, args});
+  // DOW / DOI
+  const xc = num(S.crew.xCockpit), xf = num(S.crew.xFwd), xa = num(S.crew.xAft);
+  const g1 = num(S.galley.G1), g2 = num(S.galley.G2), g4 = num(S.galley.G4B);
+  r.dowAdj = (xc + xf + xa) * AC.crewWt + g1 + g2 + g4;
+  r.doiAdj = ixOf(xc*AC.crewWt, AC.crewArm.cockpit) + ixOf(xf*AC.crewWt, AC.crewArm.fwd) + ixOf(xa*AC.crewWt, AC.crewArm.aft)
+           + ixOf(g1, AC.galley.G1) + ixOf(g2, AC.galley.G2) + ixOf(g4, AC.galley.G4B);
+  r.dow = AC.dow + r.dowAdj;
+  r.doi = AC.doi + r.doiAdj;
+  r.crew = `${AC.crewStd.cockpit + xc}/${AC.crewStd.cabin + xf + xa}`;
+
+  // Passengers
+  const ad = num(S.pax.adult), ch = num(S.pax.child), inf = num(S.pax.infant);
+  r.pax = {adult:ad, child:ch, infant:inf, seated:ad+ch, total:ad+ch+inf};
+  r.paxWt = ad*AC.paxWt.adult + ch*AC.paxWt.child + inf*AC.paxWt.infant;
+  r.dist = S.pax.auto ? uniform(ad + ch) : {OA:num(S.pax.OA), OB:num(S.pax.OB), OC:num(S.pax.OC)};
+  const avg = r.pax.seated ? r.paxWt / r.pax.seated : 0;
+  r.secRows = AC.sections.map(s => { const n = r.dist[s.id]; const w = n * avg; return {id:s.id, n, w, ix:ixOf(w, s.arm), max:s.max}; });
+  r.paxIx = r.secRows.reduce((a, s) => a + s.ix, 0);
+
+  // Holds
+  r.holdRows = AC.holds.map(h => {
+    const d = S.holds[h.id] || {};
+    const B = num(d.B), C = num(d.C), M = num(d.M);
+    const w = B + C + M;
+    return {id:h.id, name:h.name, pcs:num(d.pcs), B, C, M, w, ix:ixOf(w, h.arm), max:h.max};
+  });
+  const sum = (k) => r.holdRows.reduce((a, h) => a + h[k], 0);
+  r.pcs = sum('pcs'); r.bag = sum('B'); r.cgo = sum('C'); r.mail = sum('M'); r.dead = sum('w');
+  r.holdIx = sum('ix');
+
+  // Weights & index before LMC
+  r.ttl = r.paxWt + r.dead;
+  r.zfw = r.dow + r.ttl;
+  r.lizfw = r.doi + r.paxIx + r.holdIx;
+  r.tof = num(S.fuel.tof); r.trip = num(S.fuel.trip); r.taxi = num(S.fuel.taxi);
+  r.fuelTO = fuelSplit(r.tof);
+  r.fiTO = fuelIndex(r.tof);
+  r.lfuel = Math.max(r.tof - r.trip, 0);
+  r.fiLW = fuelIndex(r.lfuel);
+  r.tow = r.zfw + r.tof; r.litow = r.lizfw + r.fiTO;
+  r.lw = r.tow - r.trip; r.lilaw = r.lizfw + r.fiLW;
+  r.ramp = r.tow + r.taxi;
+  r.opw = r.dow + r.tof;
+  const rtow = num(S.fuel.rtow);
+  r.maxTO = rtow > 0 ? Math.min(AC.mtow, rtow) : AC.mtow;
+  r.allowA = AC.mzfw + r.tof; r.allowB = r.maxTO; r.allowC = AC.mlw + r.trip;
+  r.allowed = Math.min(r.allowA, r.allowB, r.allowC);
+  r.limiting = r.allowed === r.allowA ? 'A' : (r.allowed === r.allowB ? 'B' : 'C');
+  r.atl = r.allowed - r.opw;
+  r.under = r.atl - r.ttl;
+
+  // LMC
+  const fin = {
+    pax:{adult:ad, child:ch, infant:inf},
+    dist:{...r.dist},
+    holds:Object.fromEntries(r.holdRows.map(h => [h.id, {pcs:h.pcs, B:h.B, C:h.C, M:h.M}]))
+  };
+  let lmcW = 0, lmcIx = 0, plus = 0, minus = 0;
+  r.lmcRows = (S.lmc || []).map(it => {
+    const s = it.sign === '-' ? -1 : 1;
+    const hold = AC.holds.find(h => h.id == it.hold) || AC.holds[2];
+    let w, ix, spec, cls;
+    if (it.kind === 'pax'){
+      const n = Math.max(0, num(it.n));
+      const cat = ['adult','child','infant'].includes(it.cat) ? it.cat : 'adult';
+      const sec = AC.sections.find(x => x.id === it.sec) || AC.sections[1];
+      const pw = n * AC.paxWt[cat], bw = n * Math.max(0, num(it.bag));
+      w = pw + bw; ix = ixOf(pw, sec.arm) + ixOf(bw, hold.arm);
+      fin.pax[cat] += s * n;
+      if (cat !== 'infant') fin.dist[sec.id] += s * n;
+      if (bw > 0){ fin.holds[hold.id].B += s * bw; fin.holds[hold.id].pcs += s * n; }
+      spec = `${n} ${cat === 'adult' ? 'ADT' : cat === 'child' ? 'CHD' : 'INF'}`;
+      cls = sec.id + (bw > 0 ? '/' + hold.id : '');
+    } else {
+      const kg = Math.max(0, num(it.kg)); const c = ['B','C','M'].includes(it.cls) ? it.cls : 'B';
+      w = kg; ix = ixOf(kg, hold.arm);
+      fin.holds[hold.id][c] += s * kg;
+      spec = c === 'B' ? 'BAGGAGE' : c === 'C' ? 'CARGO' : 'MAIL';
+      cls = 'CPT ' + hold.id;
+    }
+    if (s > 0) plus += w; else minus += w;
+    lmcW += s * w; lmcIx += s * ix;
+    return {spec, cls, sign: s > 0 ? '+' : '-', w, ix: s * ix};
+  });
+  r.lmc = {plus, minus, net:lmcW, ix:lmcIx, any:r.lmcRows.length > 0};
+  r.fin = fin;
+  fin.pax.seated = fin.pax.adult + fin.pax.child;
+  fin.pax.total = fin.pax.seated + fin.pax.infant;
+  fin.dead = 0; fin.bag = 0; fin.cgo = 0; fin.mail = 0; fin.pcs = 0;
+  for (const id in fin.holds){ const h = fin.holds[id]; h.w = h.B + h.C + h.M; fin.dead += h.w; fin.bag += h.B; fin.cgo += h.C; fin.mail += h.M; fin.pcs += h.pcs; }
+
+  // Final (after LMC)
+  const F = r.f = {
+    zfw: r.zfw + lmcW, lizfw: r.lizfw + lmcIx,
+    tow: r.tow + lmcW, litow: r.litow + lmcIx,
+    lw:  r.lw + lmcW,  lilaw: r.lilaw + lmcIx,
+    ramp: r.ramp + lmcW
+  };
+  r.mac = {zfw:macOf(F.lizfw, F.zfw), tow:macOf(F.litow, F.tow), lw:macOf(F.lilaw, F.lw)};
+  r.trimV = trimAt(F.tow, r.mac.tow);
+  r.env = {zfw:envCheck('zfw', F.zfw, F.lizfw), tow:envCheck('tow', F.tow, F.litow), lw:envCheck('tow', F.lw, F.lilaw)};
+
+  // Checks — stored as message keys + values, worded in the viewer's language at render time
+  const neg = [ad,ch,inf,r.tof,r.trip,r.taxi,xc,xf,xa].some(v => v < 0) || r.holdRows.some(h => h.B < 0 || h.C < 0 || h.M < 0 || h.pcs < 0);
+  if (neg) chk('bad', 'neg');
+  if (fin.pax.seated > AC.seats) chk('bad', 'seats', fin.pax.seated, AC.seats);
+  if (!S.pax.auto){
+    const ds = r.dist.OA + r.dist.OB + r.dist.OC;
+    if (ds !== r.pax.seated) chk('bad', 'distSum', ds, r.pax.seated);
+  }
+  AC.sections.forEach(s => {
+    if (fin.dist[s.id] > s.max) chk('bad', 'secMax', s.id, fin.dist[s.id], s.max);
+    if (fin.dist[s.id] < 0) chk('bad', 'secNeg', s.id);
+  });
+  if (fin.pax.infant > fin.pax.adult) chk('warn', 'infants');
+  AC.holds.forEach(h => {
+    const fh = fin.holds[h.id];
+    if (fh.w > h.max) chk('bad', 'cptMax', h.id, Math.round(fh.w), h.max);
+  });
+  if (r.tof < r.trip) chk('bad', 'tripTof');
+  if (r.tof + r.taxi > AC.wingMax + AC.ctrMax) chk('bad', 'fuelCap', Math.round(r.tof + r.taxi), AC.wingMax + AC.ctrMax);
+  if (F.zfw > AC.mzfw) chk('bad', 'zfwMax', Math.round(F.zfw), AC.mzfw);
+  if (F.tow > r.allowed) chk('bad', 'towMax', Math.round(F.tow), Math.round(r.allowed), r.limiting);
+  if (F.lw > AC.mlw) chk('bad', 'lwMax', Math.round(F.lw), AC.mlw);
+  if (F.ramp > AC.mtw) chk('bad', 'mtw', Math.round(F.ramp), AC.mtw);
+  if (r.under < 0) chk('bad', 'overload', Math.round(-r.under));
+  if (r.lmc.net > 0 && r.lmc.net > r.under) chk('bad', 'lmcOver', Math.round(r.lmc.net), Math.round(r.under));
+  const e = r.env;
+  if (F.zfw < 30000) chk('warn', 'zfwLow');
+  if (!e.zfw.ok) chk('bad', 'envOut', 'ZFW', F.lizfw.toFixed(2), e.zfw.fwd.toFixed(1), e.zfw.aft.toFixed(1));
+  if (!e.tow.ok) chk('bad', 'envOut', 'TOW', F.litow.toFixed(2), e.tow.fwd.toFixed(1), e.tow.aft.toFixed(1));
+  if (!e.lw.ok) chk('bad', 'envOut', 'LW', F.lilaw.toFixed(2), e.lw.fwd.toFixed(1), e.lw.aft.toFixed(1));
+  {
+    const pts = [[e.zfw, F.lizfw], [e.tow, F.litow], [e.lw, F.lilaw]];
+    const fwdNeed = Math.max(0, ...pts.map(([x, I]) => x.fwd - I));
+    const aftNeed = Math.max(0, ...pts.map(([x, I]) => I - x.aft));
+    const perPax = AC.paxWt.adult * (AC.sections[2].arm - AC.sections[0].arm) / AC.C;   // one adult OA → OC
+    const u = uniform(fin.pax.seated), us = `${u.OA}/${u.OB}/${u.OC}`;
+    if (fwdNeed > 0) chk('bad', 'nose', fwdNeed.toFixed(2), Math.ceil((fwdNeed + 0.5) / perPax), us);
+    if (aftNeed > 0) chk('bad', 'tail', aftNeed.toFixed(2), Math.ceil((aftNeed + 0.5) / perPax), us);
+  }
+  if (r.mac.zfw >= 50) chk('bad', 'tipping');
+  if (r.trimV == null && F.tow > 0) chk('warn', 'trimNA', r.mac.tow.toFixed(1));
+  r.ok = !r.checks.some(c => c.lvl === 'bad');
+  if (r.ok && !r.checks.length) chk('ok', 'allOk');
+  return r;
+}
+/*CALC-END*/
+
+/* ---------- formatting ---------- */
+const MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const R = n => Math.round(n);
+const fx = (n, d = 2) => (Math.round(n * 10**d) / 10**d).toFixed(d);
+const sg = (n, d = 2) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(d);
+function dmy(iso){ if (!iso) return ''; const [y,m,d] = iso.split('-'); return d + MON[+m-1] + y.slice(2); }
+function dd(iso){ return iso ? iso.split('-')[2] : ''; }
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const U = s => esc(String(s ?? '').toUpperCase());
+
+/* ---------- language: English / العربية (the printed form always stays in English) ---------- */
+const I18N = {
+  en: {
+    langBtn:'عربي', brandSub:'Load Control',
+    'tab.build':'Build', 'tab.sheet':'Loadsheet', 'tab.msgs':'Messages', 'tab.arch':'Archive',
+    newFlight:'New flight', save:'Save', saved:'Saved', print:'Print',
+    sample:'Example flight loaded: 120 adults, 2,000 kg baggage, 8,000 kg takeoff fuel. Use <b>New flight</b> to start a real one.',
+    startBlank:'Start blank', confirm:'Confirm', cancel:'Cancel',
+    confirmNew:'Start a new flight? Unsaved entries on this flight will be cleared.',
+    secFlight:'Flight', flightNo:'Flight no', date:'Date (UTC)', time:'Time UTC', from:'From', to:'To', sno:'Sheet no', ed:'Edition',
+    captain:'Captain', prep:'Prepared by', appr:'Approved by',
+    secCrew:'Crew & dry operating weight', xc:'Extra cockpit', xf:'Extra cabin FWD', xa:'Extra cabin AFT', each80:'80 kg each',
+    g1:'Galley G1 ±kg', g2:'Galley G2 ±kg', g4:'Galley G4B ±kg', basic:'Basic (2/1 incl.)', cdow:'Corrected DOW', cdoi:'Corrected DOI',
+    crewOut:c => 'Crew ' + c,
+    secPax:'Passengers', adult:'Adult · 80 kg', child:'Child · 30 kg', infant:'Infant · 0 kg',
+    cabinDist:'Cabin distribution (seated pax)', uniform:'Uniform distribution rule',
+    secOA:'Section OA · max 48', secOB:'Section OB · max 54', secOC:'Section OC · max 60',
+    paxSum:(n, w) => `${n} pax · ${w} kg`,
+    secHolds:'Holds', holdsAux:'Counter weights from flight supervisor',
+    thCpt:'Compartment', thPcs:'Bag pcs', thBag:'Baggage kg', thCgo:'Cargo kg', thMail:'Mail kg', thTot:'Total / max', totDead:'Total deadload',
+    fwdHold:'FWD HOLD', aftHold:'AFT HOLD',
+    secFuel:'Fuel', tof:'Takeoff fuel', trip:'Trip fuel', taxi:'Taxi fuel', rtow:'Perf. limited TOW', optional:'optional', rtowHint:'Runway / climb limit',
+    wings:'Wings', center:'Center', fiTO:'Fuel index TO', fiLW:'Fuel index LDG', fuelSum:(b, l) => `Block ${b} · Landing ${l}`,
+    secLmc:'Last minute changes', addPax:'+ Passenger', addLoad:'+ Baggage / cargo / mail',
+    lmcNote:'LMC passenger = standard pax weight + 20 kg bag per adult or child (AHM: 100 kg combined for an adult).',
+    lmcNone:'None', lmcEmpty:'No changes after the loadsheet was closed.', lmcSum:(p, m, ix) => `+${p} / −${m} kg · index ${ix}`,
+    lPax:'Pax', lType:'Type', lSec:'Section', lBag:'Bag kg/pax', lBagHold:'Bag hold', lKg:'Weight kg', lCpt:'Compartment',
+    on:'+ ON', off:'− OFF', oAdult:'Adult', oChild:'Child', oInfant:'Infant', oBag:'Baggage', oCgo:'Cargo', oMail:'Mail', cpt:'Cpt ', remove:'Remove change',
+    secSi:'SI / Notes', siLabel:'Supplementary information',
+    sheetBanner:'Your 5A-WAC Load &amp; Trim Sheet, filled: page 1 loadsheet, page 2 balance chart. Printing works from GitHub Pages or from the file on your computer.',
+    copy:'Copy', copied:'Copied', selected:'Selected',
+    secArch:'Saved flights', archAux:'Stored in this browser', aFlight:'Flight', aDate:'Date', aRoute:'Route', aPax:'Pax', aSaved:'Saved',
+    archEmpty:'No saved flights yet. Press Save on a finished loadsheet.', open:'Open', del:'Delete',
+    within:'WITHIN LIMITS', notWithin:'NOT WITHIN LIMITS', ready:'Ready to print', issues:n => n + ' issue' + (n > 1 ? 's' : ''),
+    weights:'Weights', inclLmc:n => 'incl. LMC ' + n + ' kg', actual:'Actual', max:'Max', margin:'Margin', taxiRow:'Taxi',
+    traffic:'Traffic load', allowed:'Allowed', under:'Underload', limit:'Limit',
+    balance:'Balance', index:'Index', limits:'Limits', stab:'Stab trim', units:'units ANU · F5',
+    envelope:'CG envelope', envAux:'Index × weight', dashed:'Dashed lines: %MAC', checks:'Checks',
+    dockOk:'● WITHIN LIMITS', dockBad:'● CHECK LIMITS',
+    'tab.admin':'Administration', signOut:'Sign out', restricted:'RESTRICTED SYSTEM',
+    gTitle:'Weight &amp; Balance<br>Control System', gLead:'Loadsheet, balance chart and last-minute changes for the company fleet, prepared on the approved Load & Trim form.',
+    gAircraft:'AIRCRAFT', gConfig:'CONFIGURATION', gStd:'STANDARDS', gTime:'TIME REFERENCE', gInternal:'For internal use only',
+    secure:'SECURE ACCESS', signIn:'Sign in', signInLead:'Authorized personnel only. Every session is recorded in the activity log.',
+    username:'USERNAME', password:'PASSWORD', show:'Show', hide:'Hide', forgot:'Forgot your password? Contact the system administrator.',
+    signingIn:'Signing in…', badLogin:'Username or password is not correct.', noAccess:'This account is suspended. Contact the system administrator.',
+    noBackend:'The system is not connected to its server yet.', timedOut:'You were signed out after a period of inactivity.',
+    mcTitle:'Set a new password', mcLead:'Your administrator asked you to choose a new password before you continue.',
+    newPw:'New password', confirmPw:'Confirm password', pwRule:'At least 8 characters, with letters and numbers.', pwMismatch:'The two passwords do not match.',
+    savePw:'Save password and continue', admCrumb:'ADMINISTRATION', subUsers:'Users', subUsersT:'Users & access', subAircraft:'Aircraft data', subActivity:'Activity log', subSettings:'System settings',
+    accounts:'Accounts', thUser:'Username', thRole:'Role', thStatus:'Status', thLast:'Last sign-in', permissions:'Permissions', thCap:'Capability',
+    rAdmin:'System administrator', rOps:'Air Operations', changePw:'Change password', account:'Account', mustNext:'Require a new password at next sign-in',
+    updatePw:'Update password', pwStored:'Passwords are stored encrypted. Nobody can read them, the administrator included.', pwUpdated:'Password updated.',
+    suspended:'Suspended', online:'Online', activeS:'Active', suspend:'Suspend', activate:'Activate', done:'Done.',
+    capBuild:'Prepare loadsheet and LMC', capPrint:'Print loadsheet, send LDM', capArch:'Flight archive', capAc:'Aircraft data (DOW, DOI, limits)', capUsers:'Users and passwords', capLog:'Activity log and system settings', yesS:'Yes', noS:'No',
+    acTitle:'Aircraft data', acSave:'Save aircraft data', acImport:'Import aircraft file', acExport:'Export aircraft file', acNote:'Values from the AHM / weight schedule. Every change is recorded in the activity log.',
+    acDow:'DOW (kg, crew 2/1)', acDoi:'DOI', acCrewWt:'Crew weight (kg)', acNone:'No aircraft loaded', noChanges:'No changes to save.',
+    acMissing:'No aircraft data yet. Import the 5A-WAC aircraft file to start.', acMissingOps:'The system administrator has not loaded the aircraft data yet.',
+    acBadFile:'This is not a Load Control aircraft file.', acImported:'Aircraft data imported.',
+    thTime:'Time (UTC)', thAction:'Action', thDetail:'Detail', ifLang:'Interface language', ifLangNote:'Applies to every account. The printed Load & Trim form always stays in English.', sessTimeout:'Session timeout',
+    aSignIn:'Signed in', aSignOut:'Signed out', aSave:'Saved flight', aPrint:'Printed loadsheet', aPw:'Password', aAdmin:'Account change', aAircraft:'Aircraft data', aSettings:'Settings', aDelete:'Deleted flight'
+  },
+  ar: {
+    langBtn:'English', brandSub:'التحكم بالحمولة',
+    'tab.build':'الإدخال', 'tab.sheet':'اللود شيت', 'tab.msgs':'الرسائل', 'tab.arch':'الأرشيف',
+    newFlight:'رحلة جديدة', save:'حفظ', saved:'تم الحفظ', print:'طباعة',
+    sample:'رحلة تجريبية: 120 راكب بالغ، 2,000 kg شنط، 8,000 kg وقود إقلاع. اضغط <b>رحلة جديدة</b> باش تبدأ رحلة حقيقية.',
+    startBlank:'ابدأ فاضي', confirm:'تأكيد', cancel:'إلغاء',
+    confirmNew:'تبدأ رحلة جديدة؟ البيانات اللي ما تحفظتش في الرحلة هذي حتتمسح.',
+    secFlight:'الرحلة', flightNo:'رقم الرحلة', date:'التاريخ (UTC)', time:'الوقت UTC', from:'من', to:'إلى', sno:'رقم الورقة', ed:'الإصدار',
+    captain:'الكابتن', prep:'أعدّها', appr:'اعتمدها',
+    secCrew:'الطاقم والوزن التشغيلي الجاف', xc:'طاقم قيادة إضافي', xf:'مضيف إضافي قدام', xa:'مضيف إضافي ورا', each80:'80 kg للفرد',
+    g1:'المطبخ G1 ±kg', g2:'المطبخ G2 ±kg', g4:'المطبخ G4B ±kg', basic:'الأساسي (شامل 2/1)', cdow:'DOW المصحح', cdoi:'DOI المصحح',
+    crewOut:c => 'الطاقم ' + c,
+    secPax:'الركاب', adult:'بالغ · 80 kg', child:'طفل · 30 kg', infant:'رضيع · 0 kg',
+    cabinDist:'توزيع الركاب في الكابينة (الجالسين)', uniform:'قاعدة التوزيع المنتظم',
+    secOA:'قسم OA · أقصى 48', secOB:'قسم OB · أقصى 54', secOC:'قسم OC · أقصى 60',
+    paxSum:(n, w) => `${n} راكب · ${w} kg`,
+    secHolds:'العنابر', holdsAux:'الأوزان من الكاونتر (مشرف الرحلة)',
+    thCpt:'العنبر', thPcs:'عدد الشنط', thBag:'شنط kg', thCgo:'شحن kg', thMail:'بريد kg', thTot:'المجموع / الأقصى', totDead:'إجمالي حمولة العنابر',
+    fwdHold:'عنبر أمامي', aftHold:'عنبر خلفي',
+    secFuel:'الوقود', tof:'وقود الإقلاع', trip:'وقود الرحلة', taxi:'وقود التاكسي', rtow:'TOW محدود بالأداء', optional:'اختياري', rtowHint:'حد المدرج / الصعود',
+    wings:'الجناحين', center:'الخزان الأوسط', fiTO:'مؤشر الوقود للإقلاع', fiLW:'مؤشر الوقود للهبوط', fuelSum:(b, l) => `البلوك ${b} · الهبوط ${l}`,
+    secLmc:'التعديلات الأخيرة (LMC)', addPax:'+ راكب', addLoad:'+ شنط / شحن / بريد',
+    lmcNote:'راكب LMC = وزن الراكب القياسي + 20 kg شنطة لكل بالغ أو طفل (AHM: 100 kg للبالغ مع شنطته).',
+    lmcNone:'لا يوجد', lmcEmpty:'ما فيش تعديلات بعد إقفال اللود شيت.', lmcSum:(p, m, ix) => `+${p} / −${m} kg · Index ${ix}`,
+    lPax:'ركاب', lType:'النوع', lSec:'القسم', lBag:'شنطة kg/راكب', lBagHold:'عنبر الشنطة', lKg:'الوزن kg', lCpt:'العنبر',
+    on:'+ إضافة', off:'− تنزيل', oAdult:'بالغ', oChild:'طفل', oInfant:'رضيع', oBag:'شنط', oCgo:'شحن', oMail:'بريد', cpt:'عنبر ', remove:'حذف التعديل',
+    secSi:'SI / ملاحظات', siLabel:'معلومات إضافية',
+    sheetBanner:'فورم 5A-WAC Load &amp; Trim معبّى: الصفحة 1 اللود شيت، والصفحة 2 البالانس شارت. الطباعة تشتغل من GitHub Pages أو من الملف على جهازك.',
+    copy:'نسخ', copied:'تم النسخ', selected:'تم التحديد',
+    secArch:'الرحلات المحفوظة', archAux:'محفوظة في هذا المتصفح', aFlight:'الرحلة', aDate:'التاريخ', aRoute:'المسار', aPax:'الركاب', aSaved:'وقت الحفظ',
+    archEmpty:'ما فيش رحلات محفوظة. اضغط حفظ بعد ما تكمل اللود شيت.', open:'فتح', del:'حذف',
+    within:'ضمن الحدود', notWithin:'خارج الحدود', ready:'جاهز للطباعة', issues:n => n + (n > 2 && n < 11 ? ' مشاكل' : ' مشكلة'),
+    weights:'الأوزان', inclLmc:n => 'شامل LMC ' + n + ' kg', actual:'الفعلي', max:'الأقصى', margin:'الهامش', taxiRow:'التاكسي',
+    traffic:'الحمولة التجارية', allowed:'المسموح', under:'المتبقي (Underload)', limit:'الحد الملزم',
+    balance:'التوازن', index:'Index', limits:'الحدود', stab:'ستاب ترِم', units:'وحدة ANU · F5',
+    envelope:'مخطط مركز الثقل', envAux:'Index × الوزن', dashed:'الخطوط المتقطعة: %MAC', checks:'الفحوصات',
+    dockOk:'● ضمن الحدود', dockBad:'● راجع الحدود',
+    'tab.admin':'الإدارة', signOut:'خروج', restricted:'نظام مقيّد',
+    gTitle:'منظومة الوزن<br>والتوازن', gLead:'اللود شيت والبالانس شارت والتعديلات الأخيرة لطائرات الشركة، على فورم Load & Trim المعتمد.',
+    gAircraft:'الطائرة', gConfig:'التشكيلة', gStd:'المعايير', gTime:'مرجع الوقت', gInternal:'للاستخدام الداخلي فقط',
+    secure:'دخول آمن', signIn:'تسجيل الدخول', signInLead:'للمخوّلين فقط. كل جلسة تتسجّل في سجل النشاط.',
+    username:'اسم المستخدم', password:'كلمة المرور', show:'إظهار', hide:'إخفاء', forgot:'نسيت كلمة المرور؟ تواصل مع مدير المنظومة.',
+    signingIn:'جاري الدخول…', badLogin:'اسم المستخدم أو كلمة المرور غلط.', noAccess:'هذا الحساب موقوف. تواصل مع مدير المنظومة.',
+    noBackend:'المنظومة مش مربوطة بالسيرفر حتى الآن.', timedOut:'تم تسجيل خروجك بسبب عدم النشاط.',
+    mcTitle:'اختار كلمة مرور جديدة', mcLead:'مدير المنظومة طلب منك تختار كلمة مرور جديدة قبل ما تكمل.',
+    newPw:'كلمة المرور الجديدة', confirmPw:'تأكيد كلمة المرور', pwRule:'8 حروف على الأقل، فيها حروف وأرقام.', pwMismatch:'كلمتين المرور مش متطابقتين.',
+    savePw:'حفظ كلمة المرور والمتابعة', admCrumb:'الإدارة', subUsers:'المستخدمين', subUsersT:'المستخدمين والصلاحيات', subAircraft:'بيانات الطائرة', subActivity:'سجل النشاط', subSettings:'إعدادات النظام',
+    accounts:'الحسابات', thUser:'اسم المستخدم', thRole:'الصلاحية', thStatus:'الحالة', thLast:'آخر دخول', permissions:'الصلاحيات', thCap:'الميزة',
+    rAdmin:'مدير المنظومة', rOps:'العمليات الجوية', changePw:'تغيير كلمة المرور', account:'الحساب', mustNext:'يغيّرها المستخدم أول ما يدخل',
+    updatePw:'تحديث كلمة المرور', pwStored:'كلمات المرور تتخزن مشفّرة، وما يقدر حد يقراها، حتى المدير.', pwUpdated:'تم تحديث كلمة المرور.',
+    suspended:'موقوف', online:'متصل', activeS:'نشط', suspend:'إيقاف', activate:'تفعيل', done:'تم.',
+    capBuild:'إعداد اللود شيت والـ LMC', capPrint:'الطباعة ورسائل LDM', capArch:'أرشيف الرحلات', capAc:'بيانات الطائرة (DOW · DOI · الحدود)', capUsers:'المستخدمين وكلمات المرور', capLog:'سجل النشاط وإعدادات النظام', yesS:'نعم', noS:'لا',
+    acTitle:'بيانات الطائرة', acSave:'حفظ بيانات الطائرة', acImport:'استيراد ملف الطائرة', acExport:'تصدير ملف الطائرة', acNote:'القيم من الـ AHM / الـ Weight schedule. كل تعديل يتسجّل في سجل النشاط.',
+    acDow:'DOW (kg، طاقم 2/1)', acDoi:'DOI', acCrewWt:'وزن فرد الطاقم (kg)', acNone:'ما فيش طائرة محمّلة', noChanges:'ما فيش تعديلات للحفظ.',
+    acMissing:'ما فيش بيانات طائرة. استورد ملف 5A-WAC باش تبدأ.', acMissingOps:'مدير المنظومة ما حمّلش بيانات الطائرة حتى الآن.',
+    acBadFile:'هذا مش ملف طائرة تابع للمنظومة.', acImported:'تم استيراد بيانات الطائرة.',
+    thTime:'الوقت (UTC)', thAction:'الإجراء', thDetail:'التفاصيل', ifLang:'لغة الواجهة', ifLangNote:'تطبق على كل الحسابات. الفورم المطبوع يبقى دايماً بالإنجليزي.', sessTimeout:'مدة انتهاء الجلسة',
+    aSignIn:'دخول', aSignOut:'خروج', aSave:'حفظ رحلة', aPrint:'طباعة لود شيت', aPw:'كلمة المرور', aAdmin:'تعديل حساب', aAircraft:'بيانات الطائرة', aSettings:'الإعدادات', aDelete:'حذف رحلة'
+  }
+};
+const CHK = {
+  en: {
+    neg:() => 'Negative value entered. Weights and counts must be zero or more.',
+    seats:(n, m) => `${n} seated passengers exceed the ${m} seats.`,
+    distSum:(d, s) => `Cabin distribution adds up to ${d}, but ${s} passengers are seated (adults + children).`,
+    secMax:(id, n, m) => `Section ${id}: ${n} pax, maximum ${m}.`,
+    secNeg:id => `Section ${id}: LMC removes more passengers than are seated there.`,
+    infants:() => 'More infants than adults. Each infant needs an accompanying adult.',
+    cptMax:(id, w, m) => `Compartment ${id}: ${w} kg, maximum ${m} kg.`,
+    tripTof:() => 'Trip fuel is more than takeoff fuel.',
+    fuelCap:(b, c) => `Block fuel ${b} kg exceeds tank capacity ${c} kg.`,
+    zfwMax:(w, m) => `ZFW ${w} exceeds MZFW ${m}.`,
+    towMax:(w, a, l) => `TOW ${w} exceeds allowed takeoff weight ${a} (limit ${l}).`,
+    lwMax:(w, m) => `LW ${w} exceeds MLW ${m}.`,
+    mtw:(w, m) => `Taxi weight ${w} exceeds MTW ${m}.`,
+    overload:k => `Traffic load is ${k} kg over the allowed traffic load.`,
+    lmcOver:(n, u) => `LMC net +${n} kg is more than the underload ${u} kg.`,
+    zfwLow:() => 'ZFW below 30000 kg, outside the charted envelope.',
+    envOut:(l, I, f, a) => `${l} index ${I} outside limits ${f} – ${a}.`,
+    nose:(d, n, u) => `Nose heavy by ${d} index. Move at least ${n} passengers from OA to OC, load bags in Cpt 3/4, or seat by the uniform rule (OA/OB/OC ${u}).`,
+    tail:(d, n, u) => `Tail heavy by ${d} index. Move at least ${n} passengers from OC to OA, load bags in Cpt 1/2, or seat by the uniform rule (OA/OB/OC ${u}).`,
+    tipping:() => 'ZFW CG at or aft of the 50% MAC tipping limit.',
+    trimNA:m => `Stab trim not available for ${m}% MAC at this weight. Use the AFM.`,
+    allOk:() => 'All weight, compartment, envelope and fuel limits checked.'
+  },
+  ar: {
+    neg:() => 'فيه قيمة سالبة. الأوزان والأعداد لازم تكون صفر أو أكثر.',
+    seats:(n, m) => `${n} راكب جالس، أكثر من ${m} كرسي.`,
+    distSum:(d, s) => `مجموع التوزيع في الكابينة ${d}، لكن الركاب الجالسين ${s} (بالغين + أطفال).`,
+    secMax:(id, n, m) => `قسم ${id}: ${n} راكب، والأقصى ${m}.`,
+    secNeg:id => `قسم ${id}: الـ LMC ينزّل ركاب أكثر من اللي قاعدين فيه.`,
+    infants:() => 'الرضع أكثر من البالغين. كل رضيع لازم معاه بالغ.',
+    cptMax:(id, w, m) => `العنبر ${id}: ${w} kg، والأقصى ${m} kg.`,
+    tripTof:() => 'وقود الرحلة أكثر من وقود الإقلاع.',
+    fuelCap:(b, c) => `وقود البلوك ${b} kg أكثر من سعة الخزانات ${c} kg.`,
+    zfwMax:(w, m) => `ZFW ${w} أكثر من MZFW ${m}.`,
+    towMax:(w, a, l) => `TOW ${w} أكثر من وزن الإقلاع المسموح ${a} (الحد ${l}).`,
+    lwMax:(w, m) => `LW ${w} أكثر من MLW ${m}.`,
+    mtw:(w, m) => `وزن التاكسي ${w} أكثر من MTW ${m}.`,
+    overload:k => `الحمولة التجارية زايدة ${k} kg عن المسموح.`,
+    lmcOver:(n, u) => `صافي الـ LMC ‎+${n} kg أكثر من الـ Underload ${u} kg.`,
+    zfwLow:() => 'ZFW أقل من 30000 kg، برا الرسم.',
+    envOut:(l, I, f, a) => `Index الـ ${l} = ${I} برا الحدود ${f} – ${a}.`,
+    nose:(d, n, u) => `الطائرة ثقيلة من قدام (Nose heavy) بفارق ${d} Index. انقل على الأقل ${n} ركاب من OA لـ OC، أو حمّل الشنط في العنبر 3 أو 4، أو وزّع حسب القاعدة المنتظمة (OA/OB/OC ${u}).`,
+    tail:(d, n, u) => `الطائرة ثقيلة من ورا (Tail heavy) بفارق ${d} Index. انقل على الأقل ${n} ركاب من OC لـ OA، أو حمّل الشنط في العنبر 1 أو 2، أو وزّع حسب القاعدة المنتظمة (OA/OB/OC ${u}).`,
+    tipping:() => 'مركز الثقل عند ZFW وصل أو تعدى حد الانقلاب 50% MAC.',
+    trimNA:m => `الـ Stab trim مش متوفر لـ ${m}% MAC عند هذا الوزن. ارجع للـ AFM.`,
+    allOk:() => 'تم فحص كل حدود الأوزان والعنابر والـ envelope والوقود.'
+  }
+};
+let LANG = (() => { try { return localStorage.getItem('lxx-lang') === 'ar' ? 'ar' : 'en'; } catch(e){ return 'en'; } })();
+function t(k, ...a){ const v = I18N[LANG][k] ?? I18N.en[k] ?? k; return typeof v === 'function' ? v(...a) : v; }
+function tc(c){ const f = CHK[LANG][c.key] || CHK.en[c.key]; return f ? f(...(c.args || [])) : c.key; }
+function applyLang(){
+  const root = document.documentElement;
+  root.lang = LANG; root.dir = LANG === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.dataset.t));
+  document.querySelectorAll('[data-th]').forEach(el => el.innerHTML = t(el.dataset.th));
+  document.querySelectorAll('[data-tp]').forEach(el => el.placeholder = t(el.dataset.tp));
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+}
+
+/* ---------- state ---------- */
+const todayUTC = () => new Date().toISOString().slice(0,10);
+function blankState(){
+  return {
+    flt:{no:'LXX', date:todayUTC(), time:'', from:'MJI', to:'', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:''},
+    crew:{xCockpit:0, xFwd:0, xAft:0},
+    galley:{G1:0, G2:0, G4B:0},
+    pax:{adult:0, child:0, infant:0, auto:true, OA:0, OB:0, OC:0},
+    holds:{1:{pcs:0,B:0,C:0,M:0}, 2:{pcs:0,B:0,C:0,M:0}, 3:{pcs:0,B:0,C:0,M:0}, 4:{pcs:0,B:0,C:0,M:0}},
+    fuel:{tof:0, trip:0, taxi:200, rtow:''},
+    lmc:[], sample:false
+  };
+}
+function sampleState(){
+  const s = blankState();
+  s.flt = {no:'LXX101', date:todayUTC(), time:'0830', from:'MJI', to:'TUN', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:''};
+  s.pax.adult = 120;
+  s.holds = {1:{pcs:15,B:300,C:0,M:0}, 2:{pcs:35,B:700,C:0,M:0}, 3:{pcs:40,B:800,C:0,M:0}, 4:{pcs:10,B:200,C:0,M:0}};
+  s.fuel = {tof:8000, trip:4000, taxi:200, rtow:''};
+  s.sample = true;
+  return s;
+}
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+let S = store.get('lxx-ls-draft') || blankState();
+let RES = null;
+
+/* ---------- inputs ---------- */
+function getPath(o, p){ return p.split('.').reduce((a, k) => a == null ? a : a[k], o); }
+function setPath(o, p, v){ const ks = p.split('.'); let a = o; ks.slice(0,-1).forEach(k => a = a[k] ??= {}); a[ks.at(-1)] = v; }
+
+function buildHolds(){
+  document.getElementById('holdBody').innerHTML = AC.holds.map(h => `
+    <tr>
+      <td class="lbl">${h.id} · <span data-t="${h.id < 3 ? 'fwdHold' : 'aftHold'}">${t(h.id < 3 ? 'fwdHold' : 'aftHold')}</span></td>
+      <td class="cell"><input type="number" min="0" inputmode="numeric" aria-label="Hold ${h.id} pieces" id="h${h.id}p" data-k="holds.${h.id}.pcs"></td>
+      <td class="cell"><input type="number" min="0" inputmode="numeric" aria-label="Hold ${h.id} baggage kg" id="h${h.id}b" data-k="holds.${h.id}.B"></td>
+      <td class="cell"><input type="number" min="0" inputmode="numeric" aria-label="Hold ${h.id} cargo kg" id="h${h.id}c" data-k="holds.${h.id}.C"></td>
+      <td class="cell"><input type="number" min="0" inputmode="numeric" aria-label="Hold ${h.id} mail kg" id="h${h.id}m" data-k="holds.${h.id}.M"></td>
+      <td><span id="ht${h.id}">0</span>/<span style="color:var(--muted)">${h.max}</span><span class="meter" id="hm${h.id}"><i></i></span></td>
+    </tr>`).join('');
+}
+function fillInputs(){
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const v = getPath(S, el.dataset.k);
+    if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? '';
+  });
+}
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.k){
+    let v = el.type === 'checkbox' ? el.checked : el.value;
+    if (el.classList.contains('uc') && typeof v === 'string'){ const p = el.selectionStart; el.value = v = v.toUpperCase(); try { el.setSelectionRange(p,p); } catch(_){} }
+    setPath(S, el.dataset.k, v);
+    if (el.dataset.k === 'pax.auto' && !v){ S.pax.OA = RES.dist.OA; S.pax.OB = RES.dist.OB; S.pax.OC = RES.dist.OC; }
+    S.sample = false;
+    update();
+  } else if (el.dataset.lmc != null){
+    const it = S.lmc[+el.dataset.lmc];
+    it[el.dataset.f] = el.value;
+    if (el.dataset.f === 'cat') it.bag = el.value === 'infant' ? 0 : 20;
+    if (el.dataset.f === 'cat') renderLmc();
+    S.sample = false;
+    update();
+  }
+});
+document.addEventListener('change', e => { if (e.target.dataset.lmc != null) { e.target.dispatchEvent(new Event('input', {bubbles:true})); } });
+
+/* ---------- LMC ---------- */
+function opt(list, val){ return list.map(([v,t]) => `<option value="${v}"${String(v) === String(val) ? ' selected' : ''}>${t}</option>`).join(''); }
+function renderLmc(){
+  const box = document.getElementById('lmcList');
+  if (!S.lmc.length){ box.innerHTML = `<div class="empty">${t('lmcEmpty')}</div>`; return; }
+  const holds = AC.holds.map(h => [h.id, t('cpt') + h.id]);
+  box.innerHTML = S.lmc.map((it, i) => {
+    const sign = `<div class="f"><label for="l${i}s">±</label><select id="l${i}s" data-lmc="${i}" data-f="sign">${opt([['+',t('on')],['-',t('off')]], it.sign)}</select></div>`;
+    const del = `<button class="x" data-del="${i}" aria-label="${t('remove')}">✕</button>`;
+    if (it.kind === 'pax') return `<div class="lmc-row">${sign}
+      <div class="f"><label for="l${i}n">${t('lPax')}</label><input id="l${i}n" class="num" type="number" min="1" dir="ltr" data-lmc="${i}" data-f="n" value="${esc(it.n)}"></div>
+      <div class="f"><label for="l${i}c">${t('lType')}</label><select id="l${i}c" data-lmc="${i}" data-f="cat">${opt([['adult',t('oAdult')],['child',t('oChild')],['infant',t('oInfant')]], it.cat)}</select></div>
+      <div class="f"><label for="l${i}z">${t('lSec')}</label><select id="l${i}z" data-lmc="${i}" data-f="sec">${opt(AC.sections.map(s => [s.id, s.id]), it.sec)}</select></div>
+      <div class="f"><label for="l${i}b">${t('lBag')}</label><input id="l${i}b" class="num" type="number" min="0" data-lmc="${i}" data-f="bag" value="${esc(it.bag)}"></div>
+      <div class="f"><label for="l${i}h">${t('lBagHold')}</label><select id="l${i}h" data-lmc="${i}" data-f="hold">${opt(holds, it.hold)}</select></div>
+      ${del}</div>`;
+    return `<div class="lmc-row">${sign}
+      <div class="f"><label for="l${i}k">${t('lKg')}</label><input id="l${i}k" class="num" type="number" min="0" data-lmc="${i}" data-f="kg" value="${esc(it.kg)}"></div>
+      <div class="f"><label for="l${i}c">${t('lType')}</label><select id="l${i}c" data-lmc="${i}" data-f="cls">${opt([['B',t('oBag')],['C',t('oCgo')],['M',t('oMail')]], it.cls)}</select></div>
+      <div class="f"><label for="l${i}h">${t('lCpt')}</label><select id="l${i}h" data-lmc="${i}" data-f="hold">${opt(holds, it.hold)}</select></div>
+      <div></div><div></div>${del}</div>`;
+  }).join('');
+}
+document.getElementById('lmcList').addEventListener('click', e => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  S.lmc.splice(+b.dataset.del, 1); renderLmc(); update();
+});
+document.getElementById('addLmcPax').onclick = () => { S.lmc.push({kind:'pax', sign:'+', n:1, cat:'adult', sec:'OB', bag:20, hold:3}); renderLmc(); update(); };
+document.getElementById('addLmcLoad').onclick = () => { S.lmc.push({kind:'load', sign:'+', kg:20, cls:'B', hold:4}); renderLmc(); update(); };
+
+/* ---------- chart ---------- */
+function chartSVG(r, pid){
+  const W = 520, H = 440, ml = 46, mr = 14, mt = 30, mb = 38;
+  const x0 = 10, x1 = 80, y0 = 28000, y1 = 68000;
+  const X = i => ml + (i - x0) / (x1 - x0) * (W - ml - mr);
+  const Y = w => H - mb - (w - y0) / (y1 - y0) * (H - mt - mb);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="CG envelope: index versus weight"><defs><clipPath id="${pid}c"><rect x="${ml}" y="${mt}" width="${W-ml-mr}" height="${H-mt-mb}"/></clipPath></defs>`;
+  for (let i = 10; i <= 80; i += 10) s += `<line class="gl" x1="${X(i)}" y1="${mt}" x2="${X(i)}" y2="${H-mb}"/><text x="${X(i)}" y="${H-mb+14}" text-anchor="middle">${i}</text>`;
+  for (let w = 30000; w <= 65000; w += 5000) s += `<line class="gl" x1="${ml}" y1="${Y(w)}" x2="${W-mr}" y2="${Y(w)}"/><text x="${ml-6}" y="${Y(w)+3}" text-anchor="end">${w/1000}</text>`;
+  s += `<text class="axis" x="${(ml+W-mr)/2}" y="${H-6}" text-anchor="middle">INDEX</text><text class="axis" transform="translate(12 ${(mt+H-mb)/2}) rotate(-90)" text-anchor="middle">WEIGHT (T)</text>`;
+  // %MAC lines
+  s += `<g clip-path="url(#${pid}c)">`;
+  [5,10,15,20,25,30,35].forEach(m => {
+    const arm = AC.lemac + m * AC.mac / 100;
+    const ia = y0 * (arm - AC.ref) / AC.C + AC.K, ib = y1 * (arm - AC.ref) / AC.C + AC.K;
+    s += `<line class="macl" x1="${X(ia)}" y1="${Y(y0)}" x2="${X(ib)}" y2="${Y(y1)}"/>`;
+  });
+  s += `</g>`;
+  [5,10,15,20,25,30,35].forEach(m => {
+    const arm = AC.lemac + m * AC.mac / 100; const i = 66500 * (arm - AC.ref) / AC.C + AC.K;
+    if (i > x0 + 1 && i < x1 - 1) s += `<text x="${X(i)}" y="${mt-6}" text-anchor="middle">${m}%</text>`;
+  });
+  const poly = (f, a) => [...f, ...[...a].reverse()].map(([w,i]) => `${X(i).toFixed(1)},${Y(w).toFixed(1)}`).join(' ');
+  s += `<polygon class="ptow" points="${poly(AC.env.towFwd, AC.env.towAft)}"/>`;
+  s += `<polygon class="pzfw" points="${poly(AC.env.zfwFwd, AC.env.zfwAft)}"/>`;
+  s += `<text x="${X(42)}" y="${Y(AC.mtow)-5}" text-anchor="middle">MTOW ${AC.mtow}</text>`;
+  s += `<text x="${X(42)}" y="${Y(AC.mlw)-4}" text-anchor="middle">MLW ${AC.mlw}</text>`;
+  s += `<text x="${X(42)}" y="${Y(AC.mzfw)+12}" text-anchor="middle">MZFW ${AC.mzfw}</text>`;
+  const F = r.f;
+  const pt = (I, w, cls, lab, dx) => {
+    if (!(w > 0)) return '';
+    const cx = Math.max(ml, Math.min(W-mr, X(I))), cy = Math.max(mt, Math.min(H-mb, Y(w)));
+    return `<circle class="${cls}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5"/><text class="lab" x="${(cx+dx).toFixed(1)}" y="${(cy+4).toFixed(1)}" text-anchor="${dx>0?'start':'end'}">${lab}</text>`;
+  };
+  s += pt(F.lizfw, F.zfw, 'dz', 'ZFW', 9) + pt(F.lilaw, F.lw, 'dl', 'LW', -9) + pt(F.litow, F.tow, 'dt', 'TOW', 9);
+  return s + '</svg>';
+}
+
+/* ---------- messages ---------- */
+function ldmText(r){
+  const fl = S.flt, p = r.fin.pax, h = r.fin.holds;
+  const lines = ['LDM',
+    `${U(fl.no)}/${dd(fl.date)}.${AC.reg.replace('-','')}.${AC.ldmVer}.${r.crew}`,
+    `-${U(fl.to) || 'XXX'}.${p.adult}/${p.child}/${p.infant}.T${R(r.fin.dead)}.1/${R(h[1].w)}.2/${R(h[2].w)}.3/${R(h[3].w)}.4/${R(h[4].w)}.PAX/${p.seated}.PAD/0`,
+    `SI B${R(r.fin.bag)}.C${R(r.fin.cgo)}.M${R(r.fin.mail)} BAG ${R(r.fin.pcs)}PCS`];
+  if (fl.si) lines.push(...String(fl.si).toUpperCase().split(/\n+/).filter(Boolean).map(l => 'SI ' + l));
+  return lines.join('\n');
+}
+function pad(s, n){ s = String(s); return s.length >= n ? s : s + ' '.repeat(n - s.length); }
+function lpad(s, n){ s = String(s); return s.length >= n ? s : ' '.repeat(n - s.length) + s; }
+function edpText(r){
+  const fl = S.flt, F = r.f, L = k => r.limiting === k ? 'L' : ' ';
+  const h = r.holdRows, ed = String(num(fl.ed) || 1).padStart(2,'0');
+  const o = [];
+  o.push('L O A D S H E E T      CHECKED        APPROVED       EDNO');
+  o.push('ALL WEIGHTS IN KILOS   ' + pad(U(fl.prep),15) + pad(U(fl.appr),15) + ed);
+  o.push('');
+  o.push('FROM/TO FLIGHT       A/C REG  VERSION  CREW  DATE     TIME');
+  o.push(pad(`${U(fl.from)} ${U(fl.to)}`,8) + pad(`${U(fl.no)}/${dd(fl.date)}`,13) + pad(AC.reg.replace('-',''),9) + pad(AC.ver,9) + pad(r.crew,6) + pad(dmy(fl.date),9) + (fl.time || ''));
+  o.push(pad('',26) + 'WEIGHT   DISTRIBUTION');
+  o.push(pad('LOAD IN COMPARTMENTS',26) + lpad(R(r.dead),6) + '   ' + h.map(x => `${x.id}/${R(x.w)}`).join(' ') + ' 0/0');
+  o.push(pad('PASSENGER/CABIN BAG',26) + lpad(R(r.paxWt),6) + '   ' + `${r.pax.adult}/${r.pax.child}/${r.pax.infant}  TTL ${r.pax.total} CAB 0`);
+  o.push(pad('',35) + `PAX/${r.pax.seated} SOC/0 BLKD 0`);
+  o.push(pad('TOTAL TRAFFIC LOAD',26) + lpad(R(r.ttl),6));
+  o.push(pad('DRY OPERATING WEIGHT',26) + lpad(R(r.dow),6));
+  o.push(pad('ZERO FUEL WEIGHT ACTUAL',26) + lpad(R(r.zfw),6) + ' MAX ' + lpad(AC.mzfw,6) + ' ' + L('A') + ' ADJ');
+  o.push(pad('TAKE OFF FUEL',26) + lpad(R(r.tof),6));
+  o.push(pad('TAKE OFF WEIGHT  ACTUAL',26) + lpad(R(r.tow),6) + ' MAX ' + lpad(R(r.maxTO),6) + ' ' + L('B') + ' ADJ');
+  o.push(pad('TRIP FUEL',26) + lpad(R(r.trip),6));
+  o.push(pad('LANDING WEIGHT   ACTUAL',26) + lpad(R(r.lw),6) + ' MAX ' + lpad(AC.mlw,6) + ' ' + L('C') + ' ADJ');
+  o.push('');
+  o.push(pad('BALANCE AND SEATING CONDITIONS',38) + 'LAST MINUTE CHANGES');
+  const bal = [
+    `DOI      ${lpad(fx(r.doi),6)}`,
+    `LIZFW    ${lpad(fx(F.lizfw),6)}   MACZFW ${lpad(fx(r.mac.zfw,1),5)}`,
+    `LITOW    ${lpad(fx(F.litow),6)}   MACTOW ${lpad(fx(r.mac.tow,1),5)}`,
+    `LILAW    ${lpad(fx(F.lilaw),6)}   MACLAW ${lpad(fx(r.mac.lw,1),5)}`,
+    `STAB TRIM TO  ${r.trimV == null ? 'N/A' : fx(r.trimV,1) + ' UNITS ANU'}  FLAPS 5`,
+    `SEATING ${AC.sections.map(s => s.id + '/' + r.fin.dist[s.id]).join(' ')}`
+  ];
+  const lm = ['DEST  SPECIFICATION  CL/CPT  +/-  WEIGHT', ...r.lmcRows.map(x => pad(U(fl.to),6) + pad(x.spec,15) + pad(x.cls,8) + pad(x.sign,5) + R(x.w))];
+  for (let i = 0; i < Math.max(bal.length, lm.length); i++) o.push(pad(bal[i] || '', 38) + (lm[i] || ''));
+  o.push('');
+  o.push(pad(`UNDERLOAD BEFORE LMC   ${R(r.under)}`,38) + `LMC TOTAL + ${R(r.lmc.plus)}  - ${R(r.lmc.minus)}`);
+  if (r.lmc.any) o.push(`FINAL ZFW ${R(F.zfw)}  TOW ${R(F.tow)}  LAW ${R(F.lw)}`);
+  o.push('LOADMESSAGE AND CAPTAINS INFORMATION BEFORE LMC');
+  o.push(`TAXI WEIGHT ${R(r.ramp)}  TAXI FUEL ${R(r.taxi)}  TRIP ${R(r.trip)}`);
+  o.push(...ldmText(r).split('\n').slice(2));
+  o.push(`END LOADSHEET EDNO ${ed} ${U(fl.no)}/${dd(fl.date)} ${U(fl.from)} ${U(fl.to)}`);
+  return o.join('\n');
+}
+
+/* ---------- printable sheet: the company's own form, filled ---------- */
+// Coordinates are PDF points (595.276 × 841.89), measured from the original 5A-WAC LOAD & TRIM SHEET.
+// Filling conventions follow the station's hand-filled sheet (LXX610, 04 NOV 26).
+const PW = 595.276, PH = 841.89;
+let BG1 = '', BG2 = '';   // the company's form pages, loaded after sign-in
+// handwriting: pen font + a small, repeatable wobble per entry so no two figures sit exactly alike
+function jit(x, y, s, k){ let h = 2166136261; for (const c of `${x.toFixed(1)}|${y.toFixed(1)}|${s}|${k}`) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return ((h >>> 0) % 1000) / 1000 - 0.5; }
+const TX = (x, y, s, o = {}) => {
+  x = +x; y = +y; s = String(s ?? '');
+  const base = (o.fs || 9) * 1.55 * (1 + jit(x, y, s, 's') * 0.08);
+  const slant = jit(x, y, s, 'r') * 3;
+  const X = x + jit(x, y, s, 'x') * 0.9, Y = y + jit(x, y, s, 'y') * 1.0 + base * 0.03;
+  // fountain pen: every glyph has its own tilt, size, baseline and ink flow
+  let prev = 0, spans = '';
+  [...s].forEach((c, i) => {
+    const off = jit(x + i, y, c, 'b') * base * 0.08 + (i ? jit(x, y + i, s, 'w') * base * 0.03 : 0);
+    const dy = (off - prev).toFixed(2); prev = off;
+    const dx = i ? (jit(x + i * 7, y, c, 'd') * base * 0.06).toFixed(2) : '0';
+    const rot = (slant + jit(x + i * 3, y - i, c, 't') * 8).toFixed(1);
+    const fz = (base * (1 + jit(x + i, y + i, c, 'z') * 0.09)).toFixed(1);
+    const ink = (0.72 + (jit(x - i, y, c, 'o') + 0.5) * 0.28).toFixed(2);
+    spans += `<tspan dx="${dx}" dy="${dy}" rotate="${rot}" font-size="${fz}" fill-opacity="${ink}">${esc(c)}</tspan>`;
+  });
+  return `<text x="${X.toFixed(1)}" y="${Y.toFixed(1)}" font-size="${base.toFixed(1)}" text-anchor="${o.a || 'start'}"${o.cls ? ` class="${o.cls}"` : ''}>${spans}</text>`;
+};
+const BL = (y0, y1, fs) => y1 - (y1 - y0 - fs * 0.7) / 2;
+function boxR(E, y0, y1, s, fs = 9.5){
+  s = String(s ?? ''); const n = E.length - 1;
+  if (s.length > n) return TX(E[n] - 1.5, BL(y0, y1, fs - 1.5), s, {a:'end', fs:fs - 1.5});
+  let o = '';
+  [...s].forEach((c, i) => { const b = n - s.length + i; o += TX((E[b] + E[b+1]) / 2, BL(y0, y1, fs), c, {a:'middle', fs}); });
+  return o;
+}
+function boxL(E, y0, y1, s, fs = 9.5){
+  s = String(s ?? ''); const n = E.length - 1; let o = '';
+  [...s].slice(0, n).forEach((c, i) => { o += TX((E[i] + E[i+1]) / 2, BL(y0, y1, fs), c, {a:'middle', fs}); });
+  return o;
+}
+const cellR = (x1, y0, y1, s, fs = 9) => TX(x1 - 2.5, BL(y0, y1, fs), s, {a:'end', fs});
+const cellC = (x0, x1, y0, y1, s, fs = 9) => TX((x0 + x1) / 2, BL(y0, y1, fs), s, {a:'middle', fs});
+const NIL = n => n ? String(R(n)) : 'NIL';
+const P2 = n => String(R(n)).padStart(2, '0');
+const INK_FILTER = '<defs><filter id="ink" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0.6" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
+const page = (bg, body, label) => `<div class="pg"><img src="${bg}" alt="${label}"><svg class="ov" viewBox="0 0 ${PW} ${PH}" preserveAspectRatio="none">${INK_FILTER}<g filter="url(#ink)">${body}</g></svg></div>`;
+
+function sheetPage1(r){
+  const fl = S.flt, F = r.f, h = r.holdRows, any = r.lmc.any;
+  const W6 = [195.8,208.5,221.5,234.5,247.5,260.5,273.2];
+  const ZC = [377,390,403,416,429,441.8], TC = [441.8,454.6,467.5,480.5,493.5,506.8], LC = [506.8,519.5,532.5,545.5,558.5,571.5];
+  const T5 = [208.8,221.5,234.5,247.5,260.5,273.2], T4 = T5.slice(1);
+  const FLB = [14,27,40,53,66,79,92,105,118,131,143.5], REG = [156.5,169.5,182.5,195.5,208.5,221.5], VER = [247.5,260.5,273.5,286.5];
+  const ORG = [27,40,53,66,79,92,105,118], DT = [169.5,182.5,195.5,208.5,221.5,234.5,247.5];
+  const CRW = [338,351,364,377,390,403], LMW = [403,416,429,441.8];
+  const COMP = [273.2,312,351,390,429,467.8];
+  const up = v => String(v || '').toUpperCase();
+  let o = '';
+  // sheet number (replaces the printed 0001)
+  o += `<rect x="496" y="26.5" width="24" height="10.5" fill="#fff"/>` + TX(497.2, 35.3, fl.sno, {fs:9, cls:'red'});
+  // originator · date/time · flight · reg · version · crew · date
+  o += boxL(ORG, 128, 142.5, up(fl.from));
+  o += boxL(DT, 128, 142.5, dd(fl.date) + String(fl.time || '').padStart(4, ' ').slice(0, 4));
+  o += boxL(FLB, 157.5, 172, up(fl.no));
+  o += boxL(REG, 157.5, 172, AC.reg.replace('-', ''));
+  o += boxL(VER, 157.5, 172, '162');
+  const [ck, cb] = r.crew.split('/');
+  o += boxR(CRW.slice(0, 3), 157.5, 172, P2(ck)) + boxL(CRW.slice(2, 5), 157.5, 172, P2(cb));
+  o += TX(472, 168.6, dmy(fl.date), {fs:7.6});
+
+  // weights block
+  o += boxR(W6, 210.5, 225.2, R(r.dow));
+  o += boxR(W6, 240, 254.8, R(r.tof));
+  o += boxR(W6, 298, 312.8, R(r.opw));
+  o += boxR(ZC, 240, 254.8, R(r.tof)) + boxR(LC, 240, 254.8, R(r.trip));
+  o += boxR(ZC, 254.8, 269, R(r.allowA)) + boxR(LC, 254.8, 269, R(r.allowC));
+  if (r.maxTO < AC.mtow){ o += `<line class="tr" x1="443" y1="262" x2="505" y2="262"/>` + boxR(TC, 269, 283.2, R(r.maxTO)); }
+  // figures go down the limiting column; the other two columns are struck through "//"
+  const cols = {A:ZC, B:TC, C:LC}, col = cols[r.limiting];
+  o += boxR(col, 298, 312.8, R(r.opw));
+  o += boxR(col, 327.5, 342, R(r.atl));
+  o += boxR(col, 356.5, 371.2, R(r.ttl));
+  o += boxR(col, 386, 400.8, R(r.under));
+  Object.entries(cols).filter(([k]) => k !== r.limiting).forEach(([, c]) => {
+    const cx = (c[0] + c[5]) / 2;
+    o += TX(cx, 322.5, '//', {a:'middle', fs:10}) + TX(cx, 381, '//', {a:'middle', fs:10});
+  });
+  if (r.maxTO < AC.mtow) o += TX(20, 335, `PERF LIMITED TOW ${R(r.maxTO)}`, {fs:7.5});
+  if (fl.si) String(fl.si).toUpperCase().split(/\n+/).slice(0, 5).forEach((l, i) => o += TX(20, 345 + i * 10, l.slice(0, 42), {fs:7.5}));
+
+  // passengers & deadload
+  o += cellC(14, 53, 459, 488.5, up(fl.to), 9);
+  o += cellC(53, 105, 459, 503, NIL(r.pax.adult), 12) + cellC(105, 156.5, 459, 503, NIL(r.pax.child), 11) + cellC(156.5, 208.8, 459, 503, NIL(r.pax.infant), 11);
+  const rowsY = {B:[459,473.5], C:[473.5,488.5], M:[488.5,503]};
+  const tot = {B:r.bag, C:r.cgo, M:r.mail};
+  ['B','C','M'].forEach(k => {
+    const [y0, y1] = rowsY[k];
+    if (tot[k]) o += boxR(T4, y0, y1, R(tot[k]));
+    h.forEach((x, i) => { if (x[k]) o += cellC(COMP[i], COMP[i+1], y0, y1, R(x[k]), 9.5); });
+  });
+  // remarks: PAX C 00, PAX Y count; total line PAX 00/nn
+  o += boxR([467.8,480.5,493.5], 444.5, 459, '00') + boxR([519.5,532.5,545.5], 444.5, 459, P2(r.pax.seated));
+  o += TX(505, 572.5, '00', {a:'end', fs:8}) + TX(510.2, 572.5, r.pax.seated, {fs:8});
+  // totals line
+  o += cellC(53, 105, 590.8, 605.5, NIL(r.pax.adult), 9.5) + cellC(105, 156.5, 590.8, 605.5, NIL(r.pax.child), 9.5) + cellC(156.5, 208.8, 590.8, 605.5, NIL(r.pax.infant), 9.5);
+  if (r.dead) o += boxR(T5, 590.8, 605.5, R(r.dead));
+  h.forEach((x, i) => { if (x.w) o += cellC(COMP[i], COMP[i+1], 590.8, 605.5, R(x.w), 9.5); });
+
+  // totals column
+  const Y = [605.5,620.2,634.8,649.4,664,678.5,693.5,708,722.5,737,751.8,766.5,781];
+  o += boxR(T5, Y[0], Y[1], R(r.paxWt));
+  o += boxR(T5, Y[2], Y[3], R(r.ttl));
+  o += boxR(T5, Y[3], Y[4], R(r.dow));
+  o += boxR(T5, Y[4], Y[5], R(r.zfw));
+  o += boxR(T5, Y[6], Y[7], R(r.tof));
+  o += boxR(T5, Y[7], Y[8], R(r.tow));
+  o += boxR(T5, Y[9], Y[10], R(r.trip));
+  o += boxR(T5, Y[10], Y[11], R(r.lw));
+  if (any){
+    o += cellR(208.8, Y[5], Y[6], R(F.zfw)) + cellR(208.8, Y[8], Y[9], R(F.tow)) + cellR(208.8, Y[11], Y[12], R(F.lw));
+  }
+  // last minute change
+  r.lmcRows.slice(0, 6).forEach((x, i) => {
+    const y0 = 664 + i * 14.6, y1 = y0 + 14.6;
+    o += cellC(273.2, 300, y0, y1, up(fl.to), 7.5);
+    o += TX(302.5, BL(y0, y1, 7), x.spec, {fs:7});
+    o += cellC(351, 377, y0, y1, x.cls, 7.5);
+    o += cellC(377, 403, y0, y1, x.sign, 9);
+    o += boxR(LMW, y0, y1, R(x.w));
+  });
+  if (any){ o += boxR(LMW, 751.8, 766.5, R(r.lmc.plus)) + boxR(LMW, 766.5, 781, R(r.lmc.minus)); }
+  // seating conditions & balance
+  o += cellC(441.8, 467.5, 649.5, 678.5, P2(r.fin.dist.OA), 11) + cellC(467.5, 493.5, 649.5, 678.5, P2(r.fin.dist.OB), 11) + cellC(493.5, 519.5, 649.5, 678.5, P2(r.fin.dist.OC), 11);
+  [['Z.F.W', r.mac.zfw], ['T.O.W', r.mac.tow], ['L.A.W', r.mac.lw]].forEach(([l, v], i) => o += TX(522, 645 + i * 10, `${l} ${fx(v,1)}%`, {fs:7}));
+  o += TX(522, 675.5, `TRIM ${r.trimV == null ? 'AFM' : fx(r.trimV,1)}`, {fs:7});
+  o += TX(568, 690.2, r.fin.pax.total, {a:'end', fs:9});
+  o += TX(467, 701.8, r.ok ? 'WITHIN LIMITS' : 'OUT OF LIMITS', {fs:6.8, cls: r.ok ? '' : 'red'});
+  [`LIZFW ${fx(F.lizfw)} LITOW ${fx(F.litow)}`, `STAB TO ${r.trimV == null ? 'SEE AFM' : fx(r.trimV,1) + ' ANU'} FLAPS 5`, `TAXI WT ${R(F.ramp)}  TAXI FUEL ${R(r.taxi)}`]
+    .forEach((l, i) => o += TX(445.5, 711 + i * 8.5, l, {fs:6.4}));
+  o += TX(473.5, 748.4, up(fl.captain), {fs:7.5});
+  o += TX(489, 763.2, up(fl.prep), {fs:7.5});
+  o += TX(490.5, 777.9, up(fl.appr), {fs:7.5});
+  return page(BG1, o, 'Loadsheet');
+}
+
+function sheetPage2(r){
+  const fl = S.flt, F = r.f;
+  const X = i => 170.25 + i * 3.5975;            // index scale (DOI ruler, fuel chart, envelope)
+  const yF = t => 336 + 9.19 * t;                // fuel on board, tonnes
+  const yE = w => 726.5 - (w / 1000 - 30) * 5.4;  // aircraft weight, kg
+  const up = v => String(v || '').toUpperCase();
+  let o = '';
+  const field = (x, y, w, s) => TX(x + 2, y - 1.2, s, {fs:8.5});   // written just above the printed dotted line
+  o += field(52, 106.5, 90, up(fl.no));
+  o += field(41, 119.6, 98, dmy(fl.date) + (fl.time ? '  ' + fl.time + 'Z' : ''));
+  o += field(41, 132.6, 98, AC.reg);
+  o += field(37, 145.6, 102, `${up(fl.from)} - ${up(fl.to)}`);
+  o += field(77, 158.6, 64, up(fl.prep));
+  o += field(79, 171.7, 62, up(fl.appr));
+  o += cellC(136.5, 174.5, 191, 208, fx(AC.doi, 1), 10);
+  o += cellC(290, 333.5, 191, 208, fx(r.doiAdj, 1), 10);
+  o += cellC(463, 507.5, 191, 208, fx(r.doi, 1), 10);
+
+  // 1) start on the DOI ruler at the corrected index, drop row by row, step sideways by each item's index
+  const rows = [...r.holdRows.map(x => ({ix:x.ix, wt:NIL(x.w), pax:null})), ...r.secRows.map(s => ({ix:s.ix, wt:null, pax:s.n ? P2(s.n) : 'NIL'}))];
+  let cur = r.doi, d = `M${X(cur).toFixed(1)} 231`, arrows = '';
+  rows.forEach((row, i) => {
+    const y0 = 238.5 + 11 * i, y1 = y0 + 11, yc = y0 + 5.5;
+    if (row.wt != null) o += cellC(50, 86, y0, y1, row.wt, 7.5);
+    if (row.pax != null) o += cellC(15, 50, y0, y1, row.pax, 7.5);
+    const nx = cur + row.ix;
+    d += ` L${X(cur).toFixed(1)} ${yc}`;
+    if (Math.abs(row.ix) > 0.05){
+      arrows += `<line class="tr" x1="${X(cur).toFixed(1)}" y1="${yc}" x2="${X(nx).toFixed(1)}" y2="${yc}" marker-end="url(#ah)"/>`;
+      d += ` L${X(nx).toFixed(1)} ${yc}`;
+    }
+    cur = nx;
+  });
+  if (r.lmc.any){
+    d += ` L${X(cur).toFixed(1)} 320`;
+    arrows += `<line class="tr" x1="${X(cur).toFixed(1)}" y1="320" x2="${X(cur + r.lmc.ix).toFixed(1)}" y2="320" marker-end="url(#ah)"/>` + TX(X(Math.max(cur, cur + r.lmc.ix)) + 3, 322.5, 'LMC', {fs:6.5});
+    cur += r.lmc.ix;
+    d += ` L${X(cur).toFixed(1)} 320`;
+  }
+  // 2) zero fuel index straight down to the ZFW weight
+  d += ` L${X(cur).toFixed(1)} ${yE(F.zfw).toFixed(1)}`;
+  o += `<defs><marker id="ah" viewBox="0 0 6 6" refX="5.5" refY="3" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L6 3L0 6z" class="ah"/></marker></defs>`;
+  o += `<path class="tr" d="${d}"/>` + arrows;
+  // 3) from the ZFI at fuel 0, follow the fuel curves down to the fuel on board, then straight down to the TOW
+  const tt = Math.min(r.tof / 1000, 17.1);
+  let fp = `M${X(F.lizfw).toFixed(1)} ${yF(0)}`;
+  for (let t = 0.1; t < tt; t += 0.1) fp += ` L${X(F.lizfw + fuelIndex(t * 1000)).toFixed(1)} ${yF(t).toFixed(1)}`;
+  fp += ` L${X(F.litow).toFixed(1)} ${yF(tt).toFixed(1)} L${X(F.litow).toFixed(1)} ${yE(F.tow).toFixed(1)}`;
+  o += `<path class="tr" d="${fp}"/>`;
+  o += `<line class="tr dash" x1="${X(F.litow).toFixed(1)}" y1="${yF(tt).toFixed(1)}" x2="${(X(F.litow) + 14).toFixed(1)}" y2="${yF(tt).toFixed(1)}"/>` + TX(X(F.litow) + 16, yF(tt) + 2.5, `${fx(tt,1)} T`, {fs:6.5, cls:'halo'});
+  // 4) points in the envelope, marked as on the station sheet
+  const pt = (I, w, lab, mac, dx) => `<circle class="pt" cx="${X(I).toFixed(1)}" cy="${yE(w).toFixed(1)}" r="2.6"/>`
+    + TX(X(I) + dx, yE(w) - 1, lab, {fs:8, a: dx > 0 ? 'start' : 'end', cls:'halo'})
+    + TX(X(I) + dx, yE(w) + 8.5, fx(mac, 1) + '%', {fs:8, a: dx > 0 ? 'start' : 'end', cls:'halo'});
+  const side = I => I < 32 ? -6 : 6;   // write on the open side, away from the scale boxes
+  o += pt(F.lizfw, F.zfw, 'Z.F.W', r.mac.zfw, side(F.lizfw)) + pt(F.litow, F.tow, 'T.O.W', r.mac.tow, side(F.litow));
+  // take-off %MAC and stab trim
+  o += TX(97, 558, fx(r.mac.tow, 1), {a:'end', fs:13});
+  o += cellC(252.5, 301, 791.5, 805, r.trimV == null ? 'AFM' : fx(r.trimV, 1), 11);
+  // notes
+  [`ZFW ${R(F.zfw)}  LIZFW ${fx(F.lizfw)}  ${fx(r.mac.zfw,1)}%`,
+   `TOW ${R(F.tow)}  LITOW ${fx(F.litow)}  ${fx(r.mac.tow,1)}%`,
+   `LAW ${R(F.lw)}  LILAW ${fx(F.lilaw)}  ${fx(r.mac.lw,1)}%`,
+   `FUEL IDX TO ${sg(r.fiTO)} LDG ${sg(r.fiLW)}`,
+   r.ok ? 'WITHIN LIMITS' : 'OUT OF LIMITS']
+    .forEach((l, i) => o += TX(19, 765 + i * 9, l, {fs:6, cls: i === 4 && !r.ok ? 'red' : ''}));
+  return page(BG2, o, 'Balance chart');
+}
+function sheetHTML(r){ return sheetPage1(r) + sheetPage2(r); }
+
+/* ---------- results panel ---------- */
+function resultsHTML(r){
+  const F = r.f;
+  const row = (lab, act, max, k) => {
+    const m = max - act;
+    return `<tr><td>${lab}${k && r.limiting === k ? '<span class="lim">L</span>' : ''}</td><td>${R(act)}</td><td>${R(max)}</td><td class="${m < 0 ? 'neg' : 'pos'}">${m < 0 ? '−' : '+'}${Math.abs(R(m))}</td></tr>`;
+  };
+  const bal = (lab, I, mac, e) => `<tr><td>${lab}</td><td>${fx(I)}</td><td>${fx(mac,1)}%</td><td class="${e.ok ? 'pos' : 'neg'}">${fx(e.fwd,1)}–${fx(e.aft,1)}</td></tr>`;
+  const bad = r.checks.filter(c => c.lvl === 'bad').length;
+  return `
+  <div class="status ${r.ok ? 'ok' : 'bad'}"><span class="dot"></span>${r.ok ? t('within') : t('notWithin')}<small>${r.ok ? t('ready') : t('issues', bad)}</small></div>
+  <div class="sec">
+    <h2>${t('weights')} <span class="aux" dir="auto">${r.lmc.any ? t('inclLmc', (r.lmc.net >= 0 ? '+' : '−') + Math.abs(R(r.lmc.net))) : 'kg'}</span></h2>
+    <table class="w">
+      <tr><th></th><th>${t('actual')}</th><th>${t('max')}</th><th>${t('margin')}</th></tr>
+      ${row('ZFW', F.zfw, AC.mzfw, 'A')}
+      ${row('TOW', F.tow, r.allowed, '')}
+      ${row('LW', F.lw, AC.mlw, 'C')}
+      ${row(t('taxiRow'), F.ramp, AC.mtw, '')}
+    </table>
+    <div class="kv">
+      <span>${t('traffic')} <b>${R(r.ttl)}</b></span>
+      <span>${t('allowed')} <b>${R(r.atl)}</b></span>
+      <span>${t('under')} <b style="color:${r.under < 0 ? 'var(--bad)' : 'var(--ok)'}">${R(r.under)}</b></span>
+      <span>${t('limit')} <b>${r.limiting === 'A' ? 'A · MZFW' : r.limiting === 'B' ? 'B · TOW' : 'C · MLW'}</b></span>
+    </div>
+  </div>
+  <div class="sec">
+    <h2>${t('balance')}</h2>
+    <div class="bal">
+      <table class="w">
+        <tr><th></th><th>${t('index')}</th><th>MAC</th><th>${t('limits')}</th></tr>
+        <tr><td>DOI</td><td>${fx(r.doi)}</td><td></td><td></td></tr>
+        ${bal('ZFW', F.lizfw, r.mac.zfw, r.env.zfw)}
+        ${bal('TOW', F.litow, r.mac.tow, r.env.tow)}
+        ${bal('LW', F.lilaw, r.mac.lw, r.env.lw)}
+      </table>
+      <div class="trim"><span class="l">${t('stab')}</span><span class="v">${r.trimV == null ? '—' : fx(r.trimV,1)}</span><span class="l">${t('units')}</span></div>
+    </div>
+  </div>
+  <div class="sec chart">
+    <h2>${t('envelope')} <span class="aux">${t('envAux')}</span></h2>
+    ${chartSVG(r, 's')}
+    <div class="legend"><span><i style="background:var(--zfw)"></i>ZFW</span><span><i style="background:var(--tow)"></i>TOW</span><span><i style="background:var(--law)"></i>LW</span><span>${t('dashed')}</span></div>
+  </div>
+  <div class="sec">
+    <h2>${t('checks')}</h2>
+    <ul class="checks">${r.checks.map(c => `<li class="${c.lvl}">${esc(tc(c))}</li>`).join('')}</ul>
+  </div>`;
+}
+
+/* ---------- update ---------- */
+const $ = id => document.getElementById(id);
+function update(){
+  if (!AC.reg) return;
+  const r = RES = calc(S);
+  $('o-basic').textContent = `${AC.dow} / ${fx(AC.doi)}`;
+  // pax auto distribution reflected in inputs
+  ['OA','OB','OC'].forEach(k => { const el = $('i-' + k.toLowerCase()); el.disabled = !!S.pax.auto; if (S.pax.auto) el.value = r.dist[k]; });
+  $('o-crew').textContent = t('crewOut', r.crew);
+  $('o-dow').textContent = R(r.dow);
+  $('o-doi').textContent = fx(r.doi);
+  $('o-paxsum').textContent = t('paxSum', r.pax.total, R(r.paxWt));
+  r.holdRows.forEach(h => {
+    $('ht' + h.id).textContent = R(h.w);
+    const m = $('hm' + h.id); m.classList.toggle('over', h.w > h.max);
+    m.firstElementChild.style.width = Math.min(100, h.w / h.max * 100) + '%';
+  });
+  $('o-pcs').textContent = R(r.pcs); $('o-bag').textContent = R(r.bag); $('o-cgo').textContent = R(r.cgo); $('o-mail').textContent = R(r.mail); $('o-dead').textContent = R(r.dead);
+  $('o-fuelsum').textContent = t('fuelSum', R(r.tof + r.taxi), R(r.lfuel));
+  $('o-wing').textContent = R(r.fuelTO.wing); $('o-ctr').textContent = R(r.fuelTO.ctr);
+  $('o-fito').textContent = sg(r.fiTO); $('o-filw').textContent = sg(r.fiLW);
+  $('o-lmcsum').textContent = r.lmc.any ? t('lmcSum', R(r.lmc.plus), R(r.lmc.minus), sg(r.lmc.ix)) : t('lmcNone');
+  $('results').innerHTML = resultsHTML(r);
+  $('dock').innerHTML = `<span class="s ${r.ok ? 'ok' : 'bad'}">${r.ok ? t('dockOk') : t('dockBad')}</span><span>TOW ${R(r.f.tow)}</span><span>MAC ${fx(r.mac.tow,1)}%</span><span>TRIM ${r.trimV == null ? '—' : fx(r.trimV,1)}</span>`;
+  const sh = sheetHTML(r);
+  $('sheetView').innerHTML = sh;
+  $('printRoot').innerHTML = sh;
+  $('ldmText').textContent = ldmText(r);
+  $('edpText').textContent = edpText(r);
+  $('sampleBanner').hidden = !S.sample;
+  store.set('lxx-ls-draft', S);
+}
+
+/* ---------- tabs ---------- */
+function showTab(t){
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+  ['build','sheet','msgs','arch','admin'].forEach(k => $('tab-' + k).hidden = k !== t);
+  if (t === 'arch') renderArchive();
+  if (t === 'admin') showSub(SUB);
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+/* ---------- confirm bar ---------- */
+let pending = null;
+function ask(text, fn){ showTab('build'); pending = fn; $('confirmText').textContent = text; $('confirmBar').hidden = false; window.scrollTo({top:0}); }
+$('confirmYes').onclick = () => { $('confirmBar').hidden = true; if (pending) pending(); pending = null; };
+$('confirmNo').onclick = () => { $('confirmBar').hidden = true; pending = null; };
+
+function load(state){ S = state; fillInputs(); renderLmc(); update(); }
+$('btnNew').onclick = () => ask(t('confirmNew'), () => load(blankState()));
+$('btnClearSample').onclick = () => load(blankState());
+
+/* ---------- print & copy ---------- */
+function doPrint(){ try { window.print(); } catch(e){} }
+const printLogged = () => logAct('print', `${(S.flt.no || '').toUpperCase()} ${(S.flt.from || '').toUpperCase()}-${(S.flt.to || '').toUpperCase()}`);
+$('btnPrint').onclick = () => { showTab('sheet'); printLogged(); setTimeout(doPrint, 50); };
+$('btnPrint2').onclick = () => { printLogged(); doPrint(); };
+document.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
+  const el = $(b.dataset.copy);
+  try { await navigator.clipboard.writeText(el.textContent); b.textContent = t('copied'); }
+  catch(e){ const rg = document.createRange(); rg.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); b.textContent = t('selected'); }
+  setTimeout(() => b.textContent = t('copy'), 1400);
+});
+
+/* ---------- boot (runs after sign-in, once aircraft data is loaded) ---------- */
+let BOOTED = false;
+function bootApp(){
+  if (!AC.reg) return;
+  if (!BOOTED){ buildHolds(); BOOTED = true; }
+  if (!S.lmc) S.lmc = [];
+  applyLang(); fillInputs(); renderLmc(); update();
+}
+
+/* ---------- backend: sign-in, roles, shared archive, administration (Supabase) ---------- */
+const SUPA_URL = '__SUPABASE_URL__', SUPA_KEY = '__SUPABASE_ANON__';
+const EMAIL_DOMAIN = 'libyanexpress-ops.github.io';
+const sb = (window.supabase && !SUPA_URL.startsWith('__')) ? window.supabase.createClient(SUPA_URL, SUPA_KEY, {auth:{persistSession:true, autoRefreshToken:true}}) : null;
+let ME = null, SETTINGS = {language:'en', session_minutes:30}, AC_ROW = null;
+const isAdmin = () => !!ME && ME.role === 'admin';
+const userEmail = u => String(u || '').trim().toLowerCase() + '@' + EMAIL_DOMAIN;
+const utcNow = () => { const d = new Date(); return `${String(d.getUTCDate()).padStart(2,'0')} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()} · ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}Z`; };
+const zstamp = iso => { if (!iso) return '—'; const d = new Date(iso); return `${String(d.getUTCDate()).padStart(2,'0')} ${MON[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)} · ${String(d.getUTCHours()).padStart(2,'0')}${String(d.getUTCMinutes()).padStart(2,'0')}Z`; };
+async function logAct(action, detail = ''){ if (!sb || !ME) return; try { await sb.from('activity').insert({username:ME.username, action, detail}); } catch(e){} }
+function showOnly(id){ ['login','mustChange','app'].forEach(k => $(k).hidden = k !== id); }
+function pwScore(p){ let s = 0; if (p.length >= 8) s++; if (p.length >= 12) s++; if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++; if (/\d/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++; return s; }
+function paintMeter(bar, p){ const s = pwScore(p); bar.style.width = Math.min(100, s * 20) + '%'; bar.style.background = s >= 4 ? 'var(--ok)' : s >= 3 ? 'var(--warn)' : 'var(--bad)'; }
+const pwOk = p => p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p);
+
+async function loadSettings(){
+  if (!sb) return;
+  try {
+    const {data} = await sb.from('settings').select('key,value');
+    (data || []).forEach(r => SETTINGS[r.key] = r.value);
+  } catch(e){}
+  LANG = SETTINGS.language === 'ar' ? 'ar' : 'en';
+  applyLang();
+}
+async function loadAircraft(){
+  const {data, error} = await sb.from('aircraft').select('*').order('reg').limit(1);
+  if (error) throw error;
+  AC_ROW = (data && data[0]) || null;
+  for (const k of Object.keys(AC)) delete AC[k];
+  if (AC_ROW){ Object.assign(AC, AC_ROW.data); BG1 = AC_ROW.form1 || ''; BG2 = AC_ROW.form2 || ''; }
+}
+
+/* sign in */
+$('lpShow').onclick = () => { const i = $('lp'); i.type = i.type === 'password' ? 'text' : 'password'; $('lpShow').textContent = t(i.type === 'password' ? 'show' : 'hide'); };
+$('lu').addEventListener('input', e => { const p = e.target.selectionStart; e.target.value = e.target.value.toUpperCase(); try { e.target.setSelectionRange(p, p); } catch(_){} });
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('loginErr'); err.hidden = true;
+  if (!sb){ err.textContent = t('noBackend'); err.hidden = false; return; }
+  const btn = $('loginBtn'); btn.disabled = true; btn.textContent = t('signingIn');
+  try {
+    const {error} = await sb.auth.signInWithPassword({email:userEmail($('lu').value), password:$('lp').value});
+    if (error) throw new Error(t('badLogin'));
+    await afterSignIn(true);
+  } catch(ex){ err.textContent = ex.message || t('badLogin'); err.hidden = false; }
+  finally { btn.disabled = false; btn.textContent = t('signIn'); }
+});
+
+async function afterSignIn(fresh){
+  const {data:{user}} = await sb.auth.getUser();
+  if (!user){ showOnly('login'); return; }
+  const {data:prof} = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (!prof || !prof.active){ await sb.auth.signOut(); throw new Error(t('noAccess')); }
+  ME = prof;
+  if (fresh){ try { await sb.rpc('touch_sign_in'); } catch(_){} logAct('sign_in'); }
+  await loadSettings();
+  await loadAircraft();
+  if (ME.must_change){ showOnly('mustChange'); $('mc1').focus(); return; }
+  enterApp();
+}
+
+/* first sign-in: own new password */
+$('mc1').addEventListener('input', e => paintMeter($('mcBar'), e.target.value));
+$('mcForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const a = $('mc1').value, b = $('mc2').value, err = $('mcErr'); err.hidden = true;
+  if (!pwOk(a)){ err.textContent = t('pwRule'); err.hidden = false; return; }
+  if (a !== b){ err.textContent = t('pwMismatch'); err.hidden = false; return; }
+  const {error} = await sb.auth.updateUser({password:a});
+  if (error){ err.textContent = error.message; err.hidden = false; return; }
+  await sb.rpc('clear_must_change'); ME.must_change = false; logAct('password', 'Changed own password');
+  $('mc1').value = $('mc2').value = '';
+  enterApp();
+});
+
+/* session: sign out, idle timeout, clock */
+async function signOut(reason){
+  if (sb){ await logAct('sign_out', reason || ''); await sb.auth.signOut(); }
+  ME = null; for (const k of Object.keys(AC)) delete AC[k]; BG1 = BG2 = '';
+  $('sheetView').innerHTML = $('printRoot').innerHTML = '';
+  $('lp').value = '';
+  showOnly('login');
+  if (reason === 'timeout'){ const e = $('loginErr'); e.textContent = t('timedOut'); e.hidden = false; }
+}
+$('btnOut').onclick = () => signOut();
+let lastMove = Date.now();
+['pointerdown','keydown','scroll','touchstart'].forEach(ev => addEventListener(ev, () => lastMove = Date.now(), {passive:true}));
+setInterval(() => {
+  $('utcClock').textContent = utcNow();
+  if (ME && Date.now() - lastMove > (num(SETTINGS.session_minutes) || 30) * 60000) signOut('timeout');
+}, 15000);
+
+function enterApp(){
+  showOnly('app');
+  $('whoUser').textContent = ME.username;
+  const role = $('whoRole'); role.textContent = t(isAdmin() ? 'rAdmin' : 'rOps'); role.className = isAdmin() ? '' : 'ops';
+  $('tabAdmin').hidden = !isAdmin();
+  if (!AC.reg){
+    if (isAdmin()){ showTab('admin'); showSub('aircraft'); admMsg(t('acMissing')); }
+    else { $('tab-build').innerHTML = `<div class="sec">${esc(t('acMissingOps'))}</div>`; }
+    return;
+  }
+  bootApp();
+  showTab('build');
+}
+
+/* ---------- shared archive ---------- */
+async function renderArchive(){
+  const body = $('archBody');
+  const {data, error} = await sb.from('flights').select('id,flight_no,flight_date,route,summary,saved_by,saved_at').order('saved_at', {ascending:false}).limit(300);
+  if (error){ body.innerHTML = `<tr><td colspan="9" class="empty">${esc(error.message)}</td></tr>`; return; }
+  if (!data.length){ body.innerHTML = `<tr><td colspan="9" class="empty">${t('archEmpty')}</td></tr>`; return; }
+  body.innerHTML = data.map(a => `<tr>
+    <td><b>${esc(a.flight_no)}</b></td><td class="mono">${esc(dmy(a.flight_date))}</td><td class="mono">${esc(a.route)}</td><td class="mono">${a.summary?.pax ?? ''}</td>
+    <td class="mono">${a.summary?.zfw ?? ''}</td><td class="mono">${a.summary?.tow ?? ''}</td><td class="mono">${a.summary?.mac ?? ''}%</td>
+    <td class="mono">${esc(zstamp(a.saved_at))} · ${esc(a.saved_by || '')}</td>
+    <td style="white-space:nowrap"><button class="btn sm" data-open="${a.id}">${t('open')}</button>${isAdmin() ? ` <button class="btn sm danger" data-rm="${a.id}">${t('del')}</button>` : ''}</td></tr>`).join('');
+}
+$('archBody').addEventListener('click', async e => {
+  const o = e.target.closest('[data-open]'), d = e.target.closest('[data-rm]');
+  if (o){
+    const {data} = await sb.from('flights').select('state').eq('id', o.dataset.open).single();
+    if (data){ load(JSON.parse(JSON.stringify(data.state))); showTab('build'); }
+  }
+  if (d){
+    if (d.dataset.armed){ await sb.from('flights').delete().eq('id', d.dataset.rm); logAct('delete_flight', d.dataset.rm); renderArchive(); }
+    else { d.dataset.armed = '1'; d.textContent = t('confirm'); }
+  }
+});
+$('btnSave').onclick = async () => {
+  const r = RES, fl = S.flt, b = $('btnSave');
+  const row = {
+    flight_no:(fl.no || '').toUpperCase(), flight_date:fl.date || null, route:`${(fl.from || '').toUpperCase()}-${(fl.to || '').toUpperCase()}`,
+    summary:{pax:r.fin.pax.total, zfw:R(r.f.zfw), tow:R(r.f.tow), mac:fx(r.mac.tow,1), ok:r.ok},
+    state:JSON.parse(JSON.stringify(S)), saved_by:ME.username, saved_at:new Date().toISOString()
+  };
+  b.disabled = true;
+  const {error} = await sb.from('flights').upsert(row, {onConflict:'flight_no,flight_date,route'});
+  b.disabled = false;
+  if (error){ b.textContent = '!'; setTimeout(() => b.textContent = t('save'), 1800); alertMsg(error.message); return; }
+  logAct('save_flight', `${row.flight_no} ${row.route}`);
+  b.textContent = t('saved'); setTimeout(() => b.textContent = t('save'), 1400);
+};
+function alertMsg(m){ ask(m, () => {}); }
+
+/* ---------- administration ---------- */
+function admMsg(m, ok){ const b = $('admMsg'); b.textContent = m; b.hidden = !m; b.style.borderColor = ok ? 'var(--ok)' : ''; if (m) setTimeout(() => { if (b.textContent === m) b.hidden = true; }, 6000); }
+let SUB = 'users', USERS = [];
+function showSub(k){
+  SUB = k;
+  document.querySelectorAll('.subnav button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.sub === k)));
+  ['users','aircraft','activity','settings'].forEach(x => $('sub-' + x).hidden = x !== k);
+  $('admTitle').textContent = t({users:'subUsersT', aircraft:'subAircraft', activity:'subActivity', settings:'subSettings'}[k]);
+  ({users:renderUsers, aircraft:renderAircraftForm, activity:renderActivity, settings:renderSettings})[k]();
+}
+document.querySelectorAll('.subnav button').forEach(b => b.onclick = () => showSub(b.dataset.sub));
+
+async function renderUsers(){
+  const {data, error} = await sb.from('profiles').select('*').order('role');
+  if (error){ admMsg(error.message); return; }
+  USERS = data;
+  $('usrBody').innerHTML = data.map(u => `<tr>
+    <td class="mono"><b>${esc(u.username)}</b></td>
+    <td>${t(u.role === 'admin' ? 'rAdmin' : 'rOps')}</td>
+    <td>${!u.active ? `<span class="chip off">${t('suspended')}</span>` : u.id === ME.id ? `<span class="chip on"><span class="pulse dark"></span>${t('online')}</span>` : `<span class="chip idle">${t('activeS')}</span>`}</td>
+    <td class="mono">${esc(zstamp(u.last_sign_in))}</td>
+    <td style="white-space:nowrap;text-align:end"><button class="btn sm" data-pw="${u.id}">${t('changePw')}</button>${u.id !== ME.id ? ` <button class="btn sm ${u.active ? 'danger' : ''}" data-act="${u.id}" data-on="${u.active ? 0 : 1}">${t(u.active ? 'suspend' : 'activate')}</button>` : ''}</td>
+  </tr>`).join('');
+  $('pwUser').innerHTML = data.map(u => `<option value="${u.id}">${esc(u.username)}</option>`).join('');
+  const caps = [['capBuild',1,1],['capPrint',1,1],['capArch',1,1],['capAc',1,0],['capUsers',1,0],['capLog',1,0]];
+  $('permBody').innerHTML = caps.map(([k,a,o]) => `<tr><td>${t(k)}</td><td class="${a ? 'yes' : 'no'}">${t(a ? 'yesS' : 'noS')}</td><td class="${o ? 'yes' : 'no'}">${t(o ? 'yesS' : 'noS')}</td></tr>`).join('');
+}
+async function callAdmin(body){
+  const {data, error} = await sb.functions.invoke('admin-users', {body});
+  if (error){ let m = error.message; try { m = (await error.context.json()).error || m; } catch(_){} throw new Error(m); }
+  if (data && data.error) throw new Error(data.error);
+  return data;
+}
+$('usrBody').addEventListener('click', async e => {
+  const p = e.target.closest('[data-pw]'), a = e.target.closest('[data-act]');
+  if (p){ $('pwUser').value = p.dataset.pw; $('pw1').focus(); }
+  if (a){
+    if (!a.dataset.armed){ a.dataset.armed = '1'; a.textContent = t('confirm'); return; }
+    try { await callAdmin({action: a.dataset.on === '1' ? 'activate' : 'suspend', userId: a.dataset.act}); admMsg(t('done'), true); renderUsers(); }
+    catch(ex){ admMsg(ex.message); }
+  }
+});
+$('pw1').addEventListener('input', e => paintMeter($('pwBar'), e.target.value));
+$('pwForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const a = $('pw1').value, b = $('pw2').value;
+  if (!pwOk(a)) return admMsg(t('pwRule'));
+  if (a !== b) return admMsg(t('pwMismatch'));
+  try {
+    await callAdmin({action:'set_password', userId:$('pwUser').value, password:a, mustChange:$('pwMust').checked});
+    $('pw1').value = $('pw2').value = ''; paintMeter($('pwBar'), '');
+    admMsg(t('pwUpdated'), true); renderUsers();
+  } catch(ex){ admMsg(ex.message); }
+});
+
+const AC_FIELDS = [['dow','acDow'],['doi','acDoi'],['mzfw','MZFW'],['mtow','MTOW'],['mlw','MLW'],['mtw','MTW'],['crewWt','acCrewWt'],['paxWt.adult','adult'],['paxWt.child','child'],['paxWt.infant','infant']];
+function renderAircraftForm(){
+  $('acStamp').textContent = AC_ROW ? `${AC_ROW.reg} · ${zstamp(AC_ROW.updated_at)}${AC_ROW.updated_by ? ' · ' + AC_ROW.updated_by : ''}` : t('acNone');
+  $('acFields').innerHTML = AC.reg ? AC_FIELDS.map(([k, l]) => `<div class="f"><label for="ac-${k}">${esc(I18N.en[l] ? t(l) : l)}</label><input id="ac-${k}" class="num" dir="ltr" type="number" step="any" data-ac="${k}" value="${esc(getPath(AC, k))}"></div>`).join('') : `<div class="empty">${t('acMissing')}</div>`;
+}
+$('acSave').onclick = async () => {
+  if (!AC_ROW) return admMsg(t('acMissing'));
+  const data = JSON.parse(JSON.stringify(AC_ROW.data)), changes = [];
+  document.querySelectorAll('[data-ac]').forEach(i => { const k = i.dataset.ac, v = num(i.value); if (getPath(data, k) !== v){ changes.push(`${k} ${getPath(data, k)}→${v}`); setPath(data, k, v); } });
+  if (!changes.length) return admMsg(t('noChanges'), true);
+  const {error} = await sb.from('aircraft').update({data, updated_at:new Date().toISOString(), updated_by:ME.username}).eq('reg', AC_ROW.reg);
+  if (error) return admMsg(error.message);
+  logAct('aircraft', `${AC_ROW.reg}: ${changes.join(', ')}`);
+  await loadAircraft(); renderAircraftForm(); if (RES) update(); admMsg(t('saved'), true);
+};
+$('acFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text());
+    if (j.format !== 'lxx-aircraft' || !j.data || !j.data.reg) throw new Error(t('acBadFile'));
+    const {error} = await sb.from('aircraft').upsert({reg:j.data.reg, data:j.data, form1:j.form1 || null, form2:j.form2 || null, updated_at:new Date().toISOString(), updated_by:ME.username});
+    if (error) throw error;
+    logAct('aircraft', `Imported ${j.data.reg}`);
+    const first = !AC.reg;
+    await loadAircraft(); renderAircraftForm(); admMsg(t('acImported'), true);
+    if (first) bootApp(); else update();
+  } catch(ex){ admMsg(ex.message); }
+});
+$('acExport').onclick = () => {
+  if (!AC_ROW) return;
+  const blob = new Blob([JSON.stringify({format:'lxx-aircraft', version:1, reg:AC_ROW.reg, data:AC_ROW.data, form1:AC_ROW.form1, form2:AC_ROW.form2})], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${AC_ROW.reg}.aircraft.json`; document.body.appendChild(a); a.click(); a.remove();
+};
+
+const ACT_LABEL = {sign_in:'aSignIn', sign_out:'aSignOut', save_flight:'aSave', print:'aPrint', password:'aPw', admin:'aAdmin', aircraft:'aAircraft', settings:'aSettings', delete_flight:'aDelete'};
+async function renderActivity(){
+  const {data, error} = await sb.from('activity').select('*').order('at', {ascending:false}).limit(200);
+  if (error) return admMsg(error.message);
+  $('actBody').innerHTML = data.length ? data.map(a => `<tr><td class="mono">${esc(zstamp(a.at))}</td><td class="mono">${esc(a.username)}</td><td>${esc(ACT_LABEL[a.action] ? t(ACT_LABEL[a.action]) : a.action)}</td><td>${esc(a.detail || '')}</td></tr>`).join('') : `<tr><td colspan="4" class="empty">—</td></tr>`;
+}
+function renderSettings(){
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  $('setTimeout').value = String(num(SETTINGS.session_minutes) || 30);
+}
+async function saveSetting(key, value, note){
+  const {error} = await sb.from('settings').upsert({key, value, updated_at:new Date().toISOString(), updated_by:ME.username});
+  if (error) return admMsg(error.message);
+  SETTINGS[key] = value; logAct('settings', note);
+}
+document.querySelectorAll('.seg button').forEach(b => b.onclick = async () => {
+  await saveSetting('language', b.dataset.lang, `Language ${b.dataset.lang}`);
+  LANG = b.dataset.lang; applyLang(); renderLmc(); if (RES) update(); showSub('settings'); enterHeader();
+});
+$('setTimeout').onchange = e => saveSetting('session_minutes', num(e.target.value), `Session timeout ${e.target.value} min`);
+function enterHeader(){ $('whoRole').textContent = t(isAdmin() ? 'rAdmin' : 'rOps'); }
+
+/* ---------- start ---------- */
+(async function start(){
+  $('utcClock').textContent = utcNow();
+  if (!sb){ showOnly('login'); applyLang(); return; }
+  await loadSettings();
+  const {data:{session}} = await sb.auth.getSession();
+  if (session){ try { await afterSignIn(false); return; } catch(e){ const er = $('loginErr'); er.textContent = e.message; er.hidden = false; } }
+  showOnly('login');
+})();
+
+</script>
