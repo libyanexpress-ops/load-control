@@ -3,6 +3,36 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
+<meta name="lxx-build" content="20261106130654">
+<script>
+/* always run the newest version: compare this page's build with the one on the server */
+(function(){
+  var me = '20261106130654', base = location.pathname;
+  function latest(){
+    return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
+      .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
+  }
+  if (!/^https?:/.test(location.protocol)) return;
+  latest().then(function(b){
+    if (b && b !== me){
+      if (sessionStorage.getItem('lxx-upd') === b) return;      // never loop
+      sessionStorage.setItem('lxx-upd', b);
+      location.replace(base + '?v=' + b + location.hash);
+    }
+  });
+  setInterval(function(){
+    if (document.hidden) return;
+    latest().then(function(b){
+      if (!b || b === me || document.getElementById('lxxUpd')) return;
+      var d = document.createElement('div'); d.id = 'lxxUpd';
+      d.style.cssText = 'position:fixed;z-index:9999;left:50%;bottom:18px;transform:translateX(-50%);background:#0B1A3F;color:#fff;padding:10px 14px;border-radius:8px;font:600 13px system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center';
+      d.innerHTML = '<span>A new version is available</span><button style="background:#C9A54A;color:#0B1A3F;border:0;border-radius:6px;padding:6px 12px;font:700 13px system-ui,sans-serif;cursor:pointer">Reload</button>';
+      d.querySelector('button').onclick = function(){ location.replace(base + '?v=' + b + location.hash); };
+      document.body.appendChild(d);
+    });
+  }, 300000);
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B1A3F">
 <meta name="claude:viewport-fit-sides" content="cover">
