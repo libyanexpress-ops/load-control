@@ -420,6 +420,8 @@ table.usr td.mono,table.usr th{white-space:nowrap}
 .accent-top{border-top:3px solid var(--accent)}
 #pwForm{display:flex;flex-direction:column;gap:12px}
 .hint-s{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.6}
+.hint-s.fit.over{color:#A3151B;font-weight:600}
+#tab-build .sec .f + .f{margin-top:16px}
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:10px}
 .chip.on{background:var(--ok-bg);color:var(--ok)} .chip.off{background:var(--bad-bg);color:var(--bad)} .chip.idle{background:var(--sunk);color:var(--muted)}
 .perm td:not(:first-child),.perm th:not(:first-child){text-align:center}
@@ -793,6 +795,8 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
         <div class="sec">
           <h2><span data-t="secSi">SI / Notes</span></h2>
           <div class="f"><label for="i-si" data-t="siLabel">Supplementary information</label><textarea id="i-si" dir="ltr" data-k="flt.si" rows="2"></textarea></div>
+          <div class="f"><label for="i-n1" data-t="n1Label">Notes · Loadsheet</label><textarea id="i-n1" class="uc" dir="ltr" data-k="flt.n1" rows="3" placeholder="Optional"></textarea><span class="hint-s fit" id="fit-n1"></span></div>
+          <div class="f"><label for="i-n2" data-t="n2Label">Notes · Balance chart</label><textarea id="i-n2" class="uc" dir="ltr" data-k="flt.n2" rows="3" placeholder="Optional"></textarea><span class="hint-s fit" id="fit-n2"></span></div>
         </div>
       </div>
 
@@ -1245,7 +1249,7 @@ const I18N = {
     lmcNone:'None', lmcEmpty:'No changes after the loadsheet was closed.', lmcSum:(p, m, ix) => `+${p} / −${m} kg · index ${ix}`,
     lPax:'Pax', lType:'Type', lSec:'Section', lBag:'Bag kg/pax', lBagHold:'Bag hold', lKg:'Weight kg', lCpt:'Compartment',
     on:'+ ON', off:'− OFF', oAdult:'Adult', oChild:'Child', oInfant:'Infant', oBag:'Baggage', oCgo:'Cargo', oMail:'Mail', cpt:'Cpt ', remove:'Remove change',
-    secSi:'SI / Notes', siLabel:'Supplementary information',
+    secSi:'SI / Notes', siLabel:'Supplementary information', n1Label:'Notes · Loadsheet (page 1)', n2Label:'Notes · Balance chart (page 2)', notesEmpty:'Optional. Leave empty to keep the box clear.', notesFit:(u, m) => `Fits the box · ${u} of ${m} lines`, notesOver:m => `Too long for the box (${m} lines). The extra text will not print.`,
     sheetBanner:'5A-WAC Load &amp; Trim Sheet: page 1 loadsheet, page 2 balance chart. Save PDF to keep or share it. Print gives one sheet per page.',
     copy:'Copy', copied:'Copied', selected:'Selected',
     secArch:'Saved flights', archAux:'Stored in this browser', aFlight:'Flight', aDate:'Date', aRoute:'Route', aPax:'Pax', aSaved:'Saved',
@@ -1316,7 +1320,7 @@ const I18N = {
     lmcNone:'لا يوجد', lmcEmpty:'ما فيش تعديلات بعد إقفال اللود شيت.', lmcSum:(p, m, ix) => `+${p} / −${m} kg · Index ${ix}`,
     lPax:'ركاب', lType:'النوع', lSec:'القسم', lBag:'شنطة kg/راكب', lBagHold:'عنبر الشنطة', lKg:'الوزن kg', lCpt:'العنبر',
     on:'+ إضافة', off:'− تنزيل', oAdult:'بالغ', oChild:'طفل', oInfant:'رضيع', oBag:'شنط', oCgo:'شحن', oMail:'بريد', cpt:'عنبر ', remove:'حذف التعديل',
-    secSi:'SI / ملاحظات', siLabel:'معلومات إضافية',
+    secSi:'SI / ملاحظات', siLabel:'معلومات إضافية', n1Label:'ملاحظات · اللود شيت (صفحة 1)', n2Label:'ملاحظات · البالانس شارت (صفحة 2)', notesEmpty:'اختياري. اتركه فارغاً ليبقى المربع نظيفاً.', notesFit:(u, m) => `داخل المربع · ${u} من ${m} أسطر`, notesOver:m => `النص أطول من المربع (${m} أسطر). الزائد لن يُطبع.`,
     sheetBanner:'فورم 5A-WAC Load &amp; Trim: الصفحة 1 اللود شيت، والصفحة 2 البالانس شارت. احفظه PDF باش تحتفظ بيه أو تبعته، والطباعة تطلع كل ورقة في صفحة.',
     copy:'نسخ', copied:'تم النسخ', selected:'تم التحديد',
     secArch:'الرحلات المحفوظة', archAux:'محفوظة في هذا المتصفح', aFlight:'الرحلة', aDate:'التاريخ', aRoute:'المسار', aPax:'الركاب', aSaved:'وقت الحفظ',
@@ -1429,7 +1433,7 @@ function applyLang(){
 const todayUTC = () => new Date().toISOString().slice(0,10);
 function blankState(){
   return {
-    flt:{no:'LXX', date:todayUTC(), time:'', from:'MJI', to:'', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:''},
+    flt:{no:'LXX', date:todayUTC(), time:'', from:'MJI', to:'', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:'', n1:'', n2:''},
     crew:{xCockpit:0, xFwd:0, xAft:0},
     galley:{G1:0, G2:0, G4B:0},
     pax:{adult:0, child:0, infant:0, auto:true, OA:0, OB:0, OC:0},
@@ -1440,7 +1444,7 @@ function blankState(){
 }
 function sampleState(){
   const s = blankState();
-  s.flt = {no:'LXX101', date:todayUTC(), time:'0830', from:'MJI', to:'TUN', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:''};
+  s.flt = {no:'LXX101', date:todayUTC(), time:'0830', from:'MJI', to:'TUN', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:'', n1:'', n2:''};
   s.pax.adult = 120;
   s.holds = {1:{pcs:15,B:300,C:0,M:0}, 2:{pcs:35,B:700,C:0,M:0}, 3:{pcs:40,B:800,C:0,M:0}, 4:{pcs:10,B:200,C:0,M:0}};
   s.fuel = {tof:8000, trip:4000, taxi:200, rtow:''};
@@ -1651,6 +1655,50 @@ function boxL(E, y0, y1, s, fs = 9.5){
   return o;
 }
 const cellR = (x1, y0, y1, s, fs = 9) => TX(x1 - 2.5, BL(y0, y1, fs), s, {a:'end', fs});
+/* manual notes: wrapped by word, written inside the NOTES box, shrinks a little before it gives up */
+const NOTE_BOX = {
+  // each line: [x, baseline, width]; the first line of page 1 sits beside the printed word NOTES
+  p1:{fs:6, min:4.6, lines:[[468, 700.8, 100], [445.5, 710.2, 122], [445.5, 719, 122], [445.5, 727.8, 122]]},
+  p2:{fs:5.8, min:4.6, lines:[0, 1, 2, 3, 4, 5].map(i => [17.5, 761.6 + i * 7.9, 117])}
+};
+const NOTE_FIT = {};
+const penW = (s, fs) => s ? PEN.write(s, 0, 0, fs * 0.74, handOf(sheetHand()), sheetKey(), null, 0).width : 0;
+function wrapNotes(text, box, fs){
+  const out = []; let over = false;
+  const paras = String(text || '').toUpperCase().replace(/\r/g, '').split('\n').map(x => x.trim().replace(/\s+/g, ' '));
+  while (paras.length && !paras[paras.length - 1]) paras.pop();
+  for (const p of paras){
+    if (!p){ out.push(''); continue; }
+    let line = '';
+    for (let w of p.split(' ')){
+      const wid = () => box.lines[Math.min(out.length, box.lines.length - 1)][2];
+      while (penW(w, fs) > wid()){              // a word longer than the line: break it
+        let k = w.length - 1; while (k > 1 && penW((line ? line + ' ' : '') + w.slice(0, k), fs) > wid()) k--;
+        if (line && penW(line + ' ' + w.slice(0, k), fs) > wid()){ out.push(line); line = ''; continue; }
+        out.push((line ? line + ' ' : '') + w.slice(0, k)); line = ''; w = w.slice(k);
+      }
+      const t = line ? line + ' ' + w : w;
+      if (penW(t, fs) <= wid()) line = t; else { out.push(line); line = w; }
+    }
+    out.push(line);
+  }
+  if (out.length > box.lines.length) over = true;
+  return {lines: out, over};
+}
+function notesBlock(text, box, id){
+  if (!String(text || '').trim()){ NOTE_FIT[id] = {used:0, max:box.lines.length, over:false}; return ''; }
+  let fs = box.fs, w = wrapNotes(text, box, fs);
+  while (w.over && fs > box.min){ fs = Math.max(box.min, fs - 0.3); w = wrapNotes(text, box, fs); }
+  NOTE_FIT[id] = {used:Math.min(w.lines.length, box.lines.length), max:box.lines.length, over:w.over};
+  return w.lines.slice(0, box.lines.length).map((l, i) => l ? TX(box.lines[i][0], box.lines[i][1], l, {fs}) : '').join('');
+}
+function showNoteFit(){
+  ['n1', 'n2'].forEach(id => {
+    const el = $('fit-' + id); if (!el) return; const f = NOTE_FIT[id] || {used:0, max:0, over:false};
+    el.classList.toggle('over', !!f.over);
+    el.textContent = !f.used ? t('notesEmpty') : f.over ? t('notesOver', f.max) : t('notesFit', f.used, f.max);
+  });
+}
 const cellC = (x0, x1, y0, y1, s, fs = 9) => TX((x0 + x1) / 2, BL(y0, y1, fs), s, {a:'middle', fs});
 const NIL = n => n ? String(R(n)) : 'NIL';
 const P2 = n => String(R(n)).padStart(2, '0');
@@ -1746,9 +1794,7 @@ function sheetPage1(r){
   [['Z.F.W', r.mac.zfw], ['T.O.W', r.mac.tow], ['L.A.W', r.mac.lw]].forEach(([l, v], i) => o += TX(521, 643 + i * 9.6, `${l} ${fx(v,1)}%`, {fs:5.6}));
   o += TX(521, 674, `TRIM ${r.trimV == null ? 'AFM' : fx(r.trimV,1)}`, {fs:5.6});
   o += TX(568, 688.6, r.fin.pax.total, {a:'end', fs:8});
-  o += TX(467, 700.6, r.ok ? 'WITHIN LIMITS' : 'OUT OF LIMITS', {fs:5.8, cls: r.ok ? '' : 'red'});
-  [`LIZFW ${fx(F.lizfw)} LITOW ${fx(F.litow)}`, `STAB TO ${r.trimV == null ? 'SEE AFM' : fx(r.trimV,1) + ' ANU'} FLAPS 5`, `TAXI WT ${R(F.ramp)}  TAXI FUEL ${R(r.taxi)}`]
-    .forEach((l, i) => o += TX(445.5, 710 + i * 8.6, l, {fs:5.2}));
+  o += notesBlock(fl.n1, NOTE_BOX.p1, 'n1');
   o += TX(473.5, 748.4, up(fl.captain), {fs:7.5});
   o += TX(489, 763.2, up(fl.prep), {fs:7.5});
   o += TX(490.5, 777.9, up(fl.appr), {fs:7.5});
@@ -1783,20 +1829,18 @@ function sheetPage2(r){
     const nx = cur + row.ix;
     d += ` L${X(cur).toFixed(1)} ${yc}`;
     if (Math.abs(row.ix) > 0.05){
-      arrows += `<line class="tr" x1="${X(cur).toFixed(1)}" y1="${yc}" x2="${X(nx).toFixed(1)}" y2="${yc}" marker-end="url(#ah)"/>`;
       d += ` L${X(nx).toFixed(1)} ${yc}`;
     }
     cur = nx;
   });
   if (r.lmc.any){
     d += ` L${X(cur).toFixed(1)} 320`;
-    arrows += `<line class="tr" x1="${X(cur).toFixed(1)}" y1="320" x2="${X(cur + r.lmc.ix).toFixed(1)}" y2="320" marker-end="url(#ah)"/>` + TX(X(Math.max(cur, cur + r.lmc.ix)) + 3, 322.5, 'LMC', {fs:6.5});
+    arrows += TX(X(Math.max(cur, cur + r.lmc.ix)) + 3, 322.5, 'LMC', {fs:6.5});
     cur += r.lmc.ix;
     d += ` L${X(cur).toFixed(1)} 320`;
   }
   // 2) zero fuel index straight down to the ZFW weight
   d += ` L${X(cur).toFixed(1)} ${yE(F.zfw).toFixed(1)}`;
-  o += `<defs><marker id="ah" viewBox="0 0 6 6" refX="5.5" refY="3" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L6 3L0 6z" class="ah"/></marker></defs>`;
   o += `<path class="tr" d="${d}"/>` + arrows;
   // 3) from the ZFI at fuel 0, follow the fuel curves down to the fuel on board, then straight down to the TOW
   const tt = Math.min(r.tof / 1000, 17.1);
@@ -1815,12 +1859,7 @@ function sheetPage2(r){
   o += TX(97, 558, fx(r.mac.tow, 1), {a:'end', fs:13});
   o += cellC(252.5, 301, 791.5, 805, r.trimV == null ? 'AFM' : fx(r.trimV, 1), 11);
   // notes
-  [`ZFW ${R(F.zfw)}  LIZFW ${fx(F.lizfw)}  ${fx(r.mac.zfw,1)}%`,
-   `TOW ${R(F.tow)}  LITOW ${fx(F.litow)}  ${fx(r.mac.tow,1)}%`,
-   `LAW ${R(F.lw)}  LILAW ${fx(F.lilaw)}  ${fx(r.mac.lw,1)}%`,
-   `FUEL IDX TO ${sg(r.fiTO)} LDG ${sg(r.fiLW)}`,
-   r.ok ? 'WITHIN LIMITS' : 'OUT OF LIMITS']
-    .forEach((l, i) => o += TX(19, 764 + i * 9, l, {fs:4.8, cls: i === 4 && !r.ok ? 'red' : ''}));
+  o += notesBlock((S.flt || {}).n2, NOTE_BOX.p2, 'n2');
   return page(BG2, o, 'Balance chart');
 }
 function sheetHTML(r){ return sheetPage1(r) + sheetPage2(r); }
@@ -1903,6 +1942,7 @@ function update(){
   const sh = sheetHTML(r);
   $('sheetView').innerHTML = sh;
   $('printRoot').innerHTML = sh;
+  showNoteFit();
   $('ldmText').textContent = ldmText(r);
   $('edpText').textContent = edpText(r);
   $('sampleBanner').hidden = !S.sample;
