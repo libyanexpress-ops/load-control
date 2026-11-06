@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261106130654">
+<meta name="lxx-build" content="20261106131709">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261106130654', base = location.pathname;
+  var me = '20261106131709', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -439,6 +439,26 @@ table.usr td.mono,table.usr th{white-space:nowrap}
   td.acts{white-space:normal}
 }
 
+/* phones: administration tabs as a 2 × 2 block, users as cards */
+@media (max-width:560px){
+  .adm-head,.adm-head > *{min-width:0;max-width:100%}
+  .adm-head .subnav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow:visible;width:100%}
+  .adm-head .subnav button{white-space:normal;flex:none;min-height:42px;border:1px solid var(--line);line-height:1.25}
+  .adm-head .subnav button[hidden]{display:none}
+  table.usr{min-width:0!important;width:100%}
+  table.usr thead{display:none}
+  table.usr,table.usr tbody{display:block;width:100%}
+  table.usr tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
+  table.usr td{display:block;padding:0!important;border:0!important;min-width:0}
+  table.usr td:nth-child(2){text-align:end;align-self:start;padding-top:2px!important}
+  table.usr td:nth-child(3),table.usr td:nth-child(4),table.usr td:nth-child(7){grid-column:1 / -1}
+  table.usr td:nth-child(6){text-align:end;align-self:center;font-size:12px;color:var(--muted)}
+  table.usr .hand-cell svg{width:auto;height:40px;max-width:100%}
+  table.usr .pchips{max-width:none}
+  table.usr td.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;text-align:center}
+  table.usr td.acts .btn{margin:0;min-height:40px;white-space:normal;line-height:1.2}
+}
+
 /* ---- administration ---- */
 .adm-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .adm-title{margin:4px 0 0;font-family:var(--f-head);font-size:26px;font-weight:600}
@@ -451,7 +471,14 @@ table.usr td.mono,table.usr th{white-space:nowrap}
 #pwForm{display:flex;flex-direction:column;gap:12px}
 .hint-s{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.6}
 .hint-s.fit.over{color:#A3151B;font-weight:600}
-#tab-build .sec .f + .f{margin-top:16px}
+.notes-sec .f + .f{margin-top:16px}
+/* every field in a grid row lines up: one-line labels, inputs on the same line, hints underneath */
+.grid{align-items:start}
+.grid > .f > label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px;min-height:16px}
+.grid > .f > .hint{line-height:15px}
+/* text and numbers sit on the same centre line in every box */
+.f input,.f select,.cell input,.cell select{height:34px;padding-block:0;line-height:32px}
+@media (max-width:980px){ .f input,.f select,.cell input,.cell select{height:46px;min-height:46px;line-height:44px} }
 .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:10px}
 .chip.on{background:var(--ok-bg);color:var(--ok)} .chip.off{background:var(--bad-bg);color:var(--bad)} .chip.idle{background:var(--sunk);color:var(--muted)}
 .perm td:not(:first-child),.perm th:not(:first-child){text-align:center}
@@ -822,7 +849,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           <p class="hint" style="font-size:11px;color:var(--muted);margin:10px 0 0" data-t="lmcNote"></p>
         </div>
 
-        <div class="sec">
+        <div class="sec notes-sec">
           <h2><span data-t="secSi">SI / Notes</span></h2>
           <div class="f"><label for="i-si" data-t="siLabel">Supplementary information</label><textarea id="i-si" dir="ltr" data-k="flt.si" rows="2"></textarea></div>
           <div class="f"><label for="i-n1" data-t="n1Label">Notes · Loadsheet</label><textarea id="i-n1" class="uc" dir="ltr" data-k="flt.n1" rows="3" placeholder="Optional"></textarea><span class="hint-s fit" id="fit-n1"></span></div>
