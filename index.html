@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261106131709">
+<meta name="lxx-build" content="20261106133255">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261106131709', base = location.pathname;
+  var me = '20261106133255', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -141,7 +141,7 @@ table.h tfoot td{font-weight:600;border-bottom:0}
 .meter.over i{background:var(--bad)}
 
 /* LMC */
-.lmc-row{display:grid;grid-template-columns:52px repeat(5,minmax(0,1fr)) 32px;gap:6px;align-items:end;padding:8px 0;border-bottom:1px dashed var(--line)}
+.lmc-row{display:grid;grid-template-columns:88px repeat(5,minmax(0,1fr)) 32px;gap:6px;align-items:end;padding:8px 0;border-bottom:1px dashed var(--line)}
 .lmc-row .f label{font-size:10px}
 .lmc-row .x{border:1px solid var(--line);background:transparent;border-radius:4px;height:32px;cursor:pointer;color:var(--bad)}
 .empty{font-size:13px;color:var(--muted);padding:6px 0}
