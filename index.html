@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261106133255">
+<meta name="lxx-build" content="20261108170452">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261106133255', base = location.pathname;
+  var me = '20261108170452', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -371,6 +371,7 @@ body::before{background:var(--navy)}
 .ca-foot{border-top:1px solid var(--line);padding-top:16px}
 .ca-note{margin:0;font-size:13.5px;color:var(--muted);line-height:1.6}
 .gate-legal{position:relative;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);letter-spacing:.02em}
+.kb-warn{font-size:12.5px;font-weight:600;color:#8A5A00;background:#FFF4D6;border:1px solid #F0D48A;border-radius:5px;padding:7px 10px;margin-top:8px}
 .auth-err{font-size:13px;color:var(--bad);background:var(--bad-bg);border-radius:5px;padding:10px 12px;animation:lcIn .35s ease both}
 .meter2{height:4px;border-radius:2px;background:var(--sunk);overflow:hidden;margin-top:-10px}
 .meter2 i{display:block;height:100%;width:0;background:var(--bad);transition:width .3s ease,background .3s ease}
@@ -681,6 +682,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
             <div class="fx"><input id="lp" name="password" type="password" dir="ltr" autocomplete="current-password" required><i></i></div>
             <button type="button" class="btn" id="lpShow" data-t="show">Show</button>
           </div>
+          <div class="kb-warn" id="lpWarn" hidden></div>
         </div>
         <div class="auth-err" id="loginErr" role="alert" hidden></div>
         <button type="submit" class="btn-auth lc-in d4" id="loginBtn" data-t="signIn">Sign in</button>
@@ -719,6 +721,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
     <div class="fld"><label for="mc1" data-t="newPw">NEW PASSWORD</label><input id="mc1" type="password" dir="ltr" autocomplete="new-password" required></div>
     <div class="meter2"><i id="mcBar"></i></div>
     <div class="fld"><label for="mc2" data-t="confirmPw">CONFIRM PASSWORD</label><input id="mc2" type="password" dir="ltr" autocomplete="new-password" required></div>
+    <div class="kb-warn" id="mcWarn" hidden></div>
     <p class="ca-note" data-t="pwRule">At least 8 characters, with letters and numbers.</p>
     <div class="auth-err" id="mcErr" role="alert" hidden></div>
     <button type="submit" class="btn-auth" data-t="savePw">Save password and continue</button>
@@ -1322,7 +1325,7 @@ const I18N = {
     gAircraft:'AIRCRAFT', gConfig:'CONFIGURATION', gStd:'STANDARDS', gTime:'TIME REFERENCE', gInternal:'For internal use only',
     secure:'SECURE ACCESS', signIn:'Sign in', signInLead:'Authorized personnel only. Every session is recorded in the activity log.',
     username:'USERNAME', password:'PASSWORD', show:'Show', hide:'Hide', forgot:'Forgot your password? Contact the system administrator.',
-    signingIn:'Signing in…', badLogin:'Username or password is not correct.', noAccess:'This account is suspended. Contact the system administrator.',
+    signingIn:'Signing in…', badLogin:'Username or password is not correct. Check that the keyboard is in English and Caps Lock is off.', kbArabic:'Your keyboard is typing Arabic. Switch it to English.', kbCaps:'Caps Lock is on.', kbSpace:'The password starts or ends with a space.', pwBadChars:'Use English letters and numbers only, with no spaces at the start or end.', noAccess:'This account is suspended. Contact the system administrator.',
     noBackend:'The system is not connected to its server yet.', timedOut:'You were signed out after a period of inactivity.',
     mcTitle:'Set a new password', mcLead:'Your administrator asked you to choose a new password before you continue.',
     newPw:'New password', confirmPw:'Confirm password', pwRule:'At least 8 characters, with letters and numbers.', pwMismatch:'The two passwords do not match.',
@@ -1393,7 +1396,7 @@ const I18N = {
     gAircraft:'الطائرة', gConfig:'التشكيلة', gStd:'المعايير', gTime:'مرجع الوقت', gInternal:'للاستخدام الداخلي فقط',
     secure:'دخول آمن', signIn:'تسجيل الدخول', signInLead:'للمخوّلين فقط. كل جلسة تتسجّل في سجل النشاط.',
     username:'اسم المستخدم', password:'كلمة المرور', show:'إظهار', hide:'إخفاء', forgot:'نسيت كلمة المرور؟ تواصل مع مدير المنظومة.',
-    signingIn:'جاري الدخول…', badLogin:'اسم المستخدم أو كلمة المرور غلط.', noAccess:'هذا الحساب موقوف. تواصل مع مدير المنظومة.',
+    signingIn:'جاري الدخول…', badLogin:'اسم المستخدم أو كلمة المرور غلط. تأكد إن الكيبورد إنجليزي وإن Caps Lock مطفي.', kbArabic:'الكيبورد يكتب عربي، حوّله للإنجليزي.', kbCaps:'Caps Lock شغّال.', kbSpace:'كلمة المرور فيها مسافة في البداية أو النهاية.', pwBadChars:'استعمل حروف وأرقام إنجليزية بس، وبدون مسافة في البداية أو النهاية.', noAccess:'هذا الحساب موقوف. تواصل مع مدير المنظومة.',
     noBackend:'المنظومة مش مربوطة بالسيرفر حتى الآن.', timedOut:'تم تسجيل خروجك بسبب عدم النشاط.',
     mcTitle:'اختار كلمة مرور جديدة', mcLead:'مدير المنظومة طلب منك تختار كلمة مرور جديدة قبل ما تكمل.',
     newPw:'كلمة المرور الجديدة', confirmPw:'تأكيد كلمة المرور', pwRule:'8 حروف على الأقل، فيها حروف وأرقام.', pwMismatch:'كلمتين المرور مش متطابقتين.',
@@ -2055,14 +2058,15 @@ const EMAIL_DOMAIN = 'libyanexpress-ops.github.io';
 const sb = (window.supabase && !SUPA_URL.startsWith('__')) ? window.supabase.createClient(SUPA_URL, SUPA_KEY, {auth:{persistSession:true, autoRefreshToken:true}}) : null;
 let ME = null, SETTINGS = {language:'en', session_minutes:30}, AC_ROW = null;
 const isAdmin = () => !!ME && ME.role === 'admin';
-const userEmail = u => String(u || '').trim().toLowerCase() + '@' + EMAIL_DOMAIN;
+const normUser = u => { let v = toLatin(String(u || '')).replace(/\s+/g, '').toUpperCase().replace(/^LXX[-_,،]?(?=[A-Z0-9])/, 'LXX.'); if (v && !/^LXX\./.test(v)) v = 'LXX.' + v; return v; };
+const userEmail = u => normUser(u).toLowerCase() + '@' + EMAIL_DOMAIN;
 const utcNow = () => { const d = new Date(); return `${String(d.getUTCDate()).padStart(2,'0')} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()} · ${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}Z`; };
 const zstamp = iso => { if (!iso) return '—'; const d = new Date(iso); return `${String(d.getUTCDate()).padStart(2,'0')} ${MON[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)} · ${String(d.getUTCHours()).padStart(2,'0')}${String(d.getUTCMinutes()).padStart(2,'0')}Z`; };
 async function logAct(action, detail = ''){ if (!sb || !ME) return; try { await sb.from('activity').insert({username:ME.username, action, detail}); } catch(e){} }
 function showOnly(id){ ['login','mustChange','nameSetup','app'].forEach(k => $(k).hidden = k !== id); }
 function pwScore(p){ let s = 0; if (p.length >= 8) s++; if (p.length >= 12) s++; if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++; if (/\d/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p)) s++; return s; }
 function paintMeter(bar, p){ const s = pwScore(p); bar.style.width = Math.min(100, s * 20) + '%'; bar.style.background = s >= 4 ? 'var(--ok)' : s >= 3 ? 'var(--warn)' : 'var(--bad)'; }
-const pwOk = p => p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p);
+const pwOk = p => p.length >= 8 && /[A-Za-z]/.test(p) && /\d/.test(p) && /^[\x21-\x7E]+$/.test(p);
 
 async function loadSettings(){
   if (!sb) return;
@@ -2111,12 +2115,28 @@ async function afterSignIn(fresh){
   enterApp();
 }
 
+/* keyboard warnings: Arabic layout, Caps Lock, stray spaces */
+const AR_RE = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;
+function kbCheck(warnId, inputs, ev){
+  const w = $(warnId); if (!w) return;
+  const vals = inputs.map(id => $(id).value);
+  let msg = '';
+  if (vals.some(v => AR_RE.test(v))) msg = t('kbArabic');
+  else if (ev && ev.getModifierState && ev.getModifierState('CapsLock')) msg = t('kbCaps');
+  else if (vals.some(v => v && v !== v.trim())) msg = t('kbSpace');
+  w.textContent = msg; w.hidden = !msg;
+}
+['keyup', 'keydown', 'input'].forEach(k => {
+  ['lu', 'lp'].forEach(id => $(id).addEventListener(k, e => kbCheck('lpWarn', ['lu', 'lp'], e)));
+  ['mc1', 'mc2'].forEach(id => $(id).addEventListener(k, e => kbCheck('mcWarn', ['mc1', 'mc2'], e)));
+});
+
 /* first sign-in: own new password */
 $('mc1').addEventListener('input', e => paintMeter($('mcBar'), e.target.value));
 $('mcForm').addEventListener('submit', async e => {
   e.preventDefault();
   const a = $('mc1').value, b = $('mc2').value, err = $('mcErr'); err.hidden = true;
-  if (!pwOk(a)){ err.textContent = t('pwRule'); err.hidden = false; return; }
+  if (!pwOk(a)){ err.textContent = /^[\x21-\x7E]*$/.test(a) ? t('pwRule') : t('pwBadChars'); err.hidden = false; return; }
   if (a !== b){ err.textContent = t('pwMismatch'); err.hidden = false; return; }
   const {error} = await sb.auth.updateUser({password:a});
   if (error){ err.textContent = error.message; err.hidden = false; return; }
