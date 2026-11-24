@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261108170452">
+<meta name="lxx-build" content="20261124152847">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261108170452', base = location.pathname;
+  var me = '20261124152847', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -472,6 +472,20 @@ table.usr td.mono,table.usr th{white-space:nowrap}
 #pwForm{display:flex;flex-direction:column;gap:12px}
 .hint-s{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.6}
 .hint-s.fit.over{color:#A3151B;font-weight:600}
+.dist-grid > .f{position:relative}
+.sec-flag{position:absolute;bottom:7px;inset-inline-start:8px;z-index:1;pointer-events:none;font:700 12px/1 var(--f-num);color:#fff;background:#C0262D;border-radius:9px;padding:3px 7px;animation:lcIn .25s ease both}
+.dist-grid input.over{border-color:#C0262D!important;box-shadow:0 0 0 3px rgba(192,38,45,.18);color:#C0262D}
+.dist-flag{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:8px 12px;border-radius:6px;background:rgba(192,38,45,.1);border:1px solid rgba(192,38,45,.45);color:#C0262D;font-size:13px;font-weight:600;animation:lcIn .25s ease both}
+.dist-flag .big{font:700 18px/1 var(--f-num);background:#C0262D;color:#fff;border-radius:6px;padding:4px 9px}
+.dist-flag.ok{background:rgba(31,122,77,.1);border-color:rgba(31,122,77,.4);color:#1F7A4D}
+button.btn:disabled,.btn[disabled]{opacity:.42;cursor:not-allowed;filter:saturate(.4)}
+#sheetView.locked{filter:blur(7px) grayscale(.35);opacity:.75;pointer-events:none;user-select:none;transition:filter .35s ease}
+.sheet-lock{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50;width:min(440px,calc(100vw - 32px));background:var(--surface);color:var(--ink);border:1px solid rgba(192,38,45,.5);border-top:4px solid #C0262D;border-radius:10px;padding:22px 24px;box-shadow:0 24px 60px rgba(0,0,0,.35);text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;animation:lcIn .3s ease both}
+.sheet-lock[hidden]{display:none}
+.sheet-lock .sl-ico{width:44px;height:44px;border-radius:50%;background:#C0262D;color:#fff;font:700 24px/44px var(--f-num)}
+.sheet-lock b{font-size:17px}
+.sheet-lock p{margin:0;font-size:14px;line-height:1.6;color:var(--muted)}
+@media print{ .sheet-lock{display:none!important} }
 .notes-sec .f + .f{margin-top:16px}
 /* every field in a grid row lines up: one-line labels, inputs on the same line, hints underneath */
 .grid{align-items:start}
@@ -808,10 +822,11 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
             <span class="f"><label data-t="cabinDist">Cabin distribution (seated pax)</label></span>
             <label class="toggle"><input type="checkbox" id="i-auto" data-k="pax.auto"> <span data-t="uniform">Uniform distribution rule</span></label>
           </div>
-          <div class="grid">
-            <div class="f"><label for="i-oa" data-t="secOA">Section OA · max 48</label><input id="i-oa" class="num" dir="ltr" type="text" inputmode="decimal" min="0" max="48" data-k="pax.OA"></div>
-            <div class="f"><label for="i-ob" data-t="secOB">Section OB · max 54</label><input id="i-ob" class="num" dir="ltr" type="text" inputmode="decimal" min="0" max="54" data-k="pax.OB"></div>
-            <div class="f"><label for="i-oc" data-t="secOC">Section OC · max 60</label><input id="i-oc" class="num" dir="ltr" type="text" inputmode="decimal" min="0" max="60" data-k="pax.OC"></div>
+          <div class="dist-flag" id="distFlag" hidden></div>
+          <div class="grid dist-grid">
+            <div class="f"><span class="sec-flag" id="sf-OA" hidden></span><label for="i-oa" data-t="secOA">Section OA · max 48</label><input id="i-oa" class="num" dir="ltr" type="text" inputmode="decimal" min="0" max="48" data-k="pax.OA"></div>
+            <div class="f"><span class="sec-flag" id="sf-OB" hidden></span><label for="i-ob" data-t="secOB">Section OB · max 54</label><input id="i-ob" class="num" dir="ltr" type="text" inputmode="decimal" min="0" max="54" data-k="pax.OB"></div>
+            <div class="f"><span class="sec-flag" id="sf-OC" hidden></span><label for="i-oc" data-t="secOC">Section OC · max 60</label><input id="i-oc" class="num" dir="ltr" type="text" inputmode="decimal" min="0" max="60" data-k="pax.OC"></div>
           </div>
         </div>
 
@@ -871,6 +886,12 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
       <span class="sheet-actions"><button class="btn sm" id="btnPdf" data-t="savePdf">Save PDF</button><button class="btn sm primary" id="btnPrint2" data-t="print">Print</button></span>
     </div>
     <div class="paperwrap" id="sheetView" dir="ltr"></div>
+    <div class="sheet-lock" id="sheetLock" role="alert" hidden>
+      <div class="sl-ico">!</div>
+      <b data-t="lockTitle">Loadsheet locked</b>
+      <p id="lockText"></p>
+      <button class="btn primary" type="button" id="lockFix" data-t="lockFix">Fix in Build</button>
+    </div>
   </section>
 
   <!-- MESSAGES -->
@@ -1232,6 +1253,12 @@ function calc(S){
     const ds = r.dist.OA + r.dist.OB + r.dist.OC;
     if (ds !== r.pax.seated) chk('bad', 'distSum', ds, r.pax.seated);
   }
+  // cabin distribution lock: printing and the form stay closed until it adds up
+  r.distSum = r.dist.OA + r.dist.OB + r.dist.OC;
+  r.distDiff = S.pax.auto ? 0 : r.distSum - r.pax.seated;
+  r.secOver = Object.fromEntries(AC.sections.map(s => [s.id, Math.max(0, fin.dist[s.id] - s.max)]));
+  const secBad = AC.sections.find(s => fin.dist[s.id] > s.max || fin.dist[s.id] < 0);
+  r.lock = r.distDiff ? {k:'lockDist', a:[r.distSum, r.pax.seated]} : secBad ? {k:'lockSec', a:[secBad.id, fin.dist[secBad.id], secBad.max]} : null;
   AC.sections.forEach(s => {
     if (fin.dist[s.id] > s.max) chk('bad', 'secMax', s.id, fin.dist[s.id], s.max);
     if (fin.dist[s.id] < 0) chk('bad', 'secNeg', s.id);
@@ -1325,7 +1352,10 @@ const I18N = {
     gAircraft:'AIRCRAFT', gConfig:'CONFIGURATION', gStd:'STANDARDS', gTime:'TIME REFERENCE', gInternal:'For internal use only',
     secure:'SECURE ACCESS', signIn:'Sign in', signInLead:'Authorized personnel only. Every session is recorded in the activity log.',
     username:'USERNAME', password:'PASSWORD', show:'Show', hide:'Hide', forgot:'Forgot your password? Contact the system administrator.',
-    signingIn:'Signing in…', badLogin:'Username or password is not correct. Check that the keyboard is in English and Caps Lock is off.', kbArabic:'Your keyboard is typing Arabic. Switch it to English.', kbCaps:'Caps Lock is on.', kbSpace:'The password starts or ends with a space.', pwBadChars:'Use English letters and numbers only, with no spaces at the start or end.', noAccess:'This account is suspended. Contact the system administrator.',
+    signingIn:'Signing in…', badLogin:'Username or password is not correct. Check that the keyboard is in English and Caps Lock is off.', kbArabic:'Your keyboard is typing Arabic. Switch it to English.', distFlag:(d, s) => `Distribution ${d} · seated passengers ${s}`, distOk:s => `Distribution matches the ${s} seated passengers`,
+    lockTitle:'Loadsheet locked', lockFix:'Fix in Build', lockPrint:'Printing is locked until the cabin distribution is corrected.',
+    lockDist:(d, s) => `The cabin distribution adds up to ${d} but ${s} passengers are seated. Correct OA / OB / OC in Build to unlock the loadsheet.`,
+    lockSec:(id, n, m) => `Section ${id} has ${n} passengers but only ${m} seats. Correct the cabin distribution in Build to unlock the loadsheet.`, kbCaps:'Caps Lock is on.', kbSpace:'The password starts or ends with a space.', pwBadChars:'Use English letters and numbers only, with no spaces at the start or end.', noAccess:'This account is suspended. Contact the system administrator.',
     noBackend:'The system is not connected to its server yet.', timedOut:'You were signed out after a period of inactivity.',
     mcTitle:'Set a new password', mcLead:'Your administrator asked you to choose a new password before you continue.',
     newPw:'New password', confirmPw:'Confirm password', pwRule:'At least 8 characters, with letters and numbers.', pwMismatch:'The two passwords do not match.',
@@ -1396,7 +1426,10 @@ const I18N = {
     gAircraft:'الطائرة', gConfig:'التشكيلة', gStd:'المعايير', gTime:'مرجع الوقت', gInternal:'للاستخدام الداخلي فقط',
     secure:'دخول آمن', signIn:'تسجيل الدخول', signInLead:'للمخوّلين فقط. كل جلسة تتسجّل في سجل النشاط.',
     username:'اسم المستخدم', password:'كلمة المرور', show:'إظهار', hide:'إخفاء', forgot:'نسيت كلمة المرور؟ تواصل مع مدير المنظومة.',
-    signingIn:'جاري الدخول…', badLogin:'اسم المستخدم أو كلمة المرور غلط. تأكد إن الكيبورد إنجليزي وإن Caps Lock مطفي.', kbArabic:'الكيبورد يكتب عربي، حوّله للإنجليزي.', kbCaps:'Caps Lock شغّال.', kbSpace:'كلمة المرور فيها مسافة في البداية أو النهاية.', pwBadChars:'استعمل حروف وأرقام إنجليزية بس، وبدون مسافة في البداية أو النهاية.', noAccess:'هذا الحساب موقوف. تواصل مع مدير المنظومة.',
+    signingIn:'جاري الدخول…', badLogin:'اسم المستخدم أو كلمة المرور غلط. تأكد إن الكيبورد إنجليزي وإن Caps Lock مطفي.', kbArabic:'الكيبورد يكتب عربي، حوّله للإنجليزي.', distFlag:(d, s) => `التوزيع ${d} · الركاب الجالسين ${s}`, distOk:s => `التوزيع مطابق للركاب الجالسين ${s}`,
+    lockTitle:'اللود شيت مقفول', lockFix:'صحّح في Build', lockPrint:'الطباعة مقفولة لين يتصحح توزيع الركاب.',
+    lockDist:(d, s) => `مجموع التوزيع في الكابينة ${d} والركاب الجالسين ${s}. صحّح OA / OB / OC في Build باش ينفتح اللود شيت.`,
+    lockSec:(id, n, m) => `المقطع ${id} فيه ${n} راكب والكراسي ${m} بس. صحّح التوزيع في Build باش ينفتح اللود شيت.`, kbCaps:'Caps Lock شغّال.', kbSpace:'كلمة المرور فيها مسافة في البداية أو النهاية.', pwBadChars:'استعمل حروف وأرقام إنجليزية بس، وبدون مسافة في البداية أو النهاية.', noAccess:'هذا الحساب موقوف. تواصل مع مدير المنظومة.',
     noBackend:'المنظومة مش مربوطة بالسيرفر حتى الآن.', timedOut:'تم تسجيل خروجك بسبب عدم النشاط.',
     mcTitle:'اختار كلمة مرور جديدة', mcLead:'مدير المنظومة طلب منك تختار كلمة مرور جديدة قبل ما تكمل.',
     newPw:'كلمة المرور الجديدة', confirmPw:'تأكيد كلمة المرور', pwRule:'8 حروف على الأقل، فيها حروف وأرقام.', pwMismatch:'كلمتين المرور مش متطابقتين.',
@@ -2001,8 +2034,9 @@ function update(){
   $('dock').innerHTML = `<span class="s ${r.ok ? 'ok' : 'bad'}">${r.ok ? t('dockOk') : t('dockBad')}</span><span>TOW ${R(r.f.tow)}</span><span>MAC ${fx(r.mac.tow,1)}%</span><span>TRIM ${r.trimV == null ? '—' : fx(r.trimV,1)}</span>`;
   const sh = sheetHTML(r);
   $('sheetView').innerHTML = sh;
-  $('printRoot').innerHTML = sh;
+  $('printRoot').innerHTML = r.lock ? '' : sh;
   showNoteFit();
+  paintLock(r);
   $('ldmText').textContent = ldmText(r);
   $('edpText').textContent = edpText(r);
   $('sampleBanner').hidden = !S.sample;
@@ -2029,11 +2063,33 @@ function load(state){ S = state; stampPreparer(); fillInputs(); renderLmc(); upd
 $('btnNew').onclick = () => ask(t('confirmNew'), () => load(blankState()));
 $('btnClearSample').onclick = () => load(blankState());
 
+/* ---------- distribution flags and the print lock ---------- */
+function paintLock(r){
+  const f = $('distFlag'), sg = n => (n > 0 ? '+' : '') + n;
+  if (!S.pax.auto && r.distDiff){ f.className = 'dist-flag'; f.innerHTML = `<span class="big" dir="ltr">${sg(r.distDiff)}</span><span>${t('distFlag', r.distSum, r.pax.seated)}</span>`; f.hidden = false; }
+  else if (!S.pax.auto && r.pax.seated){ f.className = 'dist-flag ok'; f.innerHTML = `<span>✓ ${t('distOk', r.pax.seated)}</span>`; f.hidden = false; }
+  else f.hidden = true;
+  AC.sections.forEach(s => {
+    const b = $('sf-' + s.id), over = r.secOver[s.id], inp = $('i-' + s.id.toLowerCase());
+    if (!b) return;
+    b.hidden = !over; b.textContent = over ? '+' + over : '';
+    if (inp) inp.classList.toggle('over', !!over);
+  });
+  const L = r.lock;
+  $('sheetView').classList.toggle('locked', !!L);
+  $('sheetLock').hidden = !L;
+  if (L) $('lockText').textContent = t(L.k, ...L.a);
+  ['btnPrint', 'btnPrint2', 'btnPdf'].forEach(id => { const b = $(id); b.disabled = !!L; b.title = L ? t('lockPrint') : ''; });
+  document.querySelectorAll('[data-msgprint],[data-msgimg]').forEach(b => { b.disabled = !!L; b.title = L ? t('lockPrint') : ''; });
+}
+const locked = () => !!(RES && RES.lock);
+$('lockFix').onclick = () => { showTab('build'); setTimeout(() => { const el = $('i-oa'); el.scrollIntoView({behavior:'smooth', block:'center'}); el.focus(); }, 60); };
+
 /* ---------- print & copy ---------- */
 function doPrint(){ try { window.print(); } catch(e){} }
 const printLogged = () => logAct('print', `${(S.flt.no || '').toUpperCase()} ${(S.flt.from || '').toUpperCase()}-${(S.flt.to || '').toUpperCase()}`);
-$('btnPrint').onclick = () => { showTab('sheet'); printLogged(); setTimeout(doPrint, 50); };
-$('btnPrint2').onclick = () => { printLogged(); doPrint(); };
+$('btnPrint').onclick = () => { if (locked()){ showTab('sheet'); return; } showTab('sheet'); printLogged(); setTimeout(doPrint, 50); };
+$('btnPrint2').onclick = () => { if (locked()) return; printLogged(); doPrint(); };
 document.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
   const el = $(b.dataset.copy);
   try { await navigator.clipboard.writeText(el.textContent); b.textContent = t('copied'); }
@@ -2477,9 +2533,10 @@ async function deliver(blob, name){
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 8000);
 }
 async function busy(btn, fn){
+  if (locked()) return;
   const label = btn.textContent; btn.disabled = true; btn.textContent = t('preparing');
   try { await fn(); } catch(e){ console.error(e); ask(t('exportFail') + ' ' + (e.message || ''), () => {}); }
-  finally { btn.disabled = false; btn.textContent = label; }
+  finally { btn.disabled = locked(); btn.textContent = label; }
 }
 
 // one filled form page → canvas (background form + pen overlay, drawn as one SVG)
