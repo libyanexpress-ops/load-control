@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261124155005">
+<meta name="lxx-build" content="20261124231104">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261124155005', base = location.pathname;
+  var me = '20261124231104', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -473,6 +473,82 @@ table.usr td.mono,table.usr th{white-space:nowrap}
 .hint-s{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.6}
 .hint-s.fit.over{color:#A3151B;font-weight:600}
 .dist-grid > .f{position:relative}
+/* ---- several aircraft ---- */
+body:not(.ac-b200) .b200-only{display:none!important}
+body.ac-b200 .b737-only{display:none!important}
+body.ac-b200 [data-tab="msgs"]{display:none!important}
+.ac-chip{display:inline-flex;align-items:center;gap:8px;margin-inline-start:14px;padding:5px 12px 5px 10px;border:1px solid rgba(212,175,90,.45);border-radius:20px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font:inherit;transition:background .2s ease,border-color .2s ease}
+.ac-chip:hover{background:rgba(212,175,90,.16);border-color:#D4AF5A}
+.ac-chip b{font-family:var(--f-num);font-size:13px;letter-spacing:.04em}
+.ac-chip small{font-size:11px;color:#D4AF5A;letter-spacing:.06em}
+.ac-dot{width:7px;height:7px;border-radius:50%;background:#3BD17F;box-shadow:0 0 0 3px rgba(59,209,127,.2)}
+.ac-pick{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;overflow:auto;padding:40px max(16px,env(safe-area-inset-left,0px))}
+.ac-pick .ap-bg{position:fixed;inset:0;background:radial-gradient(1200px 700px at 50% 30%,#14295E 0%,#0B1A3F 55%,#050C22 100%)}
+.ac-pick .ap-bg::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.ap-in{position:relative;width:min(1080px,100%)}
+.ap-head{text-align:center;color:#fff;margin-bottom:34px;animation:apUp .8s cubic-bezier(.2,.7,.2,1) both}
+.ap-eyebrow{font:600 12px/1 var(--f-head);letter-spacing:.34em;color:#D4AF5A}
+.ap-head h1{font:700 40px/1.15 var(--f-head);margin:14px 0 8px;letter-spacing:.02em}
+.ap-head p{margin:0;color:#B9C3DD;font-size:15px}
+.ap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:26px}
+.ap-card{position:relative;display:block;width:100%;text-align:start;border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden;background:#0C1838;cursor:pointer;padding:0;color:#fff;font:inherit;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:apUp .9s cubic-bezier(.2,.7,.2,1) both;transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .3s ease,box-shadow .35s ease}
+.ap-card:nth-child(2){animation-delay:.12s}.ap-card:nth-child(3){animation-delay:.24s}
+.ap-card:hover,.ap-card:focus-visible{transform:translateY(-6px);border-color:#D4AF5A;box-shadow:0 28px 60px rgba(0,0,0,.45),0 0 0 1px rgba(212,175,90,.35);outline:none}
+.ap-ph{position:relative;aspect-ratio:16/9;max-width:100%;overflow:hidden;background:linear-gradient(160deg,#1A3170,#0B1A3F)}
+.ap-ph img,.ap-ph svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);transition:transform 6s cubic-bezier(.2,.7,.2,1)}
+.ap-card:hover .ap-ph img,.ap-card:hover .ap-ph svg{transform:scale(1.13) translateX(-1.5%)}
+.ap-ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,12,34,0) 35%,rgba(5,12,34,.9) 100%)}
+.ap-ph .ap-shine{position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.18) 48%,transparent 66%);transform:translateX(-120%);animation:apShine 2.6s .9s ease both;z-index:1}
+.ap-meta{position:absolute;left:0;right:0;bottom:0;padding:18px 22px;z-index:2;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.ap-meta b{display:block;font:700 30px/1 var(--f-num);letter-spacing:.05em}
+.ap-meta span{display:block;margin-top:6px;font-size:13px;color:#D4AF5A;letter-spacing:.08em;text-transform:uppercase}
+.ap-meta small{display:block;margin-top:4px;font-size:12px;color:#B9C3DD}
+.ap-go{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid rgba(212,175,90,.6);display:grid;place-items:center;color:#D4AF5A;font-size:20px;transition:background .3s ease,color .3s ease,transform .3s ease}
+.ap-meta .ap-go{display:grid;margin:0}
+.ap-card:hover .ap-go{background:#D4AF5A;color:#0B1A3F;transform:translateX(4px)}
+[dir="rtl"] .ap-card:hover .ap-go{transform:translateX(-4px) scaleX(-1)}
+[dir="rtl"] .ap-go{transform:scaleX(-1)}
+.ap-card.picked{animation:apPick .6s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes apUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes apShine{to{transform:translateX(120%)}}
+@keyframes apPick{to{transform:scale(1.04);border-color:#D4AF5A;box-shadow:0 0 0 2px #D4AF5A,0 30px 70px rgba(0,0,0,.5)}}
+.ac-splash{position:fixed;inset:0;z-index:90;overflow:hidden;background:#050C22;animation:asOut .55s ease 1.9s forwards}
+.as-photo{position:absolute;inset:-4%;background-size:cover;background-position:center;animation:asZoom 2.4s cubic-bezier(.2,.7,.2,1) both}
+.as-photo svg{width:100%;height:100%}
+.as-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,12,34,.92) 0%,rgba(5,12,34,.55) 45%,rgba(5,12,34,.15) 100%)}
+.as-txt{position:absolute;left:max(8vw,24px);top:50%;transform:translateY(-50%);color:#fff}
+.as-txt span{display:block;font:600 14px/1 var(--f-head);letter-spacing:.34em;color:#D4AF5A;text-transform:uppercase;animation:apUp .7s .15s cubic-bezier(.2,.7,.2,1) both}
+.as-txt b{display:block;margin-top:14px;font:700 clamp(44px,8vw,96px)/1 var(--f-num);letter-spacing:.06em;animation:apUp .8s .3s cubic-bezier(.2,.7,.2,1) both}
+.as-txt i{display:block;margin-top:18px;height:2px;width:0;background:linear-gradient(90deg,#D4AF5A,transparent);animation:asLine 1s .55s cubic-bezier(.2,.7,.2,1) forwards}
+[dir="rtl"] .as-txt{left:auto;right:max(8vw,24px)}
+[dir="rtl"] .as-shade{transform:scaleX(-1)}
+@keyframes asZoom{from{transform:scale(1.18) translateX(4%);filter:saturate(.6) brightness(.7)}to{transform:scale(1.02);filter:none}}
+@keyframes asLine{to{width:min(420px,70vw)}}
+@keyframes asOut{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.ap-card,.ap-head,.as-photo,.as-txt *,.ap-shine{animation:none!important}.ac-splash{animation:asOut .2s ease .6s forwards}}
+@media (max-width:760px){.ac-chip{margin:0;order:3}.ap-head h1{font-size:30px}.ap-meta b{font-size:24px}}
+/* ---- B200 screens ---- */
+.b2map-wrap{margin:2px 0 12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);padding:6px;overflow-x:auto}
+.b2map{display:block;width:100%;min-width:420px;height:auto}
+.b2map .hull{fill:var(--surface);stroke:var(--muted);stroke-width:1.2}
+.b2map .ck{fill:none;stroke:var(--muted);stroke-dasharray:3 2}
+.b2map .hold{fill:rgba(201,162,79,.12);stroke:var(--warn)}
+.b2map text{font:600 9px var(--f-num);fill:var(--muted);text-anchor:middle}
+.b2map .seat rect{fill:var(--bg);stroke:var(--line);transition:fill .25s ease,stroke .25s ease}
+.b2map .seat.on rect{fill:var(--accent-soft);stroke:var(--accent)}
+.b2map .seat.on text{fill:var(--accent)}
+#b2-seats .zt{font-family:var(--f-num);color:var(--accent);margin-inline-end:4px}
+.b2l{grid-template-columns:minmax(0,2fr) minmax(0,1fr) 32px!important}
+.b2env .envT{fill:rgba(46,125,80,.12);stroke:#2E7D50;stroke-width:1.2}
+.b2env .envZ{fill:rgba(39,71,168,.08);stroke:none}
+.b2env .gl{stroke:var(--line);stroke-width:.5}
+.b2env .lim{stroke:var(--muted);stroke-dasharray:4 3;stroke-width:.8}
+.b2env .tk{font:9px var(--f-num);fill:var(--muted);text-anchor:middle}
+.b2env .pl{font:700 9.5px var(--f-num);fill:var(--ink)}
+.b2env .path{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:3 2}
+.ov .fm{font-family:Arial,Helvetica,sans-serif;fill:#14213D;stroke:none}
+.ov .fm.wh{fill:#fff}.ov .fm.wh2{fill:#C9D3E3}.ov .fm.ac{fill:#2747A8}.ov .fm.rd{fill:#A3151B}.ov .fm.gr{fill:#2E7D50}
+.uf-ac .pbox b{font-family:var(--f-num)}
 .dist-grid.bad input{border-color:#C0262D!important;box-shadow:0 0 0 3px rgba(192,38,45,.14)}
 .f .op{font-family:var(--f-num);font-weight:700;color:var(--accent)}
 .f input.calc{background:var(--sunk);font-weight:700;cursor:default;border-style:dashed}
@@ -493,7 +569,8 @@ button.btn:disabled,.btn[disabled]{opacity:.42;cursor:not-allowed;filter:saturat
 .notes-sec .f + .f{margin-top:16px}
 /* every field in a grid row lines up: one-line labels, inputs on the same line, hints underneath */
 .grid{align-items:start}
-.grid > .f > label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px;min-height:16px}
+.grid > .f > label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:16px;min-height:16px;height:16px}
+.grid > .f > label > span{line-height:16px;vertical-align:top}
 .grid > .f > .hint{line-height:15px}
 /* text and numbers sit on the same centre line in every box */
 .f input,.f select,.cell input,.cell select{height:34px;padding-block:0;line-height:32px}
@@ -746,10 +823,24 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
   </form>
 </div>
 
+<div id="acPick" class="ac-pick" hidden>
+  <div class="ap-bg"></div>
+  <div class="ap-in">
+    <div class="ap-head">
+      <span class="ap-eyebrow">LIBYAN EXPRESS · LOAD CONTROL</span>
+      <h1 data-t="apTitle">Select aircraft</h1>
+      <p data-t="apLead">Choose the aircraft for this loadsheet.</p>
+    </div>
+    <div class="ap-grid" id="apGrid"></div>
+  </div>
+</div>
+<div id="acSplash" class="ac-splash" hidden><div class="as-photo" id="asPhoto"></div><div class="as-shade"></div><div class="as-txt"><span id="asType"></span><b id="asReg"></b><i></i></div></div>
+
 <div id="app" hidden>
 <header class="top">
   <div class="top-in">
     <div class="brand"><b>LIBYAN EXPRESS</b><span data-t="brandSub">Load Control</span></div>
+    <button type="button" class="ac-chip" id="acChip" hidden><span class="ac-dot"></span><b id="acChipReg">—</b><small id="acChipType"></small></button>
         <nav class="tabs" role="tablist">
       <button role="tab" data-tab="build" aria-selected="true" data-t="tab.build">Build</button>
       <button role="tab" data-tab="sheet" aria-selected="false" data-t="tab.sheet">Loadsheet</button>
@@ -798,7 +889,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           </div>
         </div>
 
-        <div class="sec">
+        <div class="sec b737-only">
           <h2><span data-t="secCrew">Crew &amp; dry operating weight</span> <span class="aux" id="o-crew">2/1</span></h2>
           <div class="grid">
             <div class="f"><label for="i-xc" data-t="xc">Extra cockpit</label><input id="i-xc" class="num" dir="ltr" type="text" inputmode="decimal" min="0" max="1" data-k="crew.xCockpit"><span class="hint" data-t="each80">80 kg each</span></div>
@@ -815,7 +906,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           </div>
         </div>
 
-        <div class="sec">
+        <div class="sec b737-only">
           <h2><span data-t="secPax">Passengers</span> <span class="aux" id="o-paxsum">—</span></h2>
           <div class="grid">
             <div class="f"><label for="i-ad" data-t="adult">Adult · 80 kg</label><input id="i-ad" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="pax.adult"></div>
@@ -834,7 +925,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           </div>
         </div>
 
-        <div class="sec">
+        <div class="sec b737-only">
           <h2><span data-t="secHolds">Holds</span> <span class="aux" data-t="holdsAux">Counter weights from flight supervisor</span></h2>
           <div class="tw">
             <table class="h">
@@ -845,7 +936,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           </div>
         </div>
 
-        <div class="sec">
+        <div class="sec b737-only">
           <h2><span data-t="secFuel">Fuel</span> <span class="aux" id="o-fuelsum">—</span></h2>
           <div class="grid">
             <div class="f"><label for="i-block" data-t="block">Block fuel</label><input id="i-block" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="fuel.block"></div>
@@ -862,7 +953,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           </div>
         </div>
 
-        <div class="sec">
+        <div class="sec b737-only">
           <h2><span data-t="secLmc">Last minute changes</span> <span class="aux" id="o-lmcsum">—</span></h2>
           <div id="lmcList"></div>
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
@@ -872,11 +963,53 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           <p class="hint" style="font-size:11px;color:var(--muted);margin:10px 0 0" data-t="lmcNote"></p>
         </div>
 
+        <div class="b200-only" id="b2Build">
+          <div class="sec">
+            <h2><span data-t="b2CfgT">Configuration &amp; dry operating weight</span> <span class="aux" id="b2-dowsum">—</span></h2>
+            <div class="grid">
+              <div class="f"><label for="b2-cfg" data-t="b2CfgL">Cabin configuration</label><select id="b2-cfg" data-k="b2.cfg"></select></div>
+              <div class="f"><label for="b2-crewN" data-t="b2CrewN">Flight crew</label><input id="b2-crewN" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.crewN"><span class="hint">129.0"</span></div>
+              <div class="f"><label for="b2-crewWt" data-t="b2CrewWt">Crew weight each (lb)</label><input id="b2-crewWt" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.crewWt"></div>
+              <div class="f"><label for="b2-kit" data-t="b2Kit">Kit / catering (lb)</label><input id="b2-kit" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.kit"><span class="hint">143.0"</span></div>
+            </div>
+            <div class="kv"><span>BEW <b id="b2-bew">—</b></span><span>DOW <b id="b2-dow">—</b></span><span>DOI <b id="b2-doi">—</b></span></div>
+          </div>
+          <div class="sec">
+            <h2><span data-t="b2CabinT">Cabin &amp; baggage</span> <span class="aux" id="b2-paxsum">—</span></h2>
+            <div class="b2map-wrap" id="b2-map"></div>
+            <div class="grid" id="b2-seats"></div>
+            <div class="grid" style="margin-top:12px">
+              <div class="f"><label for="b2-bagPcs" data-t="b2BagPcs">Aft baggage pieces</label><input id="b2-bagPcs" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.bagPcs"></div>
+              <div class="f"><label for="b2-bag" data-t="b2Bag">Aft baggage (lb)</label><input id="b2-bag" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.bag"><span class="hint"><span id="b2-holdTot">0</span> <span class="meter" id="b2-holdMeter"><i></i></span></span></div>
+            </div>
+          </div>
+          <div class="sec">
+            <h2><span data-t="secFuel">Fuel</span> <span class="aux" id="b2-fuelsum">—</span></h2>
+            <div class="grid">
+              <div class="f"><label for="b2-unit" data-t="b2Unit">Fuel unit</label><select id="b2-unit" data-k="b2.fuel.unit"><option value="lb">lb</option><option value="gal">US gal</option></select></div>
+              <div class="f"><label for="b2-densType" data-t="b2DensT">Density</label><select id="b2-densType" data-k="b2.fuel.densType"><option value="std" data-t="b2Std">Standard (OM)</option><option value="act" data-t="b2Act">Actual (fuel slip)</option></select></div>
+              <div class="f"><label for="b2-dens">lb / US gal</label><input id="b2-dens" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.fuel.dens"></div>
+            </div>
+            <div class="grid" style="margin-top:12px">
+              <div class="f"><label for="b2-block"><span data-t="block">Block fuel</span> · <span class="b2u">lb</span></label><input id="b2-block" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.fuel.block"></div>
+              <div class="f"><label for="b2-taxi"><span class="op">−</span> <span data-t="taxi">Taxi fuel</span> · <span class="b2u">lb</span></label><input id="b2-taxi" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.fuel.taxi"></div>
+              <div class="f"><label for="b2-tof"><span class="op">=</span> <span data-t="tof">Takeoff fuel</span> · <span class="b2u">lb</span></label><input id="b2-tof" class="num calc" dir="ltr" type="text" readonly tabindex="-1"></div>
+              <div class="f"><label for="b2-trip"><span class="op">−</span> <span data-t="trip">Trip fuel</span> · <span class="b2u">lb</span></label><input id="b2-trip" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.fuel.trip"></div>
+            </div>
+            <p class="hint-s" id="b2-fuelHint"></p>
+          </div>
+          <div class="sec">
+            <h2><span data-t="secLmc">Last minute changes</span> <span class="aux" id="b2-lmcsum">—</span></h2>
+            <div id="b2-lmcList"></div>
+            <div class="lmc-add"><button class="btn sm" id="b2-addLmc" type="button" data-t="b2AddLmc">+ Change</button></div>
+          </div>
+        </div>
+
         <div class="sec notes-sec">
           <h2><span data-t="secSi">SI / Notes</span></h2>
           <div class="f"><label for="i-si" data-t="siLabel">Supplementary information</label><textarea id="i-si" dir="ltr" data-k="flt.si" rows="2"></textarea></div>
           <div class="f"><label for="i-n1" data-t="n1Label">Notes · Loadsheet</label><textarea id="i-n1" class="uc" dir="ltr" data-k="flt.n1" rows="3" placeholder="Optional"></textarea><span class="hint-s fit" id="fit-n1"></span></div>
-          <div class="f"><label for="i-n2" data-t="n2Label">Notes · Balance chart</label><textarea id="i-n2" class="uc" dir="ltr" data-k="flt.n2" rows="3" placeholder="Optional"></textarea><span class="hint-s fit" id="fit-n2"></span></div>
+          <div class="f b737-only"><label for="i-n2" data-t="n2Label">Notes · Balance chart</label><textarea id="i-n2" class="uc" dir="ltr" data-k="flt.n2" rows="3" placeholder="Optional"></textarea><span class="hint-s fit" id="fit-n2"></span></div>
         </div>
       </div>
 
@@ -955,6 +1088,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           <div class="f"><label for="ufDisp" data-t="dispName">Name on the loadsheet</label><input id="ufDisp" class="uc" dir="ltr" autocomplete="off" maxlength="20" placeholder="A.ZAYD"><span class="hint-s" data-t="dispHint">Optional. The user can set it at first sign-in.</span></div>
           <div class="f"><label for="ufHand" data-t="thHand">Handwriting</label><select id="ufHand" dir="ltr"></select><div class="hand-prev" id="ufPrev"></div></div>
           <div class="f"><label data-t="thAccess">Access</label><div class="perm-boxes" id="ufPerms"></div></div>
+          <div class="f uf-ac"><label data-t="ufAircraft">Aircraft</label><div class="perm-boxes" id="ufAc"></div></div>
           <div class="uf-actions"><button class="btn primary" type="submit" id="ufSave" data-t="saveUser">Save</button><button class="btn" type="button" id="ufCancel" data-t="cancel">Cancel</button></div>
         </form>
         <div class="sec temp-pw" id="tempPw" hidden>
@@ -985,6 +1119,8 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
           <label class="btn" for="acFile" data-t="acImport">Import aircraft file</label>
           <input type="file" id="acFile" accept=".json,application/json" hidden>
           <button class="btn" id="acExport" data-t="acExport">Export aircraft file</button>
+          <label class="btn" for="acPhoto" data-t="acPhotoBtn">Aircraft photo</label>
+          <input type="file" id="acPhoto" accept="image/*" hidden>
         </div>
         <p class="hint-s" data-t="acNote">Values from the AHM / weight schedule. Every change is recorded in the activity log.</p>
       </div>
@@ -1336,6 +1472,12 @@ const I18N = {
     secHolds:'Holds', holdsAux:'Counter weights from flight supervisor',
     thCpt:'Compartment', thPcs:'Bag pcs', thBag:'Baggage kg', thCgo:'Cargo kg', thMail:'Mail kg', thTot:'Total / max', totDead:'Total deadload',
     fwdHold:'FWD HOLD', aftHold:'AFT HOLD',
+    apTitle:'Select aircraft', apLead:'Choose the aircraft for this loadsheet.', ufAircraft:'Aircraft', acPhotoBtn:'Aircraft photo',
+    b2CfgT:'Configuration & dry operating weight', b2CfgL:'Cabin configuration', b2CrewN:'Flight crew', b2CrewWt:'Crew weight each (lb)', b2Kit:'Kit / catering (lb)',
+    b2CabinT:'Cabin & baggage', b2BagPcs:'Aft baggage pieces', b2Bag:'Aft baggage (lb)', b2Unit:'Fuel unit', b2DensT:'Density', b2Std:'Standard (OM)', b2Act:'Actual (fuel slip)',
+    b2AddLmc:'+ Change', b2Where:'Seat / hold', b2PaxSum:(n, w, b) => `${n} occupied · ${w} lb · bags ${b} lb`,
+    b2FuelLb:(b, t, tr, d) => `In pounds: block ${b} · take-off ${t} · trip ${tr} lb (density ${d} lb/US gal)`, b2FuelGal:(g, d) => `Block fuel ≈ ${g} US gal at ${d} lb/US gal`,
+    b2Banner:'5A-LEX B200 Load &amp; Trim Sheet, all weights in pounds. Save PDF to keep or share it. Print gives one sheet per page.',
     secFuel:'Fuel', block:'Block fuel', tof:'Takeoff fuel', trip:'Trip fuel', taxi:'Taxi fuel', rtow:'Perf. limited TOW', optional:'optional', rtowHint:'Runway / climb limit',
     wings:'Wings', center:'Center', fiTO:'Fuel index TO', fiLW:'Fuel index LDG', fuelSum:(b, l) => `Landing fuel ${l}`,
     secLmc:'Last minute changes', addPax:'+ Passenger', addLoad:'+ Baggage / cargo / mail',
@@ -1410,6 +1552,12 @@ const I18N = {
     secHolds:'العنابر', holdsAux:'الأوزان من الكاونتر (مشرف الرحلة)',
     thCpt:'العنبر', thPcs:'عدد الشنط', thBag:'شنط kg', thCgo:'شحن kg', thMail:'بريد kg', thTot:'المجموع / الأقصى', totDead:'إجمالي حمولة العنابر',
     fwdHold:'عنبر أمامي', aftHold:'عنبر خلفي',
+    apTitle:'اختار الطائرة', apLead:'اختار الطائرة اللي حتجهز ليها اللود شيت.', ufAircraft:'الطائرات', acPhotoBtn:'صورة الطائرة',
+    b2CfgT:'التكوين والوزن الجاف', b2CfgL:'تكوين الكابينة', b2CrewN:'طاقم القيادة', b2CrewWt:'وزن فرد الطاقم (lb)', b2Kit:'الحقيبة والتموين (lb)',
+    b2CabinT:'الكابينة والشنط', b2BagPcs:'عدد الشنط الخلفية', b2Bag:'وزن الشنط الخلفية (lb)', b2Unit:'وحدة الوقود', b2DensT:'الكثافة', b2Std:'قياسية (OM)', b2Act:'فعلية (إيصال التزويد)',
+    b2AddLmc:'+ تعديل', b2Where:'الكرسي / العنبر', b2PaxSum:(n, w, b) => `${n} مشغول · ${w} lb · الشنط ${b} lb`,
+    b2FuelLb:(b, t, tr, d) => `بالباوند: البلوك ${b} · الإقلاع ${t} · الرحلة ${tr} lb (الكثافة ${d} lb/US gal)`, b2FuelGal:(g, d) => `وقود البلوك ≈ ${g} US gal بكثافة ${d} lb/US gal`,
+    b2Banner:'نموذج 5A-LEX B200 Load &amp; Trim، كل الأوزان بالباوند. احفظه PDF أو اطبعه، كل ورقة في صفحة.',
     secFuel:'الوقود', block:'وقود البلوك', tof:'وقود الإقلاع', trip:'وقود الرحلة', taxi:'وقود التاكسي', rtow:'TOW محدود بالأداء', optional:'اختياري', rtowHint:'حد المدرج / الصعود',
     wings:'الجناحين', center:'الخزان الأوسط', fiTO:'مؤشر الوقود للإقلاع', fiLW:'مؤشر الوقود للهبوط', fuelSum:(b, l) => `وقود الهبوط ${l}`,
     secLmc:'التعديلات الأخيرة (LMC)', addPax:'+ راكب', addLoad:'+ شنط / شحن / بريد',
@@ -1532,6 +1680,7 @@ function applyLang(){
 /* ---------- state ---------- */
 const todayUTC = () => new Date().toISOString().slice(0,10);
 function blankState(){
+  if (AC.kind === 'B200') return b2Blank();
   return {
     flt:{no:'LXX', date:todayUTC(), time:'', from:'MJI', to:'', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:'', n1:'', n2:''},
     crew:{xCockpit:0, xFwd:0, xAft:0},
@@ -1556,6 +1705,7 @@ const store = {
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 };
 let S = store.get('lxx-ls-draft') || blankState();
+const draftKey = () => 'lxx-ls-draft:' + (ME ? ME.id : '') + (AC.reg && AC.reg !== '5A-WAC' ? ':' + AC.reg : '');
 let RES = null;
 
 /* ---------- inputs ---------- */
@@ -1734,7 +1884,7 @@ function jit(x, y, s, k){ let h = 2166136261; for (const c of `${x.toFixed(1)}|$
 const sheetHand = () => (S && S.flt && S.flt.hand) || (ME && ME.hand) || 'H1';
 const sheetKey = () => { const f = (S && S.flt) || {}; return `${f.no || ''}|${f.date || ''}|${f.ed || 1}`; };
 const TX = (x, y, s, o = {}) => {
-  x = +x; y = +y; s = String(s ?? ''); if (!s.trim()) return '';
+  x = +x; y = +y; s = String(s ?? '').replace(/\u2212/g, '-'); if (!s.trim()) return '';
   const fs = o.fs || 9, h = fs * 0.74;
   const ink = o.cls === 'red' ? '#A3151B' : null;
   const r = PEN.write(s, x, y + fs * 0.04, h, handOf(sheetHand()), sheetKey(), ink, Math.max(0, y / 842));
@@ -2019,6 +2169,8 @@ function resultsHTML(r){
 const $ = id => document.getElementById(id);
 function update(){
   if (!AC.reg) return;
+  if (isB2()) return b2Update();
+  { const bn = document.querySelector('[data-th=sheetBanner]'); if (bn) bn.innerHTML = t('sheetBanner'); }
   const r = RES = calc(S);
   $('o-basic').textContent = `${AC.dow} / ${fx(AC.doi)}`;
   // pax auto distribution reflected in inputs
@@ -2048,7 +2200,7 @@ function update(){
   $('ldmText').textContent = ldmText(r);
   $('edpText').textContent = edpText(r);
   $('sampleBanner').hidden = !S.sample;
-  if (ME) store.set('lxx-ls-draft:' + ME.id, S);
+  if (ME) store.set(draftKey(), S);
   if (ME) applyAccess();
 }
 
@@ -2067,9 +2219,11 @@ function ask(text, fn){ showTab('build'); pending = fn; $('confirmText').textCon
 $('confirmYes').onclick = () => { $('confirmBar').hidden = true; if (pending) pending(); pending = null; };
 $('confirmNo').onclick = () => { $('confirmBar').hidden = true; pending = null; };
 
-function load(state){ S = state; stampPreparer(); fillInputs(); renderLmc(); update(); }
+function load(state){ S = state; if (isB2()){ b2Norm(S); B2_RENDERED = ''; b2RenderInputs(); } stampPreparer(); fillInputs(); if (!isB2()) renderLmc(); update(); }
 $('btnNew').onclick = () => ask(t('confirmNew'), () => load(blankState()));
 $('btnClearSample').onclick = () => load(blankState());
+
+$('b2-addLmc').onclick = () => { if (!isB2()) return; S.b2.lmc.push({st:AC.hold.id, w:''}); b2RenderLmc(); update(); };
 
 /* ---------- distribution flags and the print lock ---------- */
 function paintLock(r){
@@ -2113,14 +2267,400 @@ document.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
 let BOOTED = false;
 function bootApp(){
   if (!AC.reg) return;
-  if (!BOOTED){ buildHolds(); BOOTED = true; }
+  if (!isB2() && !BOOTED){ buildHolds(); BOOTED = true; }
   document.querySelectorAll('[data-lab]').forEach(el => el.dataset.label = t(el.dataset.lab));
   if (!S.lmc) S.lmc = [];
+  if (isB2()){ b2Norm(S); B2_RENDERED = ''; }
   stampPreparer();
-  applyLang(); fillInputs(); renderLmc(); update();
+  applyLang();
+  if (isB2()) b2RenderInputs();
+  fillInputs(); if (!isB2()) renderLmc(); update();
 }
 
 /* ---------- backend: sign-in, roles, shared archive, administration (Supabase) ---------- */
+/* =====================================================================
+   Beechcraft King Air B200 — weight & balance in pounds / inches
+   Index = 50 + W × (arm − 185.0) ÷ 1000   (company graphical index method)
+   ===================================================================== */
+const isB2 = () => AC.kind === 'B200';
+const b2Cfg = () => AC.configs[(S.b2 && S.b2.cfg) in AC.configs ? S.b2.cfg : 'pax'];
+const b2Ix = (w, arm) => w * (arm - AC.ref) / AC.C;
+const b2IxOf = (W, M) => AC.K + (M - W * AC.ref) / AC.C;           // index from weight and moment
+const b2Mac = cg => (cg - AC.lemac) / AC.mac * 100;
+function b2FuelArm(lb){
+  const p = AC.fuel.arms; if (lb <= p[0][0]) return p[0][1];
+  for (let i = 1; i < p.length; i++) if (lb <= p[i][0]) { const [w0, a0] = p[i-1], [w1, a1] = p[i]; return a0 + (a1 - a0) * (lb - w0) / (w1 - w0); }
+  return p[p.length - 1][1];
+}
+function b2Fwd(W){
+  const p = AC.cg.fwd; if (W <= p[0][0]) return p[0][1];
+  for (let i = 1; i < p.length; i++) if (W <= p[i][0]) { const [w0, c0] = p[i-1], [w1, c1] = p[i]; return c0 + (c1 - c0) * (W - w0) / (w1 - w0); }
+  return p[p.length - 1][1];
+}
+function b2Blank(){
+  return {
+    reg: AC.reg,
+    flt:{no:'LXX', date:todayUTC(), time:'', from:'MJI', to:'', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:'', n1:'', n2:''},
+    b2:{cfg:'pax', crewN:AC.crew.n, crewWt:AC.crew.std, kit:AC.kit.std, st:{}, bagPcs:0, bag:0,
+        fuel:{unit:'lb', densType:'std', dens:AC.fuel.densStd, block:0, taxi:AC.fuel.taxi, trip:0}, lmc:[]},
+    lmc:[], sample:false
+  };
+}
+function b2Norm(s){
+  if (!s.b2) Object.assign(s, b2Blank());
+  const b = s.b2; b.st ??= {}; b.lmc ??= []; b.fuel ??= {unit:'lb', densType:'std', dens:AC.fuel.densStd, block:0, taxi:AC.fuel.taxi, trip:0};
+  if (!(b.cfg in AC.configs)) b.cfg = 'pax';
+  return s;
+}
+
+function b2Calc(S){
+  const b = S.b2, cfg = b2Cfg(), r = {kind:'B200', checks:[], lock:null};
+  const chk = (lvl, en, ar) => r.checks.push({lvl, en, ar});
+  const item = (id, label, w, arm) => ({id, label, w, arm, mom: w * arm, ix: b2Ix(w, arm)});
+  // dry operating weight
+  r.bew = item('BEW', 'Basic empty weight', num(cfg.bew), num(cfg.bewArm));
+  r.crew = item('CREW', 'Crew', num(b.crewN) * num(b.crewWt), AC.crew.arm);
+  r.kit = item('KIT', 'Flight kit / catering', num(b.kit), AC.kit.arm);
+  r.dow = r.bew.w + r.crew.w + r.kit.w;
+  r.dowMom = r.bew.mom + r.crew.mom + r.kit.mom;
+  r.bewIx = b2IxOf(r.bew.w, r.bew.mom);
+  r.corr = r.crew.ix + r.kit.ix;
+  r.doi = b2IxOf(r.dow, r.dowMom);
+  // traffic load: cabin stations and the aft baggage hold
+  r.st = cfg.stations.map(s => ({...item(s.id, s.label, num(b.st[s.id]), s.arm), zone: s.zone}));
+  r.hold = {...item(AC.hold.id, AC.hold.label, num(b.bag), AC.hold.arm), pcs: num(b.bagPcs), max: AC.hold.max};
+  r.pax = {n: r.st.filter(s => s.w > 0).length, w: r.st.reduce((a, s) => a + s.w, 0)};
+  r.ttl = r.pax.w + r.hold.w;
+  r.zones = {};
+  r.st.forEach(s => { const z = r.zones[s.zone] ??= {w:0, ix:0, n:0, ids:[]}; z.w += s.w; z.ix += s.ix; z.n += s.w > 0 ? 1 : 0; z.ids.push(s.id); });
+  // last minute changes
+  const stArm = id => id === AC.hold.id ? AC.hold.arm : (cfg.stations.find(s => s.id === id) || {}).arm;
+  r.lmc = {rows: b.lmc.map(l => { const w = num(l.w), arm = stArm(l.st) ?? AC.ref; return {st:l.st, w, arm, mom: w * arm, ix: b2Ix(w, arm)}; })};
+  r.lmc.net = r.lmc.rows.reduce((a, l) => a + l.w, 0);
+  r.lmc.abs = r.lmc.rows.reduce((a, l) => a + Math.abs(l.w), 0);
+  r.lmc.ix = r.lmc.rows.reduce((a, l) => a + l.ix, 0);
+  r.lmc.mom = r.lmc.rows.reduce((a, l) => a + l.mom, 0);
+  r.lmc.any = r.lmc.rows.some(l => l.w);
+  // zero fuel
+  r.zfw = r.dow + r.ttl + r.lmc.net;
+  r.zfwMom = r.dowMom + r.st.reduce((a, s) => a + s.mom, 0) + r.hold.mom + r.lmc.mom;
+  // fuel: Block − Taxi = Take-off, − Trip = Landing (entered in pounds or US gallons)
+  const f = b.fuel, dens = f.densType === 'act' ? num(f.dens) || AC.fuel.densStd : AC.fuel.densStd;
+  const toLb = v => f.unit === 'gal' ? num(v) * dens : num(v);
+  r.fuel = {unit: f.unit, dens, densType: f.densType, block: toLb(f.block), taxi: toLb(f.taxi), trip: toLb(f.trip)};
+  r.fuel.tof = r.fuel.block - r.fuel.taxi;
+  r.fuel.ldg = r.fuel.tof - r.fuel.trip;
+  r.fuel.gal = f.unit === 'gal' ? num(f.block) : r.fuel.block / dens;
+  const fMom = lb => lb > 0 ? lb * b2FuelArm(lb) : 0;
+  r.tow = r.zfw + r.fuel.tof; r.towMom = r.zfwMom + fMom(r.fuel.tof);
+  r.lw = r.zfw + r.fuel.ldg;  r.lwMom = r.zfwMom + fMom(r.fuel.ldg);
+  r.ramp = r.zfw + r.fuel.block; r.rampMom = r.zfwMom + fMom(r.fuel.block);
+  const pt = (W, M) => { const cg = W ? M / W : 0; return {W, M, cg, ix: b2IxOf(W, M), mac: b2Mac(cg), fwd: b2Fwd(W), aft: AC.cg.aft}; };
+  r.p = {zfw: pt(r.zfw, r.zfwMom), tow: pt(r.tow, r.towMom), lw: pt(r.lw, r.lwMom), ramp: pt(r.ramp, r.rampMom)};
+  ['zfw', 'tow', 'lw'].forEach(k => { const p = r.p[k]; p.ok = p.W <= 0 || (p.cg >= p.fwd - 1e-9 && p.cg <= p.aft + 1e-9); });
+  // allowed weights
+  r.A = AC.mzfw + r.fuel.tof; r.B = AC.mtow; r.C = AC.mlw + r.fuel.trip;
+  r.allowed = Math.min(r.A, r.B, r.C);
+  r.limiting = r.allowed === r.A ? 'A' : r.allowed === r.B ? 'B' : 'C';
+  r.atl = r.allowed - r.dow - r.fuel.tof;
+  r.under = r.allowed - r.tow;
+  // checks
+  const L = n => R(n).toLocaleString('en-US');
+  if (r.zfw > AC.mzfw) chk('bad', `ZFW ${L(r.zfw)} lb is above MZFW ${L(AC.mzfw)} lb.`, `الـ ZFW ${L(r.zfw)} lb أكبر من MZFW ${L(AC.mzfw)} lb.`);
+  if (r.tow > r.allowed) chk('bad', `TOW ${L(r.tow)} lb is above the allowed ${L(r.allowed)} lb (${r.limiting}).`, `الـ TOW ${L(r.tow)} lb أكبر من المسموح ${L(r.allowed)} lb (${r.limiting}).`);
+  if (r.lw > AC.mlw) chk('bad', `Landing weight ${L(r.lw)} lb is above MLW ${L(AC.mlw)} lb.`, `وزن الهبوط ${L(r.lw)} lb أكبر من MLW ${L(AC.mlw)} lb.`);
+  if (r.ramp > AC.mrw) chk('bad', `Ramp weight ${L(r.ramp)} lb is above ${L(AC.mrw)} lb.`, `وزن الرامب ${L(r.ramp)} lb أكبر من ${L(AC.mrw)} lb.`);
+  ['zfw', 'tow', 'lw'].forEach(k => { const p = r.p[k]; if (p.W > 0 && !p.ok) chk('bad', `${k.toUpperCase()} CG ${fx(p.cg)}" is outside ${fx(p.fwd, 1)}"–${fx(p.aft, 1)}".`, `مركز الثقل ${k.toUpperCase()} ${fx(p.cg)}" خارج الحدود ${fx(p.fwd, 1)}"–${fx(p.aft, 1)}".`); });
+  if (r.hold.w > AC.hold.max) chk('bad', `Aft baggage ${L(r.hold.w)} lb is above ${AC.hold.max} lb.`, `الشنط ${L(r.hold.w)} lb أكثر من ${AC.hold.max} lb.`);
+  if (r.fuel.tof < 0) chk('bad', 'Block fuel is less than taxi fuel.', 'وقود البلوك أقل من وقود التاكسي.');
+  if (r.fuel.ldg < 0) chk('bad', 'Trip fuel is more than take-off fuel.', 'وقود الرحلة أكثر من وقود الإقلاع.');
+  if (r.fuel.block > AC.fuel.maxLb) chk('bad', `Fuel ${L(r.fuel.block)} lb is above capacity ${L(AC.fuel.maxLb)} lb.`, `الوقود ${L(r.fuel.block)} lb أكثر من السعة ${L(AC.fuel.maxLb)} lb.`);
+  if (r.lmc.abs > AC.lmcMax) chk('bad', `Last minute changes ${L(r.lmc.abs)} lb are above ±${AC.lmcMax} lb: prepare a new loadsheet.`, `تعديلات آخر لحظة ${L(r.lmc.abs)} lb أكثر من ±${AC.lmcMax} lb: جهّز لود شيت جديد.`);
+  if ([...r.st.map(s => s.w), r.hold.w, num(b.kit), num(b.crewN)].some(v => v < 0)) chk('bad', 'Negative values entered.', 'فيه قيم سالبة.');
+  if (r.zfw > 0 && r.zfw < AC.minW) chk('warn', `Weight below the chart (${L(AC.minW)} lb).`, `الوزن أقل من بداية الجدول (${L(AC.minW)} lb).`);
+  if (AC.fuel.provisional) chk('info', 'Fuel moment uses provisional arms until the POH Usable Fuel Moment table is entered.', 'عزم الوقود مؤقت لين يتدخل جدول Usable Fuel Moment من الـ POH.');
+  r.ok = !r.checks.some(c => c.lvl === 'bad');
+  if (!r.checks.some(c => c.lvl !== 'info')) chk('ok', 'All weight, centre of gravity and fuel limits checked.', 'كل حدود الوزن ومركز الثقل والوقود مفحوصة.');
+  // fields shared with the archive, dock and save
+  r.f = {zfw: r.zfw, tow: r.tow, lw: r.lw}; r.mac = {zfw: r.p.zfw.mac, tow: r.p.tow.mac, lw: r.p.lw.mac};
+  r.fin = {pax: {total: r.pax.n}};
+  return r;
+}
+
+/* ---------- build screen ---------- */
+let B2_RENDERED = '';
+function b2RenderInputs(){
+  const cfg = b2Cfg(), key = AC.reg + '|' + S.b2.cfg + '|' + LANG;
+  if (B2_RENDERED === key) return;
+  B2_RENDERED = key;
+  $('b2-cfg').innerHTML = Object.entries(AC.configs).map(([k, c]) => `<option value="${k}">${esc(c.label)}</option>`).join('');
+  $('b2-seats').innerHTML = cfg.stations.map(s => `<div class="f"><label for="b2s-${s.id}"><span class="zt">${s.zone}</span> ${esc(s.label)}</label><input id="b2s-${s.id}" class="num" dir="ltr" type="text" inputmode="decimal" placeholder="0" data-k="b2.st.${s.id}"><span class="hint">${fx(s.arm, 1)}" · ${sg(b2Ix(100, s.arm), 1)} / 100 lb</span></div>`).join('');
+  $('b2-map').innerHTML = b2CabinSVG(cfg);
+  b2RenderLmc();
+}
+function b2CabinSVG(cfg){
+  // plan view: cockpit, seats by zone, aft baggage — arms from the aircraft data
+  const x = a => 40 + (a - 120) * 2.05, seats = cfg.stations;
+  const pos = {}; const used = {};
+  seats.forEach(s => { const k = s.arm; used[k] = (used[k] || 0) + 1; pos[s.id] = {x: x(s.arm), y: used[k] === 1 ? 32 : 58}; });
+  return `<svg viewBox="0 0 520 96" class="b2map" role="img" aria-label="Cabin">
+    <path d="M18 48 Q22 14 70 12 L440 12 Q470 12 498 40 L498 56 Q470 84 440 84 L70 84 Q22 82 18 48 Z" class="hull"/>
+    <rect x="${x(126) - 16}" y="26" width="30" height="44" rx="6" class="ck"/><text x="${x(126) - 1}" y="52" class="lb">CREW</text>
+    ${seats.map(s => `<g class="seat" data-st="${s.id}"><rect x="${pos[s.id].x - 13}" y="${pos[s.id].y - 10}" width="${s.id === 'STR' ? 60 : 26}" height="${s.id === 'STR' ? 34 : 20}" rx="4"/><text x="${pos[s.id].x + (s.id === 'STR' ? 17 : 0)}" y="${pos[s.id].y + (s.id === 'STR' ? 11 : 4)}">${s.id === 'STR' ? 'STRETCHER' : s.id.replace('S', '')}</text></g>`).join('')}
+    <rect x="${x(325) - 26}" y="28" width="52" height="40" rx="6" class="hold"/><text x="${x(325)}" y="46" class="lb">BAGGAGE</text><text x="${x(325)}" y="58" class="lb">MAX ${AC.hold.max}</text>
+  </svg>`;
+}
+function b2RenderLmc(){
+  const box = $('b2-lmcList'), cfg = b2Cfg();
+  const opts = [...cfg.stations.map(s => [s.id, `${s.zone} · ${s.label}`]), [AC.hold.id, AC.hold.label]];
+  if (!S.b2.lmc.length){ box.innerHTML = `<div class="empty">${t('lmcEmpty')}</div>`; return; }
+  box.innerHTML = S.b2.lmc.map((l, i) => `<div class="lmc-row b2l">
+    <div class="f"><label for="b2l${i}s">${t('b2Where')}</label><select id="b2l${i}s" data-b2lmc="${i}" data-f="st">${opt(opts, l.st)}</select></div>
+    <div class="f"><label for="b2l${i}w">± lb</label><input id="b2l${i}w" class="num" dir="ltr" type="text" inputmode="decimal" data-b2lmc="${i}" data-f="w" value="${esc(l.w)}"></div>
+    <button class="x" data-b2del="${i}" aria-label="${t('remove')}">✕</button></div>`).join('');
+}
+document.addEventListener('input', e => {
+  const el = e.target; if (el.dataset.b2lmc == null) return;
+  const it = S.b2.lmc[+el.dataset.b2lmc]; if (!it) return;
+  it[el.dataset.f] = el.dataset.f === 'w' ? el.value : el.value; update();
+});
+document.addEventListener('change', e => { if (e.target.dataset.b2lmc != null) update(); });
+document.addEventListener('click', e => {
+  const d = e.target.closest('[data-b2del]'); if (!d) return;
+  S.b2.lmc.splice(+d.dataset.b2del, 1); b2RenderLmc(); update();
+});
+
+function b2Update(){
+  b2Norm(S);
+  b2RenderInputs();
+  const r = RES = b2Calc(S), F = r.fuel, gal = F.unit === 'gal', u = gal ? 'US gal' : 'lb';
+  const L = n => R(n).toLocaleString('en-US');
+  $('b2-bew').textContent = `${L(r.bew.w)} @ ${fx(r.bew.arm)}"`;
+  $('b2-dow').textContent = L(r.dow); $('b2-doi').textContent = fx(r.doi, 1);
+  $('b2-dowsum').textContent = `DOW ${L(r.dow)} lb · DOI ${fx(r.doi, 1)}`;
+  $('b2-paxsum').textContent = t('b2PaxSum', r.pax.n, L(r.pax.w), L(r.hold.w));
+  const m = $('b2-holdMeter'); m.classList.toggle('over', r.hold.w > AC.hold.max); m.firstElementChild.style.width = Math.min(100, r.hold.w / AC.hold.max * 100) + '%';
+  $('b2-holdTot').textContent = `${L(r.hold.w)} / ${AC.hold.max} lb`;
+  document.querySelectorAll('#b2-map .seat').forEach(g => g.classList.toggle('on', num(S.b2.st[g.dataset.st]) > 0));
+  // fuel
+  document.querySelectorAll('.b2u').forEach(e => e.textContent = u);
+  $('b2-dens').disabled = S.b2.fuel.densType !== 'act';
+  if (S.b2.fuel.densType !== 'act') $('b2-dens').value = AC.fuel.densStd;
+  $('b2-tof').value = gal ? fx(F.tof / F.dens, 1) : R(F.tof);
+  $('b2-fuelHint').textContent = gal ? t('b2FuelLb', L(F.block), L(F.tof), L(F.trip), fx(F.dens, 2)) : t('b2FuelGal', fx(F.gal, 1), fx(F.dens, 2));
+  $('b2-fuelsum').innerHTML = `<b class="ldg-fuel">${esc(t('fuelSum', 0, L(F.ldg) + ' lb'))}</b>`;
+  $('b2-lmcsum').textContent = r.lmc.any ? `${r.lmc.net >= 0 ? '+' : '−'}${L(Math.abs(r.lmc.net))} lb · index ${sg(r.lmc.ix, 1)}` : t('lmcNone');
+  $('results').innerHTML = b2ResultsHTML(r);
+  $('dock').innerHTML = `<span class="s ${r.ok ? 'ok' : 'bad'}">${r.ok ? t('dockOk') : t('dockBad')}</span><span>TOW ${L(r.tow)} lb</span><span>CG ${fx(r.p.tow.cg, 1)}"</span><span>MAC ${fx(r.p.tow.mac, 1)}%</span>`;
+  const sh = b2Sheet(r);
+  $('sheetView').innerHTML = sh; $('printRoot').innerHTML = sh;
+  const bn = document.querySelector('[data-th=sheetBanner]'); if (bn) bn.innerHTML = t('b2Banner');
+  $('sheetView').classList.remove('locked'); $('sheetLock').hidden = true;
+  ['btnPrint', 'btnPrint2', 'btnPdf'].forEach(id => { $(id).disabled = false; $(id).title = ''; });
+  $('sampleBanner').hidden = true;
+  if (ME) store.set(draftKey(), S);
+  if (ME) applyAccess();
+}
+
+/* ---------- results ---------- */
+function b2ResultsHTML(r){
+  const L = n => R(n).toLocaleString('en-US');
+  const row = (lab, act, max, k) => { const m = max - act; return `<tr><td>${lab}${k && r.limiting === k ? '<span class="lim">L</span>' : ''}</td><td>${L(act)}</td><td>${L(max)}</td><td class="${m < 0 ? 'neg' : 'pos'}">${m < 0 ? '−' : '+'}${L(Math.abs(m))}</td></tr>`; };
+  const bal = (lab, p) => `<tr><td>${lab}</td><td>${fx(p.ix, 1)}</td><td>${fx(p.cg, 2)}"</td><td>${fx(p.mac, 1)}%</td><td class="${p.ok ? 'pos' : 'neg'}">${fx(p.fwd, 1)}–${fx(p.aft, 1)}</td></tr>`;
+  const bad = r.checks.filter(c => c.lvl === 'bad').length;
+  return `
+  <div class="status ${r.ok ? 'ok' : 'bad'}"><span class="dot"></span>${r.ok ? t('within') : t('notWithin')}<small>${r.ok ? t('ready') : t('issues', bad)}</small></div>
+  <div class="sec">
+    <h2>${t('weights')} <span class="aux">lb</span></h2>
+    <table class="w">
+      <tr><th></th><th>${t('actual')}</th><th>${t('max')}</th><th>${t('margin')}</th></tr>
+      ${row('ZFW', r.zfw, AC.mzfw, 'A')}${row('TOW', r.tow, r.allowed, '')}${row('LW', r.lw, AC.mlw, 'C')}${row('Ramp', r.ramp, AC.mrw, '')}
+    </table>
+    <div class="kv"><span>${t('traffic')} <b>${L(r.ttl + r.lmc.net)}</b></span><span>${t('allowed')} <b>${L(r.atl)}</b></span>
+      <span>${t('under')} <b style="color:${r.under < 0 ? 'var(--bad)' : 'var(--ok)'}">${L(r.under)}</b></span>
+      <span>${t('limit')} <b>${r.limiting === 'A' ? 'A · MZFW' : r.limiting === 'B' ? 'B · MTOW' : 'C · MLW'}</b></span></div>
+  </div>
+  <div class="sec">
+    <h2>${t('balance')} <span class="aux">${esc(b2Cfg().label)}</span></h2>
+    <table class="w">
+      <tr><th></th><th>${t('index')}</th><th>CG</th><th>MAC</th><th>${t('limits')}</th></tr>
+      <tr><td>DOI</td><td>${fx(r.doi, 1)}</td><td></td><td></td><td></td></tr>
+      ${bal('ZFW', r.p.zfw)}${bal('TOW', r.p.tow)}${bal('LW', r.p.lw)}
+    </table>
+  </div>
+  <div class="sec chart"><h2>${t('envelope')} <span class="aux">CG (in) × lb</span></h2>${b2Chart(r)}
+    <div class="legend"><span><i style="background:var(--zfw)"></i>ZFW</span><span><i style="background:var(--tow)"></i>TOW</span><span><i style="background:var(--law)"></i>LW</span></div></div>
+  <div class="sec"><h2>${t('checks')}</h2><ul class="checks">${r.checks.map(c => `<li class="${c.lvl === 'info' ? 'warn' : c.lvl}">${esc(LANG === 'ar' ? c.ar : c.en)}</li>`).join('')}</ul></div>`;
+}
+function b2Chart(r){
+  const X0 = 178, X1 = 199, Y0 = 7000, Y1 = 13000, W = 360, H = 250, l = 40, tp = 12, rw = 14, bt = 30;
+  const X = c => l + (c - X0) / (X1 - X0) * (W - l - rw), Y = w => tp + (Y1 - w) / (Y1 - Y0) * (H - tp - bt);
+  const f = AC.cg.fwd, env = [[AC.cg.aft, AC.minW], [AC.cg.aft, AC.mtow], ...[...f].reverse().filter(p => p[0] <= AC.mtow).map(p => [p[1], p[0]])];
+  const envZ = [[AC.cg.aft, AC.minW], [AC.cg.aft, AC.mzfw], [b2Fwd(AC.mzfw), AC.mzfw], ...[...f].reverse().filter(p => p[0] < AC.mzfw).map(p => [p[1], p[0]])];
+  let g = '';
+  for (let c = 180; c <= 198; c += 2) g += `<line x1="${X(c)}" y1="${tp}" x2="${X(c)}" y2="${H - bt}" class="gl"/><text x="${X(c)}" y="${H - bt + 13}" class="tk">${c}</text>`;
+  for (let w = 7000; w <= 13000; w += 1000) g += `<line x1="${l}" y1="${Y(w)}" x2="${W - rw}" y2="${Y(w)}" class="gl"/><text x="${l - 5}" y="${Y(w) + 3}" class="tk" style="text-anchor:end">${w / 1000}k</text>`;
+  const poly = p => p.map(([c, w]) => `${X(c).toFixed(1)},${Y(w).toFixed(1)}`).join(' ');
+  const dot = (p, col, lab) => p.W > 0 ? `<circle cx="${X(p.cg).toFixed(1)}" cy="${Y(p.W).toFixed(1)}" r="4.2" fill="${col}" stroke="#fff" stroke-width="1.2"/><text x="${(X(p.cg) + 7).toFixed(1)}" y="${(Y(p.W) + 3).toFixed(1)}" class="pl">${lab}</text>` : '';
+  return `<svg viewBox="0 0 ${W} ${H}" class="env b2env" role="img" aria-label="CG envelope">${g}
+    <polygon points="${poly(env)}" class="envT"/><polygon points="${poly(envZ)}" class="envZ"/>
+    <line x1="${l}" y1="${Y(AC.mzfw)}" x2="${W - rw}" y2="${Y(AC.mzfw)}" class="lim"/><text x="${W - rw - 2}" y="${Y(AC.mzfw) - 3}" class="tk" style="text-anchor:end">MZFW ${AC.mzfw.toLocaleString('en-US')}</text>
+    <line x1="${l}" y1="${Y(AC.mtow)}" x2="${W - rw}" y2="${Y(AC.mtow)}" class="lim"/><text x="${W - rw - 2}" y="${Y(AC.mtow) - 3}" class="tk" style="text-anchor:end">MTOW ${AC.mtow.toLocaleString('en-US')}</text>
+    <polyline points="${[r.p.zfw, r.p.tow].filter(p => p.W > 0).map(p => `${X(p.cg).toFixed(1)},${Y(p.W).toFixed(1)}`).join(' ')}" class="path"/>
+    ${dot(r.p.zfw, 'var(--zfw)', 'ZFW')}${dot(r.p.lw, 'var(--law)', 'LW')}${dot(r.p.tow, 'var(--tow)', 'TOW')}
+    <text x="${(l + W - rw) / 2}" y="${H - 4}" class="tk">CG (inches aft of datum)</text></svg>`;
+}
+
+/* ---------- the B200 Load & Trim sheet (drawn; values in the preparer's hand) ---------- */
+const WHITE_BG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
+function b2Sheet(r){
+  const fl = S.flt, cfg = b2Cfg(), L = n => R(n).toLocaleString('en-US'), L1 = n => (Math.round(n * 10) / 10).toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const up = v => String(v || '').toUpperCase();
+  let o = '';
+  const T = (x, y, s, sz = 6.2, w = 400, a = 'start', cls = 'fm') => `<text x="${x}" y="${y}" class="${cls}" style="font-size:${sz}px;font-weight:${w}" text-anchor="${a}">${esc(s)}</text>`;
+  const box = (x, y, w, h, fill = 'none', sw = 0.6) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="#14213D" stroke-width="${sw}"/>`;
+  const hl = (x1, x2, y, sw = 0.4) => `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#14213D" stroke-width="${sw}"/>`;
+  const vl = (x, y1, y2, sw = 0.4) => `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}" stroke="#14213D" stroke-width="${sw}"/>`;
+  const HB = (x, y, w, h, s) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#1B2A4A"/>` + T(x + 5, y + h / 2 + 2.3, s, 6.4, 700, 'start', 'fm wh');
+  const P = (x, y, s, fs = 8, a = 'end', cls) => TX(x, y, s, {fs, a, cls});
+
+  // header
+  o += `<rect x="28" y="28" width="539" height="46" fill="#1B2A4A"/>`;
+  o += T(38, 47, 'LIBYAN EXPRESS', 13, 800, 'start', 'fm wh') + T(38, 59, 'FLIGHT OPERATIONS & DISPATCH', 6.2, 500, 'start', 'fm wh2');
+  o += `<rect x="200" y="32" width="250" height="38" fill="#fff"/>` + T(325, 47, 'B200 LOAD & TRIM SHEET', 11.5, 800, 'middle') + T(325, 60, cfg.label.toUpperCase(), 6.6, 700, 'middle', 'fm ac');
+  o += `<rect x="455" y="32" width="108" height="38" fill="#fff"/>` + T(459, 42, 'Form No:', 5.8, 700) + T(559, 42, cfg.form || '—', 5.8, 400, 'end') + T(459, 53, 'Revision:', 5.8, 700) + T(559, 53, 'Rev 00 / 2026', 5.8, 400, 'end') + T(459, 64, 'Ref W&B:', 5.8, 700) + T(559, 64, 'LXX-CAM-F-12', 5.8, 400, 'end');
+  // flight row
+  const fx0 = 28, fy = 78, cols = [['A/C REG', 64], ['MODEL / S/N', 80], ['FLIGHT NO.', 76], ['DATE', 76], ['FROM', 66], ['TO', 66], ['TIME UTC / ED.', 55], ['ALL WEIGHTS', 56]];
+  let cx = fx0;
+  cols.forEach(([lab, w]) => { o += box(cx, fy, w, 26) + T(cx + 3, fy + 7, lab, 5.2, 700); cx += w; });
+  cx = fx0; const fv = [AC.reg, `B200 / ${AC.sn}`, up(fl.no), dmy(fl.date), up(fl.from), up(fl.to), `${fl.time || ''} / ${fl.ed || 1}`];
+  fv.forEach((v, i) => { if (i < 2) o += T(cx + 3, fy + 20, v, 7, 700); else o += P(cx + cols[i][1] / 2, fy + 21.5, v, 8, 'middle'); cx += cols[i][1]; });
+  o += T(cx + 3, fy + 20, 'POUNDS (LB)', 6.4, 700);
+
+  // left table
+  const X0 = 28, X1 = 186, X2 = 236, X3 = 280, rh = cfg.stations.length > 5 ? 15.4 : 17;
+  let y = 110;
+  o += HB(X0, y, X3 - X0, 14, 'LOADSHEET ITEM / ZONE') + T(X2 - 4, y + 9.3, 'WEIGHT (LB)', 5.6, 700, 'end', 'fm wh') + T(X3 - 4, y + 9.3, 'ARM / MAX', 5.6, 700, 'end', 'fm wh');
+  y += 14;
+  const line = (lab, w, arm, bold, shade) => {
+    let s = (shade ? `<rect x="${X0}" y="${y}" width="${X3 - X0}" height="${rh}" fill="#EEF2F8"/>` : '') + box(X0, y, X3 - X0, rh, 'none', 0.4) + vl(X1, y, y + rh) + vl(X2, y, y + rh);
+    s += T(X0 + 3, y + 8.8, lab, 6, bold ? 700 : 400);
+    if (w !== '' && w != null) s += P(X2 - 3, y + 10, w, 8.2);
+    if (arm) s += T(X3 - 3, y + 8.8, arm, 5.8, 400, 'end');
+    y += rh; return s;
+  };
+  o += line('Basic Empty Weight (BEW)', L1(r.bew.w), fx(r.bew.arm) + '"');
+  o += line(`Crew (${num(S.b2.crewN)} × ${L(num(S.b2.crewWt))} lb)`, L1(r.crew.w), fx(AC.crew.arm) + '"');
+  o += line('Flight Kit / Catering', L1(r.kit.w), fx(AC.kit.arm) + '"');
+  o += line('DRY OPERATING WEIGHT (DOW)', L1(r.dow), '', true, true) + T(X2 + 3, y - rh + 8.8, 'DOI', 5.4, 700) + P(X3 - 3, y - 3, fx(r.doi, 1), 7.6);
+  o += HB(X0, y, X3 - X0, 12, 'CABIN & HOLD TRAFFIC LOAD'); y += 12;
+  r.st.forEach(s => { o += line(`${s.zone}: ${s.label}`, s.w ? L1(s.w) : '', fx(s.arm, 1) + '"'); });
+  o += line(`Hold 1: Aft Baggage (${r.hold.pcs || 0} pcs)`, r.hold.w ? L1(r.hold.w) : 'NIL', `Max ${AC.hold.max}`);
+  o += line(`TOTAL TRAFFIC LOAD (${r.pax.n} PAX)`, L1(r.ttl), '', true, true);
+  if (r.lmc.any) o += line('LMC (net)', (r.lmc.net >= 0 ? '+' : '−') + L1(Math.abs(r.lmc.net)), '');
+  o += line('ZERO FUEL WEIGHT (ZFW)', L1(r.zfw), L(AC.mzfw), true, true);
+  const gal = r.fuel.unit === 'gal';
+  o += line(`+ Block Fuel (${fx(r.fuel.gal, 0)} US gal @ ${fx(r.fuel.dens, 2)})`, L1(r.fuel.block), '');
+  o += line('RAMP WEIGHT', L1(r.ramp), L(AC.mrw), true);
+  o += line('− Taxi Fuel', '−' + L1(r.fuel.taxi), '');
+  o += line('TAKE-OFF WEIGHT (TOW)', L1(r.tow), L(AC.mtow), true, true);
+  o += line('− Trip Fuel', '−' + L1(r.fuel.trip), '');
+  o += line('LANDING WEIGHT (LDW)', L1(r.lw), L(AC.mlw), true, true);
+
+  // allowed weight check
+  y += 6;
+  const ax = [X0, 118, 172, 226, X3];
+  o += HB(X0, y, X3 - X0, 12, 'ALLOWED WEIGHT') + ['A (ZFW)', 'B (TOW)', 'C (LDW)'].map((s, i) => T(ax[i + 1] + 27, y + 8.5, s, 5.6, 700, 'middle', 'fm wh')).join('');
+  y += 12;
+  const arow = (lab, a, b, c, bold) => { let s = box(X0, y, X3 - X0, rh, 'none', 0.4) + ax.slice(1, 4).map(x => vl(x, y, y + rh)).join('') + T(X0 + 3, y + 8.8, lab, 5.8, bold ? 700 : 400); [a, b, c].forEach((v, i) => { if (v !== '') s += P(ax[i + 2] - 3, y + 10, v, 7.6); }); y += rh; return s; };
+  o += arow('Max structural', L(AC.mzfw), L(AC.mtow), L(AC.mlw));
+  o += arow('+ Fuel (TOF / Trip)', L1(r.fuel.tof), '', L1(r.fuel.trip));
+  o += arow('Allowed TOW', L1(r.A), L1(r.B), L1(r.C), true);
+  o += box(X0, y, X3 - X0, rh, '#EEF2F8', 0.4) + T(X0 + 3, y + 8.8, `Lowest (${r.limiting}) · Underload`, 6, 700) + P(X3 - 3, y + 10, `${L1(r.allowed)} · ${L1(r.under)}`, 7.8); y += rh;
+
+  // LMC
+  y += 6;
+  o += HB(X0, y, X3 - X0, 12, `LAST MINUTE CHANGES (MAX ±${AC.lmcMax} LB)`) + T(226, y + 8.5, '± LB', 5.6, 700, 'middle', 'fm wh') + T(262, y + 8.5, 'Δ INDEX', 5.6, 700, 'middle', 'fm wh'); y += 12;
+  const lm = r.lmc.rows.filter(l => l.w).slice(0, 3);
+  for (let i = 0; i < 3; i++){
+    const l = lm[i]; o += box(X0, y, X3 - X0, rh, 'none', 0.4) + vl(205, y, y + rh) + vl(245, y, y + rh);
+    if (l){ const lab = l.st === AC.hold.id ? 'HOLD 1' : (cfg.stations.find(s => s.id === l.st) || {}).zone + ' ' + l.st; o += P(X0 + 4, y + 10, lab, 7.4, 'start') + P(243, y + 10, (l.w > 0 ? '+' : '−') + L1(Math.abs(l.w)), 7.4) + P(X3 - 3, y + 10, sg(l.ix, 1), 7.4); }
+    y += rh;
+  }
+  // conditions
+  y += 6;
+  const cx4 = [X0, 92, 152, 216, X3];
+  o += HB(X0, y, X3 - X0, 12, 'CONDITION') + ['INDEX', 'CG (IN)', '% MAC'].map((s, i) => T((cx4[i + 1] + cx4[i + 2]) / 2, y + 8.5, s, 5.6, 700, 'middle', 'fm wh')).join(''); y += 12;
+  [['ZFW', r.p.zfw], ['TOW', r.p.tow], ['LDW', r.p.lw]].forEach(([k, p]) => {
+    o += box(X0, y, X3 - X0, rh, 'none', 0.4) + cx4.slice(1, 4).map(x => vl(x, y, y + rh)).join('') + T(X0 + 3, y + 8.8, k, 6.2, 700);
+    o += P((cx4[1] + cx4[2]) / 2, y + 10.2, fx(p.ix, 1), 7.8, 'middle', p.ok ? '' : 'red') + P((cx4[2] + cx4[3]) / 2, y + 10.2, fx(p.cg, 2) + '"', 7.8, 'middle', p.ok ? '' : 'red') + P((cx4[3] + cx4[4]) / 2, y + 10.2, fx(p.mac, 1) + '%', 7.8, 'middle', p.ok ? '' : 'red');
+    y += rh;
+  });
+
+  // right column: index method + envelope
+  const RX = 292, RW = 275;
+  let ry = 110;
+  o += HB(RX, ry, RW, 14, 'B200 BALANCE — GRAPHICAL INDEX METHOD'); ry += 14;
+  o += box(RX, ry, RW, 26) + vl(RX + 92, ry, ry + 26) + vl(RX + 184, ry, ry + 26);
+  o += T(RX + 3, ry + 7.5, 'Basic Index (BEW):', 5.4, 700) + T(RX + 95, ry + 7.5, '+ Crew / Kit corr.:', 5.4, 700) + T(RX + 187, ry + 7.5, '= Dry Operating Index:', 5.4, 700);
+  o += P(RX + 46, ry + 21, fx(r.bewIx, 1), 9, 'middle') + P(RX + 138, ry + 21, sg(r.corr, 1), 9, 'middle') + P(RX + 230, ry + 21, fx(r.doi, 1), 9, 'middle');
+  ry += 32;
+  // index ladder: one row per zone, the line walks by each zone's index change
+  const IX0 = 0, IX1 = 140, lx0 = RX + 78, lx1 = RX + RW - 6, IXX = i => lx0 + (Math.max(IX0, Math.min(IX1, i)) - IX0) / (IX1 - IX0) * (lx1 - lx0);
+  o += box(RX, ry, RW, 12, '#EEF2F8', 0.4) + T(RX + 3, ry + 8.3, 'INDEX SCALE', 5.4, 700);
+  for (let i = 0; i <= IX1; i += 10){ o += T(IXX(i), ry + 8.3, String(i), 5, 400, 'middle'); }
+  ry += 12;
+  const zones = [...new Set(cfg.stations.map(s => s.zone))].map(z => ({lab: `ZONE ${z}`, ix: r.zones[z] ? r.zones[z].ix : 0, per: b2Ix(100, cfg.stations.find(s => s.zone === z).arm)}));
+  const lad = [...zones, {lab: 'AFT HOLD 1', ix: r.hold.ix, per: b2Ix(100, AC.hold.arm)}, ...(r.lmc.any ? [{lab: 'LMC', ix: r.lmc.ix, per: null}] : []), {lab: 'FUEL (TOF)', ix: r.p.tow.ix - r.p.zfw.ix, per: null}];
+  const lh = 16, ladTop = ry;
+  let cur = r.doi, d = `M${IXX(cur).toFixed(1)} ${ry}`;
+  lad.forEach(z => {
+    o += box(RX, ry, RW, lh, 'none', 0.35) + vl(lx0 - 2, ry, ry + lh, 0.35) + T(RX + 3, ry + 7, z.lab, 5.4, 700) + (z.per != null ? T(RX + 3, ry + 13, `${sg(z.per, 1)} / 100 lb`, 4.8, 400) : '');
+    for (let i = 10; i < IX1; i += 10) o += `<line x1="${IXX(i)}" y1="${ry}" x2="${IXX(i)}" y2="${ry + lh}" stroke="#C9D3E3" stroke-width="0.3"/>`;
+    const yc = ry + lh / 2; d += ` L${IXX(cur).toFixed(1)} ${yc}`; cur += z.ix; d += ` L${IXX(cur).toFixed(1)} ${yc}`; ry += lh;
+  });
+  d += ` L${IXX(cur).toFixed(1)} ${ry}`;
+  o += `<path class="tr" d="${d}"/>`;
+  o += P(Math.min(IXX(cur) + 4, lx1 - 30), ry + 8, `TOW ${fx(r.p.tow.ix, 1)}`, 7, 'start');
+  ry += 14;
+  // envelope chart: weight vs CG (inches), POH limits
+  const ex0 = RX + 30, ex1 = RX + RW - 8, ey0 = ry + 4, ey1 = ry + 236, C0 = 179, C1 = 198, W0 = 7000, W1 = 13000;
+  const EX = c => ex0 + (c - C0) / (C1 - C0) * (ex1 - ex0), EY = w => ey0 + (W1 - w) / (W1 - W0) * (ey1 - ey0);
+  o += box(RX, ry - 4, RW, 262, 'none', 0.5);
+  for (let c = 180; c <= 198; c += 2){ o += `<line x1="${EX(c)}" y1="${ey0}" x2="${EX(c)}" y2="${ey1}" stroke="#C9D3E3" stroke-width="0.3"/>` + T(EX(c), ey1 + 8, String(c), 5, 400, 'middle'); }
+  for (let w = 7000; w <= 13000; w += 500){ o += `<line x1="${ex0}" y1="${EY(w)}" x2="${ex1}" y2="${EY(w)}" stroke="#C9D3E3" stroke-width="${w % 1000 ? 0.2 : 0.35}"/>` + (w % 1000 ? '' : T(ex0 - 3, EY(w) + 2, (w).toLocaleString('en-US'), 4.8, 400, 'end')); }
+  const fw = AC.cg.fwd, envP = [[AC.cg.aft, AC.minW], [AC.cg.aft, AC.mtow], ...[...fw].reverse().filter(p => p[0] <= AC.mtow).map(p => [p[1], p[0]])];
+  o += `<polygon points="${envP.map(([c, w]) => `${EX(c).toFixed(1)},${EY(w).toFixed(1)}`).join(' ')}" fill="rgba(46,125,80,.10)" stroke="#2E7D50" stroke-width="0.9"/>`;
+  o += `<line x1="${ex0}" y1="${EY(AC.mzfw)}" x2="${ex1}" y2="${EY(AC.mzfw)}" stroke="#2747A8" stroke-width="0.6" stroke-dasharray="3 2"/>` + T(ex1 - 2, EY(AC.mzfw) - 2.5, `MAX ZFW ${AC.mzfw.toLocaleString('en-US')} LB`, 4.8, 700, 'end', 'fm ac');
+  o += `<line x1="${ex0}" y1="${EY(AC.mtow)}" x2="${ex1}" y2="${EY(AC.mtow)}" stroke="#A3151B" stroke-width="0.6" stroke-dasharray="3 2"/>` + T(ex1 - 2, EY(AC.mtow) - 2.5, `MTOW / MLW ${AC.mtow.toLocaleString('en-US')} LB`, 4.8, 700, 'end', 'fm rd');
+  [[AC.cg.aft, 'AFT LIMIT'], [181, 'FWD 181.0']].forEach(([c, s]) => { o += T(EX(c), ey0 + 6, s, 4.6, 700, 'middle', 'fm gr'); });
+  o += T((ex0 + ex1) / 2, ey1 + 16, 'CG — INCHES AFT OF DATUM   ·   MAC 70.41"  LEMAC 171.23"', 4.8, 700, 'middle');
+  o += `<text x="${RX + 8}" y="${(ey0 + ey1) / 2}" class="fm" style="font-size:5px;font-weight:700" transform="rotate(-90 ${RX + 8} ${(ey0 + ey1) / 2})" text-anchor="middle">AIRCRAFT WEIGHT (LB)</text>`;
+  const pts = [['ZFW', r.p.zfw], ['TOW', r.p.tow], ['LDW', r.p.lw]].filter(([, p]) => p.W > 0);
+  if (pts.length > 1) o += `<path class="tr" d="M${EX(r.p.zfw.cg).toFixed(1)} ${EY(r.p.zfw.W).toFixed(1)} L${EX(r.p.tow.cg).toFixed(1)} ${EY(r.p.tow.W).toFixed(1)}"/>`;
+  pts.forEach(([k, p], i) => { o += `<circle class="pt" cx="${EX(p.cg).toFixed(1)}" cy="${EY(p.W).toFixed(1)}" r="2.2"/>` + P(EX(p.cg) + (p.cg > 192 ? -5 : 5), EY(p.W) + (k === 'LDW' ? 9 : -2), `${k} ${fx(p.mac, 1)}%`, 6.6, p.cg > 192 ? 'end' : 'start', p.ok ? '' : 'red'); });
+  ry += 266;
+  // notes
+  o += HB(RX, ry, RW, 12, 'NOTES / SI'); ry += 12;
+  const nh = Math.max(46, 702 - ry);
+  o += box(RX, ry, RW, nh);
+  o += notesBlock(fl.n1, {fs: 7.4, min: 5.4, lines: Array.from({length: Math.floor((nh - 4) / 11)}, (_, i) => [RX + 5, ry + 12 + i * 11, RW - 10])}, 'n1');
+  ry += nh;
+
+  // signatures
+  const sy = 712;
+  o += box(28, sy, 539, 14, '#EEF2F8', 0.5) + T(32, sy + 9.3, `CERTIFICATION: ${AC.reg} (${cfg.label}) is loaded within certified mass and CG limits per the approved W&B report and B200 POH Section 6.`, 5.4, 700);
+  const sw = 539 / 3;
+  [['PREPARED BY (DISPATCHER)', up(fl.prep)], ['CHECKED BY (LOAD CONTROL)', ''], ['APPROVED BY (CAPTAIN)', up(fl.appr)]].forEach(([lab, v], i) => {
+    const x = 28 + i * sw; o += box(x, sy + 14, sw, 40) + T(x + 4, sy + 22, lab, 5.6, 700);
+    if (v) o += P(x + 6, sy + 38, v, 9, 'start');
+  });
+  if (fl.captain) o += T(28 + 2 * sw + 4, sy + 50, 'PIC: ' + up(fl.captain), 5.4, 400);
+  o += T(28, 800, `Libyan Express — Flight Operations (OM-B Beechcraft B200)`, 5.4, 400) + T(567, 800, `${cfg.form || ''} · Page 1 of 1`, 5.4, 400, 'end');
+  o += hl(28, 567, 793, 0.4);
+  return page(WHITE_BG, o, 'B200 Load & Trim sheet');
+}
+
 const SUPA_URL = 'https://qkquhrpqcydbvpjhsczf.supabase.co', SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcXVocnBxY3lkYnZwamhzY3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3OTExMDIsImV4cCI6MjEwOTM2NzEwMn0.dwsvVvJIlDAnLkCdZzB94RQQk3YgfWRlqSsEdMZc7p0';
 const EMAIL_DOMAIN = 'libyanexpress-ops.github.io';
 const sb = (window.supabase && !SUPA_URL.startsWith('__')) ? window.supabase.createClient(SUPA_URL, SUPA_KEY, {auth:{persistSession:true, autoRefreshToken:true}}) : null;
@@ -2145,12 +2685,69 @@ async function loadSettings(){
   LANG = SETTINGS.language === 'ar' ? 'ar' : 'en';
   applyLang();
 }
+let AC_LIST = [];
 async function loadAircraft(){
-  const {data, error} = await sb.from('aircraft').select('*').order('reg').limit(1);
+  const keep = AC_ROW && AC_ROW.reg;
+  const {data, error} = await sb.from('aircraft').select('*').order('reg');
   if (error) throw error;
-  AC_ROW = (data && data[0]) || null;
+  const mine = ME && !isAdmin() && Array.isArray(ME.aircraft) ? ME.aircraft : null;   // RLS already filters; this is a second guard
+  AC_LIST = (data || []).filter(a => !mine || mine.includes(a.reg));
+  setAircraft(AC_LIST.find(a => a.reg === keep) || null);
+}
+function setAircraft(row){
+  AC_ROW = row || null;
   for (const k of Object.keys(AC)) delete AC[k];
-  if (AC_ROW){ Object.assign(AC, AC_ROW.data); BG1 = AC_ROW.form1 || ''; BG2 = AC_ROW.form2 || ''; }
+  BG1 = BG2 = '';
+  if (AC_ROW){ Object.assign(AC, AC_ROW.data); AC.reg = AC_ROW.reg; BG1 = AC_ROW.form1 || ''; BG2 = AC_ROW.form2 || ''; }
+  document.body.classList.toggle('ac-b200', AC.kind === 'B200');
+}
+const acType = row => row.data.kind === 'B200' ? 'King Air B200' : 'Boeing 737-400';
+const acSub = row => row.data.kind === 'B200' ? `S/N ${row.data.sn || ''} · ${Object.values(row.data.configs || {}).map(c => c.label.split(' · ')[0]).join(' / ')}` : `${row.data.seats || 162} seats · all economy`;
+function acArt(row){
+  if (row.photo) return `<img src="${row.photo}" alt="${esc(row.reg)}" loading="lazy">`;
+  const jet = row.data.kind !== 'B200';
+  return `<svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="sk${row.reg}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A4A96"/><stop offset="1" stop-color="#0B1A3F"/></linearGradient></defs><rect width="640" height="360" fill="url(#sk${row.reg})"/>
+    <g fill="#E9EEF8" opacity=".95" transform="translate(320 185)">${jet
+      ? '<path d="M-250 0 Q-240 -16 -200 -18 L210 -18 Q246 -18 262 -4 Q246 10 210 12 L-200 12 Q-240 10 -250 0Z"/><path d="M-30 -2 L-100 70 L-60 70 L60 -2Z"/><path d="M-30 -14 L-80 -60 L-50 -60 L40 -16Z" opacity=".7"/><path d="M170 -16 L220 -74 L246 -74 L222 -14Z"/><path d="M186 0 L238 26 L252 26 L224 2Z"/><ellipse cx="-40" cy="40" rx="26" ry="10"/>'
+      : '<path d="M-230 2 Q-226 -14 -190 -16 L170 -14 Q214 -10 236 -2 Q214 8 170 10 L-190 12 Q-226 12 -230 2Z"/><path d="M-60 -4 L-150 36 L-120 38 L30 -2Z"/><path d="M-60 -6 L-150 -46 L-120 -48 L30 -10Z" opacity=".7"/><path d="M178 -12 L210 -78 L236 -80 L222 -10Z"/><path d="M200 -76 L260 -82 L262 -74 L210 -70Z"/><rect x="-118" y="10" width="44" height="12" rx="5"/><rect x="-118" y="-30" width="44" height="12" rx="5" opacity=".7"/>'}</g>
+</svg>`;
+}
+function paintChip(){
+  const c = $('acChip'); c.hidden = !AC_ROW; if (!AC_ROW) return;
+  $('acChipReg').textContent = AC_ROW.reg; $('acChipType').textContent = AC.kind === 'B200' ? 'B200' : 'B737';
+  c.disabled = AC_LIST.length < 2; c.style.cursor = AC_LIST.length < 2 ? 'default' : '';
+}
+function openPicker(){
+  const last = (() => { try { return localStorage.getItem('lxx-ac:' + ME.id); } catch(e){ return null; } })();
+  $('apGrid').innerHTML = AC_LIST.map(a => `<button type="button" class="ap-card" data-reg="${esc(a.reg)}"${a.reg === last ? ' aria-current="true"' : ''}>
+    <div class="ap-ph">${acArt(a)}<span class="ap-shine"></span></div>
+    <div class="ap-meta"><div><b>${esc(a.reg)}</b><span>${esc(acType(a))}</span><small>${esc(acSub(a))}</small></div><span class="ap-go"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></button>`).join('');
+  $('acPick').hidden = false;
+  const f = $('apGrid').querySelector('[aria-current]') || $('apGrid').firstElementChild; if (f) f.focus({preventScroll:true});
+}
+$('apGrid').addEventListener('click', e => {
+  const c = e.target.closest('.ap-card'); if (!c) return;
+  c.classList.add('picked');
+  const row = AC_LIST.find(a => a.reg === c.dataset.reg);
+  setTimeout(() => { $('acPick').hidden = true; openAircraft(row, true); }, 380);
+});
+$('acChip').onclick = () => { if (AC_LIST.length > 1) openPicker(); };
+function playSplash(row){
+  const sp = $('acSplash');
+  $('asPhoto').style.backgroundImage = row.photo ? `url("${row.photo}")` : '';
+  $('asPhoto').innerHTML = row.photo ? '' : acArt(row);
+  $('asType').textContent = acType(row); $('asReg').textContent = row.reg;
+  sp.hidden = false; sp.style.animation = 'none'; sp.offsetWidth; sp.style.animation = '';
+  clearTimeout(playSplash.t); playSplash.t = setTimeout(() => { sp.hidden = true; }, 2500);
+}
+function openAircraft(row, splash){
+  setAircraft(row);
+  try { localStorage.setItem('lxx-ac:' + ME.id, row.reg); } catch(e){}
+  S = store.get(draftKey()) || (AC.reg === '5A-WAC' ? store.get('lxx-ls-draft:' + ME.id) : null) || blankState();
+  if (isB2()) b2Norm(S);
+  paintChip();
+  bootApp(); applyAccess(); showTab('build');
+  if (splash) playSplash(row);
 }
 
 /* sign in */
@@ -2217,7 +2814,7 @@ $('mcForm').addEventListener('submit', async e => {
 /* session: sign out, idle timeout, clock */
 async function signOut(reason){
   if (sb){ await logAct('sign_out', reason || ''); await sb.auth.signOut(); }
-  ME = null; S = blankState(); for (const k of Object.keys(AC)) delete AC[k]; BG1 = BG2 = '';
+  ME = null; setAircraft(null); AC_LIST = []; S = blankState(); $('acPick').hidden = true; $('acSplash').hidden = true; paintChip();
   $('sheetView').innerHTML = $('printRoot').innerHTML = '';
   $('lp').value = '';
   showOnly('login');
@@ -2236,21 +2833,22 @@ function enterApp(){
   $('whoUser').textContent = ME.display_name || ME.username;
   const role = $('whoRole'); role.textContent = t(isAdmin() ? 'rAdmin' : 'rOps'); role.className = isAdmin() ? '' : 'ops';
   $('tabAdmin').hidden = !isAdmin();
-  if (!AC.reg){
+  if (!AC_LIST.length){
+    paintChip();
     if (isAdmin()){ showTab('admin'); showSub('aircraft'); admMsg(t('acMissing')); }
     else { $('tab-build').innerHTML = `<div class="sec">${esc(t('acMissingOps'))}</div>`; }
     return;
   }
-  S = store.get('lxx-ls-draft:' + ME.id) || blankState();   // each user keeps their own draft
-  bootApp();
-  applyAccess();
-  showTab('build');
+  if (AC_LIST.length > 1) openPicker();
+  else openAircraft(AC_LIST[0], true);
 }
 
 /* ---------- shared archive ---------- */
 async function renderArchive(){
   const body = $('archBody');
-  const {data, error} = await sb.from('flights').select('id,flight_no,flight_date,route,summary,saved_by,saved_at').order('saved_at', {ascending:false}).limit(300);
+  let {data, error} = await sb.from('flights').select('id,flight_no,flight_date,route,reg,summary,saved_by,saved_at').order('saved_at', {ascending:false}).limit(300);
+  if (error && /reg/.test(error.message || '')) ({data, error} = await sb.from('flights').select('id,flight_no,flight_date,route,summary,saved_by,saved_at').order('saved_at', {ascending:false}).limit(300));   // before migration 3
+  if (!error) data = (data || []).filter(a => (a.reg || '5A-WAC') === AC.reg);
   if (error){ body.innerHTML = `<tr><td colspan="9" class="empty">${esc(error.message)}</td></tr>`; return; }
   if (!data.length){ body.innerHTML = `<tr><td colspan="9" class="empty">${t('archEmpty')}</td></tr>`; return; }
   body.innerHTML = data.map(a => `<tr>
@@ -2263,7 +2861,11 @@ $('archBody').addEventListener('click', async e => {
   const o = e.target.closest('[data-open]'), d = e.target.closest('[data-rm]');
   if (o){
     const {data} = await sb.from('flights').select('state').eq('id', o.dataset.open).single();
-    if (data){ load(JSON.parse(JSON.stringify(data.state))); showTab('build'); }
+    if (data){
+      const st = JSON.parse(JSON.stringify(data.state));
+      if (st.reg && st.reg !== AC.reg){ const row = AC_LIST.find(a => a.reg === st.reg); if (row) openAircraft(row, false); }
+      load(st); showTab('build');
+    }
   }
   if (d){
     if (d.dataset.armed){ await sb.from('flights').delete().eq('id', d.dataset.rm); logAct('delete_flight', d.dataset.rm); renderArchive(); }
@@ -2274,11 +2876,12 @@ $('btnSave').onclick = async () => {
   const r = RES, fl = S.flt, b = $('btnSave');
   const row = {
     flight_no:(fl.no || '').toUpperCase(), flight_date:fl.date || null, route:`${(fl.from || '').toUpperCase()}-${(fl.to || '').toUpperCase()}`,
-    summary:{pax:r.fin.pax.total, zfw:R(r.f.zfw), tow:R(r.f.tow), mac:fx(r.mac.tow,1), ok:r.ok},
-    state:JSON.parse(JSON.stringify(S)), saved_by:ME.username, saved_at:new Date().toISOString()
+    reg:AC.reg, summary:{pax:r.fin.pax.total, zfw:R(r.f.zfw), tow:R(r.f.tow), mac:fx(r.mac.tow,1), ok:r.ok, unit:isB2() ? 'lb' : 'kg'},
+    state:JSON.parse(JSON.stringify({...S, reg:AC.reg})), saved_by:ME.username, saved_at:new Date().toISOString()
   };
   b.disabled = true;
-  const {error} = await sb.from('flights').upsert(row, {onConflict:'flight_no,flight_date,route'});
+  let {error} = await sb.from('flights').upsert(row, {onConflict:'flight_no,flight_date,route'});
+  if (error && /reg/.test(error.message || '')){ delete row.reg; ({error} = await sb.from('flights').upsert(row, {onConflict:'flight_no,flight_date,route'})); }   // before migration 3
   b.disabled = false;
   if (error){ b.textContent = '!'; setTimeout(() => b.textContent = t('save'), 1800); alertMsg(error.message); return; }
   logAct('save_flight', `${row.flight_no} ${row.route}`);
@@ -2366,7 +2969,7 @@ function applyAccess(){
   hide($('tabAdmin'), !(isAdmin() || can('log')));
   document.querySelectorAll('.subnav button').forEach(b => b.hidden = !isAdmin() && b.dataset.sub !== 'activity');
   const ro = !can('build');
-  document.querySelectorAll('#tab-build [data-k], #holdBody input, #lmcList input, #lmcList select').forEach(i => i.disabled = ro || (i.id && /^i-o[abc]$/.test(i.id) && S.pax.auto));
+  document.querySelectorAll('#tab-build [data-k], #holdBody input, #lmcList input, #lmcList select').forEach(i => i.disabled = ro || (i.id && /^i-o[abc]$/.test(i.id) && S.pax && S.pax.auto));
   $('roBanner').hidden = !ro;
 }
 
@@ -2381,7 +2984,7 @@ async function renderUsers(){
     <td><b>${esc(u.full_name || '—')}</b>${u.display_name ? `<div class="sub-l mono">${esc(u.display_name)}</div>` : ''}</td>
     <td class="mono">${esc(u.username)}</td>
     <td><div class="hand-cell"><span class="hid">${esc(u.hand || '')}</span>${handSample(u.hand, u.display_name || u.username, 170, 34)}</div></td>
-    <td><div class="pchips">${u.role === 'admin' ? `<span class="pchip gold">${t('rAdmin')}</span>` : permChips(u.perms)}</div></td>
+    <td><div class="pchips">${u.role === 'admin' ? `<span class="pchip gold">${t('rAdmin')}</span>` : permChips(u.perms)}${u.role === 'admin' ? '' : (u.aircraft || AC_LIST.map(a => a.reg)).map(r => `<span class="pchip gold">${esc(r)}</span>`).join('')}</div></td>
     <td>${!u.active ? `<span class="chip off">${t('suspended')}</span>` : u.id === ME.id ? `<span class="chip on"><span class="pulse dark"></span>${t('online')}</span>` : `<span class="chip idle">${t('activeS')}</span>`}</td>
     <td class="mono">${esc(zstamp(u.last_sign_in))}</td>
     <td class="acts"><button class="btn sm" data-edit="${u.id}">${t('edit')}</button>${u.role !== 'admin' ? ` <button class="btn sm" data-reset="${u.id}">${t('resetPw')}</button>` : ''}${u.id !== ME.id ? ` <button class="btn sm ${u.active ? 'danger' : ''}" data-act="${u.id}" data-on="${u.active ? 0 : 1}">${t(u.active ? 'suspend' : 'activate')}</button>` : ''}</td>
@@ -2408,6 +3011,8 @@ function openUserForm(u){
   }).join('');
   $('ufHand').value = u ? (u.hand || 'H1') : freeHand();
   const p = u ? (u.perms || {}) : DEFAULT_PERMS;
+  const acs = u ? (u.role === 'admin' ? AC_LIST.map(a => a.reg) : (u.aircraft || AC_LIST.map(a => a.reg))) : AC_LIST.map(a => a.reg);
+  $('ufAc').innerHTML = AC_LIST.map(a => `<label class="toggle pbox"><input type="checkbox" data-acreg="${esc(a.reg)}" ${acs.includes(a.reg) ? 'checked' : ''} ${adminRow ? 'disabled checked' : ''}> <span><b>${esc(a.reg)}</b> · ${esc(a.data.kind === 'B200' ? 'B200' : 'B737')}</span></label>`).join('');
   $('ufPerms').innerHTML = PERMS.map(([k, l]) => `<label class="toggle pbox"><input type="checkbox" data-perm="${k}" ${p[k] ? 'checked' : ''} ${adminRow ? 'disabled checked' : ''}> <span>${t(l)}</span></label>`).join('');
   paintPrev();
   $('usrForm').scrollIntoView({block:'nearest', behavior:'smooth'});
@@ -2438,14 +3043,16 @@ $('usrForm').addEventListener('submit', async e => {
   e.preventDefault();
   const perms = Object.fromEntries(PERMS.map(([k]) => [k, !!document.querySelector(`[data-perm="${k}"]`).checked]));
   const body = {full_name:$('ufName').value.trim(), display_name:$('ufDisp').value.trim().toUpperCase() || null, hand:$('ufHand').value, perms};
+  const aircraft = [...document.querySelectorAll('[data-acreg]')].filter(i => i.checked).map(i => i.dataset.acreg);
   const btn = $('ufSave'); btn.disabled = true;
   try {
     if (!EDIT.id){
       const res = await callAdmin({action:'create_user', username:$('ufUser').value.trim().toUpperCase(), ...body});
+      try { await sb.from('profiles').update({aircraft}).eq('username', res.username); } catch(_){}
       $('usrForm').hidden = true; showTemp(res.username, res.password); admMsg(t('userCreated'), true);
     } else {
       const upd = {full_name:body.full_name || null, display_name:body.display_name, hand:body.hand};
-      if (EDIT.role !== 'admin') upd.perms = perms;
+      if (EDIT.role !== 'admin'){ upd.perms = perms; upd.aircraft = aircraft; }
       const {error} = await sb.from('profiles').update(upd).eq('id', EDIT.id);
       if (error) throw error;
       logAct('admin', `Updated ${EDIT.username}`);
@@ -2471,10 +3078,11 @@ $('usrBody').addEventListener('click', async e => {
   }
 });
 
+const B2_FIELDS = [['configs.pax.bew','BEW passenger config (lb)'],['configs.pax.bewArm','BEW arm passenger (in)'],['configs.amb.bew','BEW ambulance config (lb)'],['configs.amb.bewArm','BEW arm ambulance (in)'],['mzfw','MZFW (lb)'],['mtow','MTOW (lb)'],['mlw','MLW (lb)'],['mrw','Max ramp (lb)'],['crew.std','Crew std weight (lb)'],['kit.std','Flight kit std (lb)'],['fuel.densStd','Std fuel density (lb/US gal)'],['fuel.taxi','Taxi fuel (lb)'],['hold.max','Aft baggage max (lb)'],['lmcMax','LMC max ± (lb)']];
 const AC_FIELDS = [['dow','acDow'],['doi','acDoi'],['mzfw','MZFW'],['mtow','MTOW'],['mlw','MLW'],['mtw','MTW'],['crewWt','acCrewWt'],['paxWt.adult','adult'],['paxWt.child','child'],['paxWt.infant','infant']];
 function renderAircraftForm(){
   $('acStamp').textContent = AC_ROW ? `${AC_ROW.reg} · ${zstamp(AC_ROW.updated_at)}${AC_ROW.updated_by ? ' · ' + AC_ROW.updated_by : ''}` : t('acNone');
-  $('acFields').innerHTML = AC.reg ? AC_FIELDS.map(([k, l]) => `<div class="f"><label for="ac-${k}">${esc(I18N.en[l] ? t(l) : l)}</label><input id="ac-${k}" class="num" dir="ltr" type="text" inputmode="decimal" step="any" data-ac="${k}" value="${esc(getPath(AC, k))}"></div>`).join('') : `<div class="empty">${t('acMissing')}</div>`;
+  $('acFields').innerHTML = AC.reg ? (isB2() ? B2_FIELDS : AC_FIELDS).map(([k, l]) => `<div class="f"><label for="ac-${k}">${esc(I18N.en[l] ? t(l) : l)}</label><input id="ac-${k}" class="num" dir="ltr" type="text" inputmode="decimal" step="any" data-ac="${k}" value="${esc(getPath(AC, k))}"></div>`).join('') : `<div class="empty">${t('acMissing')}</div>`;
 }
 $('acSave').onclick = async () => {
   if (!AC_ROW) return admMsg(t('acMissing'));
@@ -2491,17 +3099,32 @@ $('acFile').addEventListener('change', async e => {
   try {
     const j = JSON.parse(await f.text());
     if (j.format !== 'lxx-aircraft' || !j.data || !j.data.reg) throw new Error(t('acBadFile'));
-    const {error} = await sb.from('aircraft').upsert({reg:j.data.reg, data:j.data, form1:j.form1 || null, form2:j.form2 || null, updated_at:new Date().toISOString(), updated_by:ME.username});
+    const {error} = await sb.from('aircraft').upsert({reg:j.data.reg, data:j.data, form1:j.form1 || null, form2:j.form2 || null, ...(j.photo ? {photo:j.photo} : {}), updated_at:new Date().toISOString(), updated_by:ME.username});
     if (error) throw error;
     logAct('aircraft', `Imported ${j.data.reg}`);
     const first = !AC.reg;
-    await loadAircraft(); renderAircraftForm(); admMsg(t('acImported'), true);
-    if (first) bootApp(); else update();
+    await loadAircraft(); admMsg(t('acImported'), true);
+    if (first){ const row = AC_LIST.find(a => a.reg === j.data.reg) || AC_LIST[0]; openAircraft(row, false); showTab('admin'); showSub('aircraft'); }
+    else { if (AC_ROW && AC_ROW.reg === j.data.reg){ setAircraft(AC_ROW); update(); } paintChip(); }
+    renderAircraftForm();
   } catch(ex){ admMsg(ex.message); }
+});
+$('acPhoto').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f || !AC_ROW) return;
+  try {
+    const im = new Image(); im.src = URL.createObjectURL(f); await im.decode();
+    const k = Math.min(1, 1600 / im.naturalWidth), c = document.createElement('canvas');
+    c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+    const photo = c.toDataURL('image/jpeg', 0.86);
+    const {error} = await sb.from('aircraft').update({photo, updated_at:new Date().toISOString(), updated_by:ME.username}).eq('reg', AC_ROW.reg);
+    if (error) throw error;
+    AC_ROW.photo = photo; logAct('aircraft', `${AC_ROW.reg}: photo updated`); admMsg(t('saved'), true); playSplash(AC_ROW);
+  } catch(ex){ admMsg(ex.message || String(ex)); }
 });
 $('acExport').onclick = () => {
   if (!AC_ROW) return;
-  const blob = new Blob([JSON.stringify({format:'lxx-aircraft', version:1, reg:AC_ROW.reg, data:AC_ROW.data, form1:AC_ROW.form1, form2:AC_ROW.form2})], {type:'application/json'});
+  const blob = new Blob([JSON.stringify({format:'lxx-aircraft', version:1, reg:AC_ROW.reg, data:AC_ROW.data, form1:AC_ROW.form1, form2:AC_ROW.form2, photo:AC_ROW.photo || null})], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${AC_ROW.reg}.aircraft.json`; document.body.appendChild(a); a.click(); a.remove();
 };
 
@@ -2529,7 +3152,7 @@ function enterHeader(){ $('whoRole').textContent = t(isAdmin() ? 'rAdmin' : 'rOp
 
 /* ---------- export: loadsheet PDF, message image, printing ---------- */
 const PEN_FONT = 'data:font/woff2;base64,d09GMgABAAAAADp8ABEAAAAAe+QAADoaAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhwbDBw0BmAAgSQIOAmISBEICoHbRIGxYwuBYAABNgIkA4M8BCAFhA4HggAMgXEb/2RXxF27cBLoDkJfJZTqGkXJZm1d8f///+cENcYQHjzQspULgKPKumuuvnA9wZVou8vYj2v38zzrBnsk/vW/rKu/I2dOf6pWAEMhSdyKO7KWqCoUew+z4wfxgeHx5f9+Jd3+xUAVaYVkVmg//sjXLgWSTxOobAzkQWFTVf6S2FL0CrToCGk1/pE9cA1PhbFLMdA/jXFGSDI7QHPrdlvfqhmwYFSMCrcmx4BRJSMFYXQIYqEgmC9tvAUoRmHVCxhRH6Ko/8ZLkD/2OfvBojsuSNqSZpCASp7Rja9QZXupo41f45q6Ju//VNXDelj/v4872B1FbXXaMrM+5j2mc2DSx/TVWYXKXlVJB5RrmySZf4obvb+BBBovRBBJMx0gnh+tvd6FaAIb4LvgC9MEacK3AWpZKED5QZhWuNadnL9CtUK2wrXCdz43/WQsWSvQcBA5AxInvYoJ8l2WqWuXyd4urkfuf5fqj/VOsSzLvn9LJ58VJdU5qjKWkq1WHXPAAtYCWAALYAEsgAWsABZVONThgbFkNwwI22zG8NAmnAcRSxwIz/s/2/w/aUn73LtvXmrr1rShJe2aASNr2UUWsxhE9N2Zq4jMXV06VFpE/BJvwkn2chKeq769zP2aB3ngufxKsFzaQrBgs44M0442ZFaZykFXTS0EQu9F7OCW9Sf7c+nnTeCFNtQKwAEsw0tDmcAQIlGJvqLidZX0tti/3dp7pRV7Df33N548gqYmwF5dCD4gfdtz9v+mllRzLaV2FB9A1xEJDECaP7rnmS87J0tXZMnOk7UpWjnFHm2VrnWAkgMoNC+A2PJW+aqN1k46agXgENAKgCEkofwSQPICSACjgaFBIfh+pUm3NdHzLMpOKSW+NCyArZFpwpj0Z+K/Mx5ZlpJbXm1oamGuS845OQ9VCArAKX5BFAwNDQPt7/f6HqyQaXNTStDwfF3jcx1jKs3lD0Mak1BEYd8BB9j2fz8EgAEAPAEEKA+GyQGTyxguAOAui8ClkNACiJu3Q/WA2fuwOBvgflpJv/H3ULoYDYi43PoL4yEzQXRBiqt7BYAdjF4GfiRrAgy8kQj8MQwT/lfNiwJT+JcQzh/n29TGpQiBJQFYT9oAgM/aCjrdpYNf3UOH0OXyIUbDpUpTb8iIrbYbM+m2r8cU31Qg/GUaEVyXbnDl3mtaPu9bSzueIIzH42pcjk2T9tppuYIn+8l6/AEwg6Bz0osLPz4CNKR8CdxS+qMp3E8OePdWHgTYPwrz9NlYxMrnGqMtyr0MDPjbNw4KdvoYX/VKuTfeHZXA08cl2a9DOxTcgo0Y3rlxHLXbIHUsde9pir8RvHx4GiM6R7Te5lkqfiiIRUWv1sn6KIyv2sYdsWfWzg4oBLflCJ7i6kbwms/y1zSL/2dtpO2ms5x2SXQUxY3VGF9ds41hGKzHU3KsTJVDa6NbUPJSU/34qk5ygi6hrnMBw0ucCM0Vm+pkGe0hTUiZVeqkfT2hhne7cslS54nCO9cV9kUO4F8IG6+N9nA0bOOdVmsDCmu7J9H6GqlMCXF6Xj8pW8nW4WS8nBOxxjd5sunTjcgJLssvKJSr61jf4a+L4tctN6FapybN8prINb7J7aarjZiRbtnstzq/WFvHLVkakOHiQhc+MsNmwFoA7qEhSQbiDwAAbx89kSGWjjcYEaJljuLgNc86GB5kcDCT8hz35XuA64O720JOIoRd7S3ZP5ZANVBVfY+8HrFzej7FJ43R+f2XLL3ipoy6vhKPuY9z3wtikKdM5mbVbG4XLyq9qC/R2mwaeBDEOO6kP9rp2uP1jdut5Cq4s/3NV4bpblcf5zb3WlgQNIFyVDWFPa7fZzhtujQRe189WcSds8d90FBScMf0Y7pT+zJHLiZcXjtT6i4JGBfnCytkquuoA5wDNCDdWkoh9MgRzc+VEw4FWRR9YtXzimiACySGDmmCvEaDmKc/mPY1buzvc6PJ0r/tFhZUBJWDgOSITKWWdu3EhE5oQBZqZn3RQM+m9FUpSzRDne05bl1jAiGk+Ku3wHBK11k8lCWRm16x0i70rkTzn30AzY9F8FRRxyAbasrcf6YS4MnvXDQ4HS7xpm47o1FpA0BEGXKjALX5jZrgwEYVh0LIj05BKrh5ZXr3A32LJNTUTuK2ttudEV1OAcWfPzPop2noTG8JCi+4wIBw2HUojmOK+eKByxxRhU90VLN7nIFTO6zQUf/m02umN8F0bV091GP7QaJbmkI+mBBrvs8pDMOvQNVtbrJt1nM/FU65FW4fL4rFiSzOXrNhMGtdcc5yuYcRdmdWt45mGEJ9TN2fSTQBCn7909Qv6JibEFzQmklU8bTdaORcuiUjl2JDLlK+Cc4+HRhFEYDSNFqJK/UZ5lpMEc3CApIyGGFXkPbvkpqP23T6GcXXEL1Yb9FsVirTnfM30OAUC/JUnRoKCD3ifNcPMhhxQtxzy9Ahi3jbT4MVUvQEld6V3WxXSQZA9+qyJFZFNCynmdj7hiFfo8JNLEJN9buVaSj0iGTJllgTXzpMAAyI8g0IXSS7miabYt3kxEaVKadq/zYlRfiebmDiTO2JLqJrtno7xSr4JFtZMMJ9h0ccUqKs/+ehvwEw9PhbAX+y0+7O/NoUxStjFR/9HQd6s/kgoA51rfX74NJpM1s8bZzo61b1PLbHVVdAK1V3XLrcGLLEgwhTROVKnuAsIMRC63QHi6wJ0gAIwB9NX9NP6ujNJcpRyY03b6FKW/kkZ4cLFeLTp66iKdaFo6RMrH+ppdx9zeKj0nbCVGNLBrIR751P6WWqyNeZYzZhDo4sWURbTKksmAiAhPxYhVosTU9sXC+AAnfDAyA7fnaJtgvVpZuNBUy0z9+YZXZsVqfvayJSdcwROMd4Ygk9ZhFIhI/LOUU355zP4TrPFp25+j6xburTRNLD0kMIpTJtt83wwFLIKCFlg67QydLu2RqYWNM6CQqh1Kn/dBYhNadQAGKrXcM8xWzJ5m0znvv8DWatvTWk/siflV0ZjGiEMc9ZvkqIsx3SRA2fob+ZGuoqPpfZgwUx9SJ2wAFF7NaOei7drLmZqlBfPHBvLA33KxfQSXWHtLji8bW8N+CbBNjTcWbnqACaRnG/b4AMnWzn3kwqJe2D86UoAKdq2e50VPBdib6+fYmurcSIOfHsyevpIbHq+TxEAm5Cc3PxHIg+sMdKqR74jAgFj+t2WRvLpCNVmJ3YosPXV+u2bKUYwEyyjjh59Hy8j6IegZvn6PE3hMOqRAXSK/IaC+Jk0VDkvgulsYFXoCLa+m53RIYkVfAGje7agkpF03pZImJUsmoU4UyuvLbT6oiDaoGuYRPrnsfG6NM2Xpfe0mBcIFTBCYdx20wlcwXSoTN1qEK5sTCZw8E88EzvFy2GcLz6D+I6JpOFGrvS986AFJsrFKLIOkK5yqFciDwjBoBD6JsSTWNAksk8kVoP9gTe79dxxiGk8C7L821RM8DLYjJaNFQYcrOiwIT+uGCe3GifbXUKsrd9wBTccclcM99VAnxslxfR3OPzs/eoAlwrxVYNIbVA2FmtXJOd/Ar0j5/iMpzX1RKbbojPRogJlrbiOFAzqWWnPe/P2HD6njSOJlPCvYHJlfyNodVD9/yhRXFJmPc8ppRuF57S3U+vLR+XNezSyfcZYkjS2UYCXj/dUipzgTFg49zKQPhO1lUCHMdGTIXQg+1tRSPxPmisd9kwohmDgIPyzx9yLcmuYHCOLAI0ilLhSgQF8LXx1sWjl5RfYhwRaWLaG6EW+myZleacK/5ACCt4WirKh7gYljCxmkptv9KxHkYGhtThMNe9pZH5qnxiX2dU6US3NEsKrHLrQEfbFdvabCKQ/n2Srp9iYuOYdAJUkKpnoK7knbZaykzCiL/L50qAG9gEXmwa70OGZ+lBNYoZWHZQibgi5DExlfA1sl3YYMTGlgeEw+xVlauwIBlqwOz6UT8mJOZPJhNL6Z1Bbl0yt+63dZ/4J2HML336ul63kXyXjgd2pTHV6ekQ14flPY5TAIaq3T55McH+nEsmU6H8QURjgtnEaxfPx8YKfSrt/neNzdrqZWsrQ297d0ZYZdyztyfLF15Kp01ZTXQ7ShYm+/VYlH0IWhYMUWLtWE8HBwCWjj7NskCa85h6IL6vxZldvSB9DojUV+I7uhClnovVx1czTpkeoiwZe9X8XDr3RriBHEYZUPa7UDeaLYkRZrTKUKAchKdvR6zFtTQARfzhyekPuk4fE6QL5PBaTvfqjmrK1fRO2MfBAedZWtCEPqM9xWq4EkApnLCMhpwhl5sCanc7DzIwR7Mam4PdS5Ms4W9Lc8AkN2O2c122tpmm8weJOwgDjfKIk2ItPj8++GgrOUVmsuyO2sltiRgP8NtXW03DzWm9OrvAJbs+q3c6Jl/nq66QAQ5mq+g7L3bdrt3xEJ84KpkRn2GGmnElo6ilkWkvQt/ElbJDWecE0f3tYLNkwMYvnEFzEYm3ZgCprx/pqxdzMs6erJqR6/bmRqSP13KadBWaz4WiKsGu8WzmJlAXl5EO28aXIC3SiPQdbMK2vgoQnM8yVTJM05i83wJZlYlMrsoDu8odowYs8D4xFZ4PyLody+zChcBCfHDi3gtBmI4i9C8gNPIeQtrzwBXOTnavIRUOmwss7N+KJYG0zAIpqxDSLlQCYXxAxsgO2MJN0I3VMhzM0QqVgiyakTejrT4Kr5a0u8l3N1EMzv+FCJL42EqAd7dIh4QqEj2dERz2yXHurQYkgzIivi1CBl9chRTFBAIQjnEk/6UECuM6kGYf9uSbili76z9G44IjDvTXx1Y61VI2K0UN7UESxCAd4/2FZMmzJHGHSSr5vQuIKsmRpa24X0S31ZJx5MpgVmMK+F1l6gqygwGN9TXXMcrrodWbEqKvSh4tFiWM61Qy/WHVmEz0jITVSa3kdNJ1mYz5xGcVIBeD7XKEqmD2f2c+g2MoP2jj3SH7KWVGJy/I55knqb+Zlq6CVE1s7A0G4PcB3XDHdpJm27oW2g/esEEAb2SAdEOwvdWKQrcAXUW2Kz339xYOyd72mUQz5rPHfQASVqVvyuGd3EGM8iAVViXYccCVVjJxOY7F76QGXfftOVAqoDV0U6wRJ+klD8xYbtdFGbqzKPG8rq1wiOCnbKSUidgjtgtFDrdZ1aIKWhdKzJNEt4ODTHKhMqD4D9vt+RgShym7KtCJY+FBKbf1OxgVgfDksY7SuhsYJ9jAHGoB/VSRq7FNOTKUi0Va4RNeKuEHKdYUHygkaiA1srS6uu85or3NBI3vFHPp5ulv1jNE8irQPHh3bzQ1X+EQkMZ4QxRLJQj0sFxtdIrL0e1u8RC3epI6cXnImOhjNgtu0th+cqjbaGZL7P9kAofemY5G6JutGtafxAfHg/EYky6XhqI9sM9wKWwDDDebxbGYykSwSWgB3Vrt/MpufXIRKJ7K71w7nEO64RpL2nj2mjbWC7a9/T9PDlqGm++9lMzpyqXeTRZhx+ZvqMVLDkMApzaz0YJyy4FKFsLM4WipOS0mFbdOKQQHDbZWDo2NnbK7trYOC+To9vL8TOYGjnj9QviU1TvmKbKcwVmMSgBBMgIYwITHyz6YNGBTvZBxvLcspf56Y6xBVWkGBHBETjl3qoQy23kVDNz6JUuUYjgEiOxrwmiaV9wx55LBLUZmoUjPeP+AS6ZC/uBNZHsCavImVpIBczK1sCZB9R+UI7D2iQb4Cimwn6qAeioANUdsd/h888DTJWLSjyq9goPZGubZk9Mo25rmPQybeQE6Q+gwU4GGU/Duu4BiwWS90I24xjnPgUsDEFPBq/W1785miPDEqjV/A/mnCx6glqvWkAKW3zpsK1NfE6F3dk4Xr8KNALFdGkCr9K7s+d64Fmh9X7Tb5q+EadqnbrbbXppG8wPqOvar885nzG004Ndo8XshOEb6gfTDwbiD6JyAcL3mhqnQOqwjqk6ljOl29OBI07rVzahQSCJHDL+b7T7Ecg17zReXbmThRqvNN50M6nnoifNrOJct9mlKI0qkT8OGxRWz27H+VwuCRuo6uzuuippk2uvtvHHOZemtBrq9igpNZQSU0UgrDJpmwMqnHBEW955tb8uEmF1jnmlMNIsoi/kw4YnPzgFsAYGRU8Nul3/hRcBl1+dtMYFT0DrpMZvYVr2BpwhWME1wjqgSDk/zz+fFFE9cLWHKx1dX1bupipniOMAwOppnf6ZKJbPP1GRbRmbM0s1Cqea+uUq7cjMxG+//L8p0Pp/t16w1St1tJy+81HxiIA6FgzNuC2ydneG1C7CA72DA0xyTL2VtiW136NFS0xsRc850mJ1Jsz2U0orWAA6J2K/5emxnCuSX5US+Yznxur29CwpuPjRm6DYeKGiU9ZS9MVMTSc52VTpcczMkSzhB4u2j2SbJcgk+oNJtyGZ11j7kL6NKuHucpEOtyiYIMNQtM/cTqALKikA/n3dA4Q8dEZDYpLgAC0aTbM/16z3Aj6YgMx88c21apqXu5EM5rPFRRP7zjs/atb7Nek4dEcGmuGO934tF3LPzZLsHBB7QePe4JT5z0ohsGWB0u9Q09iVSiYTvi8GS0jyq40PLsUJOeLCY1lJDSNPrsX30xOLNRUfDsGrA79Th0cidD3xpq8NlU/RR0nRvFSZPbrAmg0RhPZdhI/3hS4GNY/NeAd8skiV/KJOrPgBs4Fg/xai2Gk9t/yrImWFYa7+bTEWsrpwznRprxzHaDKgyXVFWGpfW2p5xqdnClduxPWLSGrUbwaJaa90cCj/S3piu1dsq9S0TbyZGJpvx6e12YSV3/lMCBRhRBkuMO4PcFlnlqjx99jIYsO5mLGrTdamNDgki1ikmvampGoB38QoWS9GDYJ3WbrUIm8nZiJhX2tdI7/Ik0QfTIUBXbDdIYIALh71VegQaryeTxNZdWY3uzTh8Hu6zP5m4g2jZhK1Rt981yTBEZeIgUIdDJtLdZ0otOnydZp4c3ExSPZelR90O5rxPu6BZpck7eq+Q5zoiz1ttGOf2FJjP97E27OaW0DvddDhwG9pz2+42sm7Kfu0yhthWfXtMhvdZrN+VunYXaMVq7DnPL6vjx3czN1j17T/XsYwaTYpGR9tyhxbGrhkHMojp7LRriqjuF3W2FpByj+hm6XeI9fNMxPOD1Un5P7pZLC+GPc9aaqxl+9HFaUH1hbmI13/9JDmsw9CcNmAxrzfmw9uyfrS/YD+MJeUflN8d/1eJDhTP/7S2uOzFjLqF0xD1PAwe6VBzEAu+ArEUzszYSRBUylHS+sNYehlNAJcL5uafjnkFBx92FkjISFVP7MTqMv4/bj0+PZQoPtqSmWpsenW0CK3Ms5hMmjS1SWsOsCeYNp0SotSSukt7SlHODYexuEM6OtZZh0cyQ4c941UipVJU6sBmIfulVDBQVOOB7TMND3L8Hwkx0GqGztj08mgRi+3K6blBMRFW9DvGYWAK+AuvdE6qgu8UseHyuoG7VOGC3XS/4Wa2OSo3+OoJmvSwuYNZ1s/lFx+Qlm9P9t/6A/HcYruvCZ13SOIzXNYqN8+MRnQ9vK9zSAy5wTcE2xgyIxkMFict8LAkKYhZvO9865/u2GUrvOadTBClYXsYEDdtBYJWoA8FTf0S4F2q/zcXrECFoYlwaYATzYv2bTCVkyXuaNz3wD4EsZuTuIlcAB8YshQ93TcC0NbJvmf98cffY8rVT3lrpRFP2ozuY1faD1c8V++AQ5Cg4LvLMD2MRn9ZMCppchyDgRSXrn8N/oQzx7H53wqW0hauMvd/4QNBmcd82zGBaBmnvmuX8jR9kcepmbOCz85y8whigqMTI0kU4Sw/o19dtoQOvHqVSmzkFJsnbaSvfeE3saaQKrfkKEUthDBC+GjVUekrx8Ka0p6akv/uduPZiuiAp6vxlnYDmJNDYV4HqjHXzlZLVHnCRZr1dspqtzETtL3y+ppL53xzfEbF+tEnB3pM+AEE3ImidD+ZpE/tkwpUuEQrNLt373vRQ9dBX9Go61Qw0zWtiFghVStLdqCHiLsxTKo2oYanvzMAgmZE2A2LgyIMKkbrccNQNoVwBwIRAhlsYM4W6gfSS5+bp25YEFZe5tn7MZRX7F7iiCUaxn9mH90GaIOQQVgZUIYu6ydxOYY1nS2QDO08uSEVKl+usKBk8wUDc5LxlLwE376T/zaPOWqzuVphsqVBlGgaXCo+QDjvVZpRyJHzo0TJ5nqOAlIMsohygWJRQyeQsY5vSdVaK9cuKHlj6rbp7iHTI8Yid+tvykOCYD/U9yXXp58c8Oval9Nm9g1N6OeuV46h0F+PFKBo6eApZBquSdpKAn9cvFGy5QNvhqJuz4roPyuLdNxyBTEfCoVBwbjZGRtTkLPjN11RtpWZQPGka/r2xeqW/XOjsSBiAb0zm99+2qLFFMvo9nun3FiiM9yD/3d166UdFOHaTGaHcVpVnduBqzKVi9DY0jVD+uvEHpoFqNozO8wwMWMZsscnZrywilKWFU+ta3NXtAefo5BhICvEbBBxhniQXI5Q3PpmoXv6vB1F/Cr6/PA1Egi3gwhd06ZkrS/x/PFz+r+40scoWgz1e2gjR/VGSrWGl1QbingTI1aM8Y6f7afD79yr8lgrDgpmMrvTr1N0FNZxPKilbsRJOc+L0Riu6yJLfQpgODn8YmBfOToLrERmkZg+xX82Pw8XhpvGE+PAyCdwxGdE/V5ndlb5f4mU3s8uYzPd6gas7P7snknCTbt/iWz0Qu3hAF21pMxQCbgeY0fb7aAHL+jqltXJERii/TAnyuhGm5ijXKMge6XdMqQCIYVzUG+ONaBIhxfkTYkEdz6WmuWVvix+vgxo9HSKWG8yayJctkfm4MR8OitwLnFQRwm3y7OXOD6wYiXi3t56UOiHuW1KPbLrfC8ZBiwQyEkzViczFSfsaKUjJqFB3FuXFPDve7EwI3gTV2zyvoluiohF7QFT+r/KR5lW3mac06ustKhfWSqMONP50cVnG1nVG8N+ybaorJctK29JRFHkn88MydWfb+LNIy+hCoADK5teI/0F+e1rBjpCg18XUVdaG1CEw5yKaHNIWThftd1olIZmgPvcovUShriTlMRY3ymuaj9ijjPzW3Jv+UvcAFhSMi/RN9eLEUF5Sy2DY8VLr/56k/4eI116dAgIbw6R/wsPNWyrxQXB/T9AcI5FHERxmdeg3deMUKBZWjmjY+joUmnM7/7SX1eT4uBYy6V5QQhxfbNeMl9SAg7gXi6/t8TPDGd+pL1K3AnAk9fur5hxLzAzcKhHW5Xwhw8fGceFqHsx/dezqPDCMgMpqiKbiQp+ulDJP3eZo/AMd7i5qKkzhiKSoeGeBozq3i0ofBX68eQ66+dw5bw/bO7BM5NAklnoNdck2POIT1NLIeju17Zc2JkvAQkIuYtFmiwk1sFJoraxlZOjfQlF3zPItIDfVoBwer2g9imdadoVLWnA9Ytw8WWNaPfjNCbccn2TcMONSnEwHKHz0JIDqUzq6lf6Gum3Jgt3co2o1anVq3ZWc0qmuImGp1cNGmctFrnzpfz+iZCUz8HXNj1AuCFcIhe+frBbDJjJZ/oWQnMj9MDWeocsQZYcFkIUJZB6i7tVLMUhSIZT/hZBJA+sGZEdS6hMbBx0ls+YWv/Zc/Cclthd8Y+e42SpZq2cgO62XW3yW7laZC2UrQjkWFHWI9E3yglRVQhm+KMHUKC31bm8r+/ciBbB48qZtDSOVCQENnwxtlYzI0booZuOlnwnR7/effARxkSSeousROnt0S/jNbnRt/NV5JISufAlW4lkccMdVVKvwtFDajqwDkpD7AsBE1G6KVRsOeQPLkPrTgSkMWCuoW9CS72L15xNxqOoVJYUoyD8rR8sFh6B4PdD85qvV/AaATpIpmCp1C88Lm8ABmHrh2je2WKybBHg7/D0ac/ZMxIQAXJo2N5Y3GpZ3Y5UO0YDZkiP3BuJU8n1YCSSOIaByCd79agxOUopMF2Jw/53pQGJjWZuJ0QLiGWJVIJDTXpmHEyPCSZtw7JmW5HPzm1AYSyjb8lAGTi/l7wRQ/30ARDTeQglUlUoZu2EGOv59bpsUiTT2sbKJN41Sq0cez682CJXbZ71bicix8//X2slKzDANkYJU7JEAJUSMf6lGUfQEfrh4ZikpW1wSEkWI0Pcc3ilDPcaFRwmamwpMhEfp0cTU5DpPDN7DPay0QVF8tdaVrDDmSmWlCAIQ8rbOAMnpezAJb+qw4eh9WAsBi0uPQ4RflHRYAI6ER8zhvyb//e9sq3ju9JvESBl+9qqHfnt1j4HBDPTTQkhg87xHzeod3yLPtTrvy0hRSyDAuMfGHzGnKdu9DGYvRGTWduX3lmZb3dVd8UIU8fKB0IodW5KcTAmUQJRBwY49GR8JimHkrWS+0CAPrcjobqdKEfr0TGoCDNGJCmaHImnwl1KsIRNt15Gvw6ihFHCKOzXn20ROsIgVkcWzyxcnmAWC6WTqpgbqLl3vAvPU2m8H8LguBqYHNW4nNsou7HfvgUdC8bHwa255BgEJS5nraOm9Q8uc2ioyplsYF+EDFT2hm0MlJ66lxQmeXxqIH0KlXUBvRWUwRthUiyZVk4ThYAR8BAGS9zocorgfdlhp/URYjdah13TP/auIzzxWc0/lSdicJRFVBUQSFW8M+dcN27ErF/f/bluJyB/vNhrEJKzhH6WzH7fW63BOurjd9q1v16+sLpajRvsB9oxQAx+HyEeQaclGBaif01AlMqpPYFki8kbRx+ms69cjPpcg2K25j+KpcUhwsRBAnq4uyzIA2UCROXvf7p1ZvPD1du2vg5YpIhw1XTEFO1nI6Q6Y3HP6dNHNO45yM2LGYDxx7vbh+dKXnzlddL3Xre64uly45LM7BrE+hZ1IhIeG+t2V7tJ+xdOscrfuqG4veK6Dli83AJMzgBSmThbHeUMlUQinT95LUQm+ftNkkuaIsfx1hmjHrK+pLAKowlcZF6H6cEBFWq7BQneM9GvepNP3Y3Imty3Bw1oGcRveN2GlSmQo6WbcmtZ0sY+PIlwNOePCd6GpZo7Jt+L7/OyAqX/9ukYx7M3usfdKjXMstZ+cFNpB1cmuX/MCGexfSSfTxqDLPJUsJTTuCzEMZskUWUbtNDkSsYVzppzLE7tukToyYBkAg+owE6ECsHlZhszPCC0Br4iofaTS5EFKyjZpbvlwqXR/N9+FZTK0/PLQ09K0+CjGwttVlFklx2TTl1iPcMNtKWiVBHsxPO3M/QNzwQJus1O0usuc4ygg7wQTmiAj36uh95+tsT/U2C5j9a3nWkptwwShT5Njhq4IeDk/M8LDh10C39Fw3+L67OJ9zqlzt5UiZTKJy2UnBEgBnNiL9mLwk7Byn5OPjOFzR4sqkKb7cQKk4NMxCpRID9oKqThzuhK0oYfTH3g9lnnuDtBDeODy4JdrQIzKhaoUDONZQbHgMXuPrKg9ZJw3+AEB+G9kfPtbuq+tXGBV9Zu9/F9BT1IXJCPkDtQTPmQHcUWma5w8qtReClhtav7ldWlZX1rVl/W1Vmfnmgvswsm2KsdNQ4qQ1YY8h4T6WWrxAvjjShy2dvtIin4+TAKGr5x4/shGXpuain/NMfKateK6emRfWkG76sYkbUkMx5OG/cKHJamItJQ8ahZ4oUg1hGxIQ2bic5ANHYtjVuWnJMqke0diFopLCcOTK/uKJfAWsFl8BaKToO1KDpKwA435QVhBUiJ71eEHLkC7Ok0ozK+0wHjsqzphJB2WvsIvOBWxnmF+zfbQLwnsgHRDu8E5Dj6xzElchC+JlD7xgLDlcLOmAHRsAwwG0yFh3OKWibvnPq0Susz0DJho/ncNLuoPIblgO9BjeenmzuwE8PcZL2v1hcPHWy4mZTX9HpvDzCyOhkYQcfi5obrvByXnotgxKMNiFyAOmhJsScJ//bVOvmhP58MjXjic9ejtAGcFzTF6GpbDi1s6T90hILhWPDMLG9U/LzYkV5RQV8GW/voUxFfV/jh1Km8/nDGWWPpFTJq/KNDjqGSRGB4eL3JlTy/eesR08k5XOr/9o5nbGyI8zGcnlXAeQIroSNRMxE9bCGX8tTIWUVk56q/+T33SiDWZUjy5lkMcOVnodzcYiqQ/emmsXbL9PIVhsrs+nhS6rPImH9iMlQK7hDLmTZTIdgFe5rhRCsWPiPk+80P7wuyRzpDGlBGsx9khabkKmy+0+rOxf53kFHRbLLHTfXGxQbiZmfFs92oXkNzyCsN7e1ushtev46uf1ZQtmfV8R3RPokugyrxTPGiFq/VuY7PIEpbDjRavK06RDITlGEjEdGWyC0KSZzE0+3w/a5bfYCs9cVuneq0dU/T7O5Y1eVw9swbIxKP2NS+ETW67DP+4OqqAyLCy2tuDKeamvNtlXCbqrmPro+6qp84J/xNVOBV4Yls3bVr0eKIvT0QLn9MdqUCtiTdPWO3b1b45tcfgLORVzkmXklvpTAyPGqrWesqyGdk0ub9vU61eoy2f0T3enyxJxsiAQpi96RDOotTeIYmxcuTGORPEMagtUsu3Y+r+Ngawg0hh3m6XMFgro1WYlTIhWBGronEbcysdJrOMWIaNecnjllgDpWc9VKQB+dF7IRCxOidT0XDRxPhBMLtAXIKimqSWJkwZdP/GUPfSKE4MrHXferVxk9ylM5yamv+Y4iFGSiTOWf8QvRRg3Zrrx1a8zahaS02sMBMxW7dFlLoTDL3Pe384dkowmTwVkSE/UmTv8j0COerMSP7EwJ0/DAJSiWMvP0BnHeOIxaSKojGRFNg+OW/lXWkRTW+ocE3oVodIp/1hpBr1486uHkVsphgxBWjCwisrg/AmxTDCZI2Mt1i5NdGIIm82/ep3G/qmWDn1QdobOfqnPx7pCp7DCGpZPjj+iSEZWHtaApt+e99ZJzeFePK9YKgRp/U229fF87uWrV4dd4HCGP2+bJDNS5LCuycB81bc845GspjKYcOAeFMwTUzNSUsOeHBrbuIkPcOdU/Jd/c1lxrWZimH1hxDY8KoDUR5VmezmES8e29ZjE3l74xDVUKbsu+YkGhfizu5HOIGzmWqbvQchM/EH2M7cirTsq7HadBLNzleNRBJsyQctR9gYSzhkXYnA73TOL5KjEaGpNPjSs5go4Rp9qFhAzdE5A17G7H/nA2+PejZEp5sq+4/V3nlPoEY+odUAlfBc0t9r7xD8qa+9gapjrl9dpJORdZVkRvJnfhWR9yZk9L7Kg1UUF5dXuOGiuV2fdQHcj3CG8KHXTZNWEbd5GTmW95zJ2gZVASJluVCVjM60Uoiun9vPNcN0iW5LFDIReKnrm5uqpznW7muxYjYD3q0Y2KYRYhdb6/l7I4xDVWD4qAw73ciqT8pbAPXWLfoiWggLOyWH7bBwOAMVAcRmwZmcClQBz+KQcbg6DNGsg2PB0QJLTEJPXAmd8uV98Sa1giQY24ORpkJhHOE9xRUN2IJ3REdK4LG0MAzvAsq2t5Ferh+OAGShoSvB8fXmmX7xhMx2jTp2R0rMaZoDU4DKRJsTQabrELCOvLjCO+W/Gk9WEpX1QAKjPyynHXU+GxFcdXrb58s5E6x/9fPQSQgHrWgbQE9VNbzaV9VQfIna88tBEulldpa5q2mbG2GlndXe2Cmi6x1dy/d0UlE6ujfNjROyWIH4hz/D+QXzABq4rr72tX011rukdKoOE0iL+fBzDdTGUdWVT1N6bZlxKrWOGjvWepZLs9Q/ynjBnLyFxP24WlTuz03qzcoD+ErcN4UijM3aLqq7/x1dmf+1cio3P1QygExqgCeR860SpKHO5UKqLcY1vvv7/UNEkXjDInHf53qKMQj0/OtlK1ojsvAs/XBPg/90gmkFak7eKgF9Tt0c62kZNZ0NJFYI5BG8C2TPfhp1Fjomh1HPtx8r6aPyVpK3GG3Y9fq59P+AjT836MYarXLYWSBst+zHjqY9uXdJiRy/bmXUmQwLhitgT8hr5vCDrAE1p5cY0eB+KtxZitMiYBR1AZJGpl5jSfWgjEIvR1NgxxC48zR9pLWzX+ux0D/bQ5AMcEgMALU8hIkExNf6xNcHiaMDNDCkGEEzaLjZzDPSTEpqIjf7jUKhmgMoAO+Cr1UjbZEFhqbUFe60BuhbkQf0LXwZZ3nH1u06rzdeTLAx1e3tAWz0h2nRIQgQn5vUa1fTSAu8jUNnwaWT47Z+iTCw7F6QnjiqxOY+l2HAmallZ/mgzz8Nt6OdLlr+2+au7296Y8SMp9x8nDt+15hX3ls9oa/Hkd8kMGvhQmp3OqdwQudZx9j7a51i9iurPO1EXiU6XYed1X3hYOaqJ+Ynd9uFNYUqm3iaXbIr9+POfwgJvpHXL3WBdbwwynihgXNoyGeghj5ShMZC0mu/0di5gryQegSmutaLKabbjRhVjGL/kpNLW90UTR39lvP7je4OYTyWgXB/hKLVCQyxsHZVWmTVsxeJLd86KmFrRSTInA8jHDufm6VSSAJVIQFy50REc5v1tvUSjDE2nkW45/gcaHc1IX68+4XHL5myxj07hLNxiKemDr7h9rfxdxvM8v5jF0m/yr/V/M9ZqKupDGZaVdQzPHv0y8z8B+z4ximxLEAKSWVvhkApyhEpxvucmwJt9BevbV56LmJnRtWpoKtnrOB+oH0G5+EcEVrvxrdQgpBr3HkclYcPM1vU+ICMRpwDPHx810Ua6Kz8OKHJ2SaTLB6hyqVg0Q3jSabM4AOmAaWgT6KCIFjEda6YDwq8jTKAavDnodngSHAKl9UhMbDwJfD59wPDjlIE4bV7V8PzUfjaFZwrA53Hsxaq+YF8BSOTmaahlCWw/Gou2/S0S7PXr11b/aW/5N/OHXvKR8dc9X3TQ0yIwFbcYROcBzJClrp/vtb7OSCP04NWfiFQIOM8DvKtgyF7VxY+eqxP/QssH3vCoophI+H/86Np4nmAChTmsOcoDH/oselN9+3cMdEzORS+1J6FvA+gCjcyeu2DAxmq0LfTt4GxO51+HOvKzshZVkIQ5Y1dOtsScAdR0+EjCTfjcz5OKn17J5pktAxwIZozRgvsH07V8Rd9K/z/+VzvaaxzU71MEoLOnYMb7X+TAx8OQzne0fwd8XTUVPNQoE0BQYcVvRl/42HXx7enEnDPcq/OZX9fMQv0J2jcALJPYgKAo+2cTR/TOGNkS3oGIt7uS/M6wsr1BxccFwy1gilk7wL87uTy2+jgi5QaUTTetRIUdopKtk10LueLHda+8m5ULJRYND3Q5fYf7nw5f8AOQ0ON7bAeGBle0TeampSlZz/BVQS3zRr6lJlGwT9bNNKGXJCCILSf5jFqe2XFS/kq6juv0Savz2SPNorlaA7vS8qakR+yaNqo1U4hZA+Ig7fdXzSPq0cDFro5Z4nSxbAGFbpXjbmIRyY3K3Qo1oBfIMY+uklF97gD+paeBoN4/aepW4l3T1LU2rzkEHYrq4Z14qiaIqoU7BP14hdAa9Gtz1lL9nay7Mf11x6cabi9yWGsvIONgVHxna9/Ai63FKKRxqtGA4/Ts+S7lSP0Vw22N6WrW3aQPyT+ruI/1O4tGX0ior0jj9xHyYa0/DXy7GghRNFBhvvwA0/vbvImncMhdpNWDRmPMvouvirtTyEDMISpikmtJsw2sduXBLRvu2ZpafYjNCq9CgCs2Cy/mmIhnXLgYjkmdvjb2fSuoS/bfpB6VPjnTCjlxJW1zWgqi4RqD0yokHrDrsQ+4mJvkzf4NuhMh1Oev/TeDfrRNv1tCndpNsvisWMZ9PZRpWrPSHYpbuj9T4Kc6BgNPfmguCGBx1E38NyTbFW1uihvJuSqbRUeijVyhhllrJcuUTZqxxVTirP+feE19eQwE0A8BIAgK+/Mj0PYvx3XsDLwEHYrCzunW8+zEMV1h408+hKU+pGlrpueQ5eqVmxZs2DN29V6jEaj/QdTd+ptfMu145vrpw+dZpLU1VVVVVVjWpRXT2UWuby/jvS+fBo+ZQzNRebNn1AbHQbsk7aWJbHY79T3Mdp89g+Ok9v9KR227WdrhyPj10PrnVbsd1X5IjSeW08z46uxbIZA6ddj/5jxj8zlRWqb3uSGdusV95K+uaHjF9Plb6WiBBCCCGEEEJCCMm2OBtKZaoTXVe1tM1aWhkppZRSSimllHLXjfOOv5rdijJMZwztX7Yfdj9zmBaXRIQQQgghhBBCiBecFr1U1psZezA9ODnQg+3B28GnPyW7y6Yyb1QB1HbpdMu1TBkgAAAAAAAAAO9SWKlBQUHLSR1XNjAND1o+/Uhf83oUcx/ejd6848+O0s91Ksl1kxBCCCGEEEIIKaQsXV6v1sPyl4SH9SIAAAAAAAACALsqspsX8srjdMb2Q77tmcHY5i/+20Bpsu3mjhjfHboKtOqE6nviTnAtdLLiVvaf3k+GeT+XgIdzzjnnnHPOOf+A8pX6qLt1SV+abZMr98srV7tCfqbLFnkCm/7haaptStVN/UysGuI0N1arg1Jzp4d3AAAAAAAABABqjXKYmZmZmZm5MK/ne2F3bc7XlTPs1UWpPhmu8xoTOA03NFCrf2/T6p7B4THVkbEHzq/nUfXj77G++k+lvLFa7ZZqXIRCREREREREheid5+3ArrMMLEt7T8pHCCGEEEIIoSCEGiEr9GWpnbXuPbrRwtlJbtWbuxQW/QLYtpcKZVWUUkoppZRSSql0mUjcNFAIIYQQQgghIoS4CC/nE3tjOZFOjulaL4USERERERGFiI7zRK0ZGSmllFJKKaWUssHgctqd/Lot1WXy24DyYmtruouqqlLnP2WcQEREREREDCK+K1ypQVHibnOU3bxhOHCAHsePXsYv3gfvqGKw3kmjW8h7zT+1lGSzIYx9FCoRERERERGRIuVSrzZKdUljN7EUTb7bw+JwGXhoGCDjxnX37CYYY4wxxhhjHIxxw9/qYDXiqnF1DbJq79qhfgoBAAAAAABAAAK59BtV3KrQUAN4Bb/9rbXcFizqwLQtkZfeSPjaflfUz1la9z1rH8+bYRiGYRiGYRgmDHPIdDUKmXJmQ4wxxhhjjDEOxoe4u+VfLV030dZUNJcADWY3Wk2sLuo4ix/VquP0EmTP7E6VKTOje3J6Dkt6Het8nhJGCCGEEEIIoSB0Quu9fYxRAtuUfe+HvHlXvmIHqLw7MVmqh8omN/c+3PnwPM/zPM/zPM/zhQeJUj3dFV3pMYAhhBBCCCGEMBAWWE5qMaERmnWTi9lrgI0XOZC19syDkpWvedGNj5PdNKCCIAiCIAiCIAgRBOGuUnbihtHMMc9ssG6N81PDPFG1Ni5BttoF8c73+lPFnwpFURRFURRFURRFHSttKuUkSZIkSZIkSZIhSTJrZNPLPLOdm4th2mW+86VZO/fLAXzEI+oguq2NZB+C1CM90sly7qWk3zQEnOFimIR7juR4cBzHcRzHcRzHcfx31BEZrDiZvL0n7rOl1nSAoiiKoiiKoigaFEV39Z4/d1Pga72TL4s2vzbCJWntLzY5A2rtk1BzJhNVx0KuvepPp0PTNE3TNE3TNE0f0t3qsqaCZcOyLMuyLMuyLMsesg9EOtbNP3JrYkFBebOiH516G08JhSAIgiAIgiAIEgTpCDrdRPiB1++JLsgXUE8sD9prjgNuDW4d2dvW3+WUc06TyqRIkiRJkiRJkiRJ0vxDSCdfg3XlDBxnJU8OrCeAOD1woqvivDkNvp/VJlBPNiyY+pIJwzAMwzAMwzAMw2T+ryzSmWIGw9DdiPncagTLamc6+imSRVRvPEwpYRF0XD30Zv4S83h8s85G/CWgFlmSakTlnXuVeZx1iz5ussYmokpDsZ6RS1EURVEURVEUxYhiETt9tjldFFwnjpGspGYefZy0SF0NfGbMeqOlayZhZt2uaNrQI97kgojNLqdcuy6+c5Hkx8V3aHdqubwdvGV6mTAMwzAMwzAMw4JhWN2S5y1gvd3FLqM7nUme5W6lR8+MRX9ohW1NeCkRgiAIgiAIgiAIgkjn3xNq7xgM5zA5RjoeinWwLPvxeDefrM2lO3WxcT9h9DYVlk0XqPGs5djln4UHSslHG3zR8NuHUTEqntxCtExyTtz11jc//PTLb3/ir3/F/yzm7GYqt9d5Jo+93M1wuDdQkBrtbpQUcnvhYbFz9Dto05SYmyeG46S0556UHJMN2Sa3Npokj85fOZHrXqMrBo0uwYZpvUqO4ziO4ziO47hwHPchFh6xW0ybqp8lSR49FqswEEIIIYQQQghh5yeeFPm1IkAAAAAAAAAAAID7arVtSjhyKQwPfvp4JP2V1Q8N+murpeXadGgtD2OMMcYYY4yFscLYw7UmxVlFSysxdHW5aRrZdlv5Nlu/LjgdURpKKaWUUkoppTRtCVRq1FB+hw6XSh3vOT7tI0vZU8o427k3YG4QAAAAAAAAgF3Mq8nMVSq8SDXWTIFzeFnn/C8GTQ8bD6s1gkFERERERERsvsz/3qrlH8PY2OQzz6213BAAAAAAAAAoACu2+YjvZs8Oqbz5Ln/65n8lWy/axacz5jAzMzMzM3Phjjzry6tBq5To5Wx9tf611lprrbXWOlrrrCWbFw/Zzy3iDBUAAAAAAmA3Zj0zM7nGZnnB6M5hmKZrLzbD3/0yLqoGNjrncfoNmSRJkiQZspCrW6rRsSRJkiRFUtbCJNvPjniSAD7x5wYOBUWMgbHGd/F6wvgqvPmYcGj3dSa4zO9k5rcX/PnwkdCGOOMQ2rFWsmRwOV2Ofrdc5tbHxcXFxcXFxcXFxcUNLi7u/a/MvylHRA9byBwXzM8NgAEA2Nb7Z+mj9Cv5/SNn+gbuuvhx/EPGrc/myvOon5GnAkBGRZcVGODvmi8t5RFFYq/7DH+WFE53AmAbMYEAJFOO1TDzyWfWSTa+ig4PumCzrRe33Zje86qYwHm2+bEui8hx3i1BzR6zaYwa2GTFLj1ySpxycHKSHU58OyUwugg6JaAUTr1j2RXktoznkWNe3vjRBlAsAcD+onaGlVn+2WN1FLtJlrOQU1fZdYBlveN706yaAotVRP2F0hhhW3BmCUGXcdqGM3iAl15I+LEohWXFTHqCVjZeEcTlMS8Tu1SmlSBFFGGb2fmIkxlc9OKbIZ0UELcNrx621Y9v9eCWTVgUVutgYgObejDGC696zHpxmtXEqMxHkaaZNpbMS6AP9j+WHVca+zEnWURUoPcK13+CfeNTifBIQTt2UoSReT9Z9RzHujEThpVnAgqjEBT1iCysmEVA8J/gTB2TcV3YDJv/is8Y98FQTd8HIjp1H5yblfchCOXfh8Smvw+Fz00QZRQAcpTudxXx4dRcIkOxXFeUOlc5KhH5RhS2zjWbk3BqobTSLVamgE5mKTuITDzbpx0iXUSMpxdzEIWRUT4Xjupo55OL/Pv18PPTv2i+oshoKfmK3Jd1IEFRhUJFqlanZ69a+zGMK+Es8C4+rUCdP10UD6Swmq50FcKRyjL5+9F8TnoJS2QakinKRTdM19UnklI0TGEn6YsvXb6FP8jBKDlpKhRyZqJFwS7KWi/MlSGelPAgolJ0RIZXCPz/n4/h8ULAv5wzEAwsHAgeAREJGQUVDR2DRA6NjYPLBI8pM+b4BIRELIhZsrrtZMuOPQeOnLR1HpBw5cadB09evPnw5cdfgAWkZOSUVNQ0AgUJFiJUGK1wOhEiRdGLFiNWnHgJEiVJliJVmnRLLNOiW4cPDpp0wD77LdeqTS8F+Ff0XtuXSsFc2AlUqUL4cmACAHh7Ak08mwN8IrKkQx9OYZQkkG1qjUUw2YNIf2t+ReEaZweEFysQA+IvCfK6MH6ESlB7s+HyRaCMZ0qr4PlrjpB9JoLI3dEQKHsQTBITsAMAAAA=';
-const OV_CSS = 'text{font-family:"LXX Pen",cursive;fill:#1E2C6E;stroke:#1E2C6E;stroke-width:.18px;stroke-linejoin:round;white-space:pre}text.red{fill:#A3151B;stroke:#A3151B}.tr{stroke:#1E2C6E;stroke-width:.95;fill:none;stroke-linecap:round;stroke-linejoin:round}.tr.dash{stroke-dasharray:3 2}.ah,.pt{fill:#1E2C6E}';
+const OV_CSS = '.fm{font-family:Arial,Helvetica,sans-serif;fill:#14213D;stroke:none}.fm.wh{fill:#fff}.fm.wh2{fill:#C9D3E3}.fm.ac{fill:#2747A8}.fm.rd{fill:#A3151B}.fm.gr{fill:#2E7D50}text{font-family:"LXX Pen",cursive;fill:#1E2C6E;stroke:#1E2C6E;stroke-width:.18px;stroke-linejoin:round;white-space:pre}text.red{fill:#A3151B;stroke:#A3151B}.tr{stroke:#1E2C6E;stroke-width:.95;fill:none;stroke-linecap:round;stroke-linejoin:round}.tr.dash{stroke-dasharray:3 2}.ah,.pt{fill:#1E2C6E}';
 const isPhone = () => matchMedia('(pointer:coarse)').matches || innerWidth < 760;
 const fileBase = () => { const f = S.flt || {}; return [(f.no || 'LXX').toUpperCase(), dmy(f.date) || 'NODATE', `${(f.from || '').toUpperCase()}-${(f.to || '').toUpperCase()}`].join('_').replace(/[^A-Z0-9_-]/gi, ''); };
 
