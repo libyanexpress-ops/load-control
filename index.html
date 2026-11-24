@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261124152847">
+<meta name="lxx-build" content="20261124155005">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261124152847', base = location.pathname;
+  var me = '20261124155005', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -473,6 +473,10 @@ table.usr td.mono,table.usr th{white-space:nowrap}
 .hint-s{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.6}
 .hint-s.fit.over{color:#A3151B;font-weight:600}
 .dist-grid > .f{position:relative}
+.dist-grid.bad input{border-color:#C0262D!important;box-shadow:0 0 0 3px rgba(192,38,45,.14)}
+.f .op{font-family:var(--f-num);font-weight:700;color:var(--accent)}
+.f input.calc{background:var(--sunk);font-weight:700;cursor:default;border-style:dashed}
+.ldg-fuel{font-weight:700;color:var(--accent);font-size:13px}
 .sec-flag{position:absolute;bottom:7px;inset-inline-start:8px;z-index:1;pointer-events:none;font:700 12px/1 var(--f-num);color:#fff;background:#C0262D;border-radius:9px;padding:3px 7px;animation:lcIn .25s ease both}
 .dist-grid input.over{border-color:#C0262D!important;box-shadow:0 0 0 3px rgba(192,38,45,.18);color:#C0262D}
 .dist-flag{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:8px 12px;border-radius:6px;background:rgba(192,38,45,.1);border:1px solid rgba(192,38,45,.45);color:#C0262D;font-size:13px;font-weight:600;animation:lcIn .25s ease both}
@@ -844,9 +848,10 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
         <div class="sec">
           <h2><span data-t="secFuel">Fuel</span> <span class="aux" id="o-fuelsum">—</span></h2>
           <div class="grid">
-            <div class="f"><label for="i-tof" data-t="tof">Takeoff fuel</label><input id="i-tof" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="fuel.tof"></div>
-            <div class="f"><label for="i-trip" data-t="trip">Trip fuel</label><input id="i-trip" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="fuel.trip"></div>
-            <div class="f"><label for="i-taxi" data-t="taxi">Taxi fuel</label><input id="i-taxi" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="fuel.taxi"></div>
+            <div class="f"><label for="i-block" data-t="block">Block fuel</label><input id="i-block" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="fuel.block"></div>
+            <div class="f"><label for="i-taxi"><span class="op">−</span> <span data-t="taxi">Taxi fuel</span></label><input id="i-taxi" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="fuel.taxi"></div>
+            <div class="f"><label for="i-tof"><span class="op">=</span> <span data-t="tof">Takeoff fuel</span></label><input id="i-tof" class="num calc" dir="ltr" type="text" readonly tabindex="-1"></div>
+            <div class="f"><label for="i-trip"><span class="op">−</span> <span data-t="trip">Trip fuel</span></label><input id="i-trip" class="num" dir="ltr" type="text" inputmode="decimal" min="0" data-k="fuel.trip"></div>
             <div class="f"><label for="i-rtow" data-t="rtow">Perf. limited TOW</label><input id="i-rtow" class="num" dir="ltr" type="text" inputmode="decimal" min="0" placeholder="optional" data-tp="optional" data-k="fuel.rtow"><span class="hint" data-t="rtowHint">Runway / climb limit</span></div>
           </div>
           <div class="kv">
@@ -1177,6 +1182,8 @@ function calc(S){
   r.ttl = r.paxWt + r.dead;
   r.zfw = r.dow + r.ttl;
   r.lizfw = r.doi + r.paxIx + r.holdIx;
+  if (S.fuel.block === undefined || S.fuel.block === null) S.fuel.block = num(S.fuel.tof) + num(S.fuel.taxi);
+  S.fuel.tof = num(S.fuel.block) - num(S.fuel.taxi);
   r.tof = num(S.fuel.tof); r.trip = num(S.fuel.trip); r.taxi = num(S.fuel.taxi);
   r.fuelTO = fuelSplit(r.tof);
   r.fiTO = fuelIndex(r.tof);
@@ -1329,8 +1336,8 @@ const I18N = {
     secHolds:'Holds', holdsAux:'Counter weights from flight supervisor',
     thCpt:'Compartment', thPcs:'Bag pcs', thBag:'Baggage kg', thCgo:'Cargo kg', thMail:'Mail kg', thTot:'Total / max', totDead:'Total deadload',
     fwdHold:'FWD HOLD', aftHold:'AFT HOLD',
-    secFuel:'Fuel', tof:'Takeoff fuel', trip:'Trip fuel', taxi:'Taxi fuel', rtow:'Perf. limited TOW', optional:'optional', rtowHint:'Runway / climb limit',
-    wings:'Wings', center:'Center', fiTO:'Fuel index TO', fiLW:'Fuel index LDG', fuelSum:(b, l) => `Block ${b} · Landing ${l}`,
+    secFuel:'Fuel', block:'Block fuel', tof:'Takeoff fuel', trip:'Trip fuel', taxi:'Taxi fuel', rtow:'Perf. limited TOW', optional:'optional', rtowHint:'Runway / climb limit',
+    wings:'Wings', center:'Center', fiTO:'Fuel index TO', fiLW:'Fuel index LDG', fuelSum:(b, l) => `Landing fuel ${l}`,
     secLmc:'Last minute changes', addPax:'+ Passenger', addLoad:'+ Baggage / cargo / mail',
     lmcNote:'LMC passenger = standard pax weight + 20 kg bag per adult or child (AHM: 100 kg combined for an adult).',
     lmcNone:'None', lmcEmpty:'No changes after the loadsheet was closed.', lmcSum:(p, m, ix) => `+${p} / −${m} kg · index ${ix}`,
@@ -1403,8 +1410,8 @@ const I18N = {
     secHolds:'العنابر', holdsAux:'الأوزان من الكاونتر (مشرف الرحلة)',
     thCpt:'العنبر', thPcs:'عدد الشنط', thBag:'شنط kg', thCgo:'شحن kg', thMail:'بريد kg', thTot:'المجموع / الأقصى', totDead:'إجمالي حمولة العنابر',
     fwdHold:'عنبر أمامي', aftHold:'عنبر خلفي',
-    secFuel:'الوقود', tof:'وقود الإقلاع', trip:'وقود الرحلة', taxi:'وقود التاكسي', rtow:'TOW محدود بالأداء', optional:'اختياري', rtowHint:'حد المدرج / الصعود',
-    wings:'الجناحين', center:'الخزان الأوسط', fiTO:'مؤشر الوقود للإقلاع', fiLW:'مؤشر الوقود للهبوط', fuelSum:(b, l) => `البلوك ${b} · الهبوط ${l}`,
+    secFuel:'الوقود', block:'وقود البلوك', tof:'وقود الإقلاع', trip:'وقود الرحلة', taxi:'وقود التاكسي', rtow:'TOW محدود بالأداء', optional:'اختياري', rtowHint:'حد المدرج / الصعود',
+    wings:'الجناحين', center:'الخزان الأوسط', fiTO:'مؤشر الوقود للإقلاع', fiLW:'مؤشر الوقود للهبوط', fuelSum:(b, l) => `وقود الهبوط ${l}`,
     secLmc:'التعديلات الأخيرة (LMC)', addPax:'+ راكب', addLoad:'+ شنط / شحن / بريد',
     lmcNote:'راكب LMC = وزن الراكب القياسي + 20 kg شنطة لكل بالغ أو طفل (AHM: 100 kg للبالغ مع شنطته).',
     lmcNone:'لا يوجد', lmcEmpty:'ما فيش تعديلات بعد إقفال اللود شيت.', lmcSum:(p, m, ix) => `+${p} / −${m} kg · Index ${ix}`,
@@ -1531,7 +1538,7 @@ function blankState(){
     galley:{G1:0, G2:0, G4B:0},
     pax:{adult:0, child:0, infant:0, auto:true, OA:0, OB:0, OC:0},
     holds:{1:{pcs:0,B:0,C:0,M:0}, 2:{pcs:0,B:0,C:0,M:0}, 3:{pcs:0,B:0,C:0,M:0}, 4:{pcs:0,B:0,C:0,M:0}},
-    fuel:{tof:0, trip:0, taxi:200, rtow:''},
+    fuel:{block:200, tof:0, trip:0, taxi:200, rtow:''},
     lmc:[], sample:false
   };
 }
@@ -1540,7 +1547,7 @@ function sampleState(){
   s.flt = {no:'LXX101', date:todayUTC(), time:'0830', from:'MJI', to:'TUN', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:'', n1:'', n2:''};
   s.pax.adult = 120;
   s.holds = {1:{pcs:15,B:300,C:0,M:0}, 2:{pcs:35,B:700,C:0,M:0}, 3:{pcs:40,B:800,C:0,M:0}, 4:{pcs:10,B:200,C:0,M:0}};
-  s.fuel = {tof:8000, trip:4000, taxi:200, rtow:''};
+  s.fuel = {block:8200, tof:8000, trip:4000, taxi:200, rtow:''};
   s.sample = true;
   return s;
 }
@@ -2026,7 +2033,8 @@ function update(){
     m.firstElementChild.style.width = Math.min(100, h.w / h.max * 100) + '%';
   });
   $('o-pcs').textContent = R(r.pcs); $('o-bag').textContent = R(r.bag); $('o-cgo').textContent = R(r.cgo); $('o-mail').textContent = R(r.mail); $('o-dead').textContent = R(r.dead);
-  $('o-fuelsum').textContent = t('fuelSum', R(r.tof + r.taxi), R(r.lfuel));
+  $('o-fuelsum').innerHTML = `<b class="ldg-fuel">${esc(t('fuelSum', R(r.tof + r.taxi), R(r.lfuel)))}</b>`;
+  $('i-tof').value = R(r.tof);
   $('o-wing').textContent = R(r.fuelTO.wing); $('o-ctr').textContent = R(r.fuelTO.ctr);
   $('o-fito').textContent = sg(r.fiTO); $('o-filw').textContent = sg(r.fiLW);
   $('o-lmcsum').textContent = r.lmc.any ? t('lmcSum', R(r.lmc.plus), R(r.lmc.minus), sg(r.lmc.ix)) : t('lmcNone');
@@ -2069,10 +2077,14 @@ function paintLock(r){
   if (!S.pax.auto && r.distDiff){ f.className = 'dist-flag'; f.innerHTML = `<span class="big" dir="ltr">${sg(r.distDiff)}</span><span>${t('distFlag', r.distSum, r.pax.seated)}</span>`; f.hidden = false; }
   else if (!S.pax.auto && r.pax.seated){ f.className = 'dist-flag ok'; f.innerHTML = `<span>✓ ${t('distOk', r.pax.seated)}</span>`; f.hidden = false; }
   else f.hidden = true;
+  const exp = (!S.pax.auto && r.distDiff) ? uniform(r.pax.seated) : null;
+  document.querySelector('.dist-grid').classList.toggle('bad', !!exp);
   AC.sections.forEach(s => {
     const b = $('sf-' + s.id), over = r.secOver[s.id], inp = $('i-' + s.id.toLowerCase());
     if (!b) return;
-    b.hidden = !over; b.textContent = over ? '+' + over : '';
+    const d = exp ? r.dist[s.id] - exp[s.id] : over;
+    b.hidden = !d; b.textContent = d ? sg(d) : '';
+    b.title = exp ? `${s.id}: ${r.dist[s.id]} / uniform ${exp[s.id]}` : over ? `${s.id} max ${s.max}` : '';
     if (inp) inp.classList.toggle('over', !!over);
   });
   const L = r.lock;
