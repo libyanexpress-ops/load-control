@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261124231104">
+<meta name="lxx-build" content="20261124235744">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261124231104', base = location.pathname;
+  var me = '20261124235744', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -476,7 +476,6 @@ table.usr td.mono,table.usr th{white-space:nowrap}
 /* ---- several aircraft ---- */
 body:not(.ac-b200) .b200-only{display:none!important}
 body.ac-b200 .b737-only{display:none!important}
-body.ac-b200 [data-tab="msgs"]{display:none!important}
 .ac-chip{display:inline-flex;align-items:center;gap:8px;margin-inline-start:14px;padding:5px 12px 5px 10px;border:1px solid rgba(212,175,90,.45);border-radius:20px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font:inherit;transition:background .2s ease,border-color .2s ease}
 .ac-chip:hover{background:rgba(212,175,90,.16);border-color:#D4AF5A}
 .ac-chip b{font-family:var(--f-num);font-size:13px;letter-spacing:.04em}
@@ -1821,6 +1820,7 @@ function chartSVG(r, pid){
 
 /* ---------- messages ---------- */
 function ldmText(r){
+  if (r.kind === 'B200') return b2LdmText(r);
   const fl = S.flt, p = r.fin.pax, h = r.fin.holds;
   const lines = ['LDM',
     `${U(fl.no)}/${dd(fl.date)}.${AC.reg.replace('-','')}.${AC.ldmVer}.${r.crew}`,
@@ -1832,6 +1832,7 @@ function ldmText(r){
 function pad(s, n){ s = String(s); return s.length >= n ? s : s + ' '.repeat(n - s.length); }
 function lpad(s, n){ s = String(s); return s.length >= n ? s : ' '.repeat(n - s.length) + s; }
 function edpText(r){
+  if (r.kind === 'B200') return b2EdpText(r);
   const fl = S.flt, F = r.f, L = k => r.limiting === k ? 'L' : ' ';
   const h = r.holdRows, ed = String(num(fl.ed) || 1).padStart(2,'0');
   const o = [];
@@ -2457,9 +2458,61 @@ function b2Update(){
   const bn = document.querySelector('[data-th=sheetBanner]'); if (bn) bn.innerHTML = t('b2Banner');
   $('sheetView').classList.remove('locked'); $('sheetLock').hidden = true;
   ['btnPrint', 'btnPrint2', 'btnPdf'].forEach(id => { $(id).disabled = false; $(id).title = ''; });
+  $('ldmText').textContent = b2LdmText(r);
+  $('edpText').textContent = b2EdpText(r);
   $('sampleBanner').hidden = true;
   if (ME) store.set(draftKey(), S);
   if (ME) applyAccess();
+}
+
+/* ---------- messages (weights in pounds) ---------- */
+function b2Ver(){ return S.b2.cfg === 'amb' ? 'AMB' : 'Y' + b2Cfg().stations.length; }
+function b2LdmText(r){
+  const fl = S.flt, crew = `${num(S.b2.crewN)}/0`;
+  const lines = ['LDM',
+    `${U(fl.no)}/${dd(fl.date)}.${AC.reg.replace('-','')}.${b2Ver()}.${crew}`,
+    `-${U(fl.to) || 'XXX'}.${r.pax.n}/0/0.T${R(r.hold.w)}.1/${R(r.hold.w)}.PAX/${r.pax.n}.PAD/0`,
+    `SI B${R(r.hold.w)}.C0.M0 BAG ${R(r.hold.pcs)}PCS WEIGHTS IN LB`];
+  if (fl.si) lines.push(...String(fl.si).toUpperCase().split(/\n+/).filter(Boolean).map(l => 'SI ' + l));
+  return lines.join('\n');
+}
+function b2EdpText(r){
+  const fl = S.flt, p = r.p, ed = String(num(fl.ed) || 1).padStart(2,'0'), L = k => r.limiting === k ? 'L' : ' ';
+  const crew = `${num(S.b2.crewN)}/0`, o = [];
+  o.push('L O A D S H E E T      CHECKED        APPROVED       EDNO');
+  o.push('ALL WEIGHTS IN POUNDS  ' + pad(U(fl.prep),15) + pad(U(fl.appr),15) + ed);
+  o.push('');
+  o.push('FROM/TO    FLIGHT       A/C REG  VERSION  CREW  DATE     TIME');
+  o.push(pad(`${U(fl.from)} ${U(fl.to)}`,11) + pad(`${U(fl.no)}/${dd(fl.date)}`,13) + pad(AC.reg.replace('-',''),9) + pad(b2Ver(),9) + pad(crew,6) + pad(dmy(fl.date),9) + (fl.time || ''));
+  o.push(pad('',26) + 'WEIGHT   DISTRIBUTION');
+  o.push(pad('LOAD IN COMPARTMENTS',26) + lpad(R(r.hold.w),6) + '   ' + `1/${R(r.hold.w)}`);
+  o.push(pad('PASSENGER/CABIN BAG',26) + lpad(R(r.pax.w),6) + '   ' + `${r.pax.n}/0/0  TTL ${r.pax.n} CAB 0`);
+  o.push(pad('',35) + `PAX/${r.pax.n} SOC/0 BLKD 0`);
+  o.push(pad('TOTAL TRAFFIC LOAD',26) + lpad(R(r.ttl),6));
+  o.push(pad('DRY OPERATING WEIGHT',26) + lpad(R(r.dow),6));
+  o.push(pad('ZERO FUEL WEIGHT ACTUAL',26) + lpad(R(r.zfw),6) + ' MAX ' + lpad(AC.mzfw,6) + ' ' + L('A') + ' ADJ');
+  o.push(pad('TAKE OFF FUEL',26) + lpad(R(r.fuel.tof),6));
+  o.push(pad('TAKE OFF WEIGHT  ACTUAL',26) + lpad(R(r.tow),6) + ' MAX ' + lpad(R(r.allowed),6) + ' ' + L('B') + ' ADJ');
+  o.push(pad('TRIP FUEL',26) + lpad(R(r.fuel.trip),6));
+  o.push(pad('LANDING WEIGHT   ACTUAL',26) + lpad(R(r.lw),6) + ' MAX ' + lpad(AC.mlw,6) + ' ' + L('C') + ' ADJ');
+  o.push('');
+  o.push(pad('BALANCE AND SEATING CONDITIONS',38) + 'LAST MINUTE CHANGES');
+  const bal = [
+    `DOI      ${lpad(fx(r.doi,1),6)}`,
+    `IZFW     ${lpad(fx(p.zfw.ix,1),6)}   CG ${lpad(fx(p.zfw.cg),6)} MAC ${fx(p.zfw.mac,1)}`,
+    `ITOW     ${lpad(fx(p.tow.ix,1),6)}   CG ${lpad(fx(p.tow.cg),6)} MAC ${fx(p.tow.mac,1)}`,
+    `ILAW     ${lpad(fx(p.lw.ix,1),6)}   CG ${lpad(fx(p.lw.cg),6)} MAC ${fx(p.lw.mac,1)}`,
+    `SEATING ${Object.entries(r.zones).map(([z, v]) => z + '/' + v.n).join(' ')}`
+  ];
+  const lm = ['DEST  SPECIFICATION  +/-  WEIGHT', ...r.lmc.rows.filter(x => x.w).map(x => pad(U(fl.to),6) + pad(x.st === AC.hold.id ? 'HOLD 1' : 'SEAT ' + x.st,15) + pad(x.w >= 0 ? '+' : '-',5) + R(Math.abs(x.w)))];
+  for (let i = 0; i < Math.max(bal.length, lm.length); i++) o.push(pad(bal[i] || '', 38) + (lm[i] || ''));
+  o.push('');
+  o.push(pad(`UNDERLOAD BEFORE LMC   ${R(r.under)}`,38) + `LMC TOTAL ${r.lmc.net >= 0 ? '+' : '-'} ${R(Math.abs(r.lmc.net))}`);
+  o.push('LOADMESSAGE AND CAPTAINS INFORMATION BEFORE LMC');
+  o.push(`TAXI WEIGHT ${R(r.ramp)}  TAXI FUEL ${R(r.fuel.taxi)}  TRIP ${R(r.fuel.trip)}  FUEL ${fx(r.fuel.gal,0)} USG @ ${fx(r.fuel.dens,2)}`);
+  o.push(...b2LdmText(r).split('\n').slice(2));
+  o.push(`END LOADSHEET EDNO ${ed} ${U(fl.no)}/${dd(fl.date)} ${U(fl.from)} ${U(fl.to)}`);
+  return o.join('\n');
 }
 
 /* ---------- results ---------- */
