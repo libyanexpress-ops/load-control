@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261124235744">
+<meta name="lxx-build" content="20261126225921">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261124235744', base = location.pathname;
+  var me = '20261126225921', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -2131,7 +2131,7 @@ function resultsHTML(r){
     <table class="w">
       <tr><th></th><th>${t('actual')}</th><th>${t('max')}</th><th>${t('margin')}</th></tr>
       ${row('ZFW', F.zfw, AC.mzfw, 'A')}
-      ${row('TOW', F.tow, r.allowed, '')}
+      ${row('TOW', F.tow, r.maxTO, 'B')}
       ${row('LW', F.lw, AC.mlw, 'C')}
       ${row(t('taxiRow'), F.ramp, AC.mtw, '')}
     </table>
