@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>LXX Load Control</title>
-<meta name="lxx-build" content="20261126225921">
+<meta name="lxx-build" content="20261126234246">
 <script>
 /* always run the newest version: compare this page's build with the one on the server */
 (function(){
-  var me = '20261126225921', base = location.pathname;
+  var me = '20261126234246', base = location.pathname;
   function latest(){
     return fetch(base + '?_=' + Date.now(), {cache:'no-store'}).then(function(r){ return r.ok ? r.text() : ''; })
       .then(function(t){ var m = /name="lxx-build" content="([^"]+)"/.exec(t); return m ? m[1] : null; }).catch(function(){ return null; });
@@ -476,6 +476,9 @@ table.usr td.mono,table.usr th{white-space:nowrap}
 /* ---- several aircraft ---- */
 body:not(.ac-b200) .b200-only{display:none!important}
 body.ac-b200 .b737-only{display:none!important}
+.wu-tg{font:600 11px/1 var(--f-num);letter-spacing:.04em;color:var(--muted);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer;margin-inline-start:auto}
+.wu-tg b{color:var(--accent)}
+.wu-tg:hover{border-color:var(--accent);color:var(--ink)}
 .ac-chip{display:inline-flex;align-items:center;gap:8px;margin-inline-start:14px;padding:5px 12px 5px 10px;border:1px solid rgba(212,175,90,.45);border-radius:20px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font:inherit;transition:background .2s ease,border-color .2s ease}
 .ac-chip:hover{background:rgba(212,175,90,.16);border-color:#D4AF5A}
 .ac-chip b{font-family:var(--f-num);font-size:13px;letter-spacing:.04em}
@@ -967,9 +970,10 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
             <h2><span data-t="b2CfgT">Configuration &amp; dry operating weight</span> <span class="aux" id="b2-dowsum">—</span></h2>
             <div class="grid">
               <div class="f"><label for="b2-cfg" data-t="b2CfgL">Cabin configuration</label><select id="b2-cfg" data-k="b2.cfg"></select></div>
+              <div class="f"><label for="b2-wu" data-t="b2WU">Weight unit</label><select id="b2-wu"><option value="lb">lb · pounds</option><option value="kg">kg · kilograms</option></select></div>
               <div class="f"><label for="b2-crewN" data-t="b2CrewN">Flight crew</label><input id="b2-crewN" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.crewN"><span class="hint">129.0"</span></div>
-              <div class="f"><label for="b2-crewWt" data-t="b2CrewWt">Crew weight each (lb)</label><input id="b2-crewWt" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.crewWt"></div>
-              <div class="f"><label for="b2-kit" data-t="b2Kit">Kit / catering (lb)</label><input id="b2-kit" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.kit"><span class="hint">143.0"</span></div>
+              <div class="f"><label for="b2-crewWt"><span data-t="b2CrewWt">Crew weight each</span> · <span class="b2wu">lb</span></label><input id="b2-crewWt" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.crewWt"></div>
+              <div class="f"><label for="b2-kit"><span data-t="b2Kit">Kit / catering</span> · <span class="b2wu">lb</span></label><input id="b2-kit" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.kit"><span class="hint">143.0"</span></div>
             </div>
             <div class="kv"><span>BEW <b id="b2-bew">—</b></span><span>DOW <b id="b2-dow">—</b></span><span>DOI <b id="b2-doi">—</b></span></div>
           </div>
@@ -979,7 +983,7 @@ pre.tx.plain{background:var(--sunk);color:var(--ink);border:0;box-shadow:none;pa
             <div class="grid" id="b2-seats"></div>
             <div class="grid" style="margin-top:12px">
               <div class="f"><label for="b2-bagPcs" data-t="b2BagPcs">Aft baggage pieces</label><input id="b2-bagPcs" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.bagPcs"></div>
-              <div class="f"><label for="b2-bag" data-t="b2Bag">Aft baggage (lb)</label><input id="b2-bag" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.bag"><span class="hint"><span id="b2-holdTot">0</span> <span class="meter" id="b2-holdMeter"><i></i></span></span></div>
+              <div class="f"><label for="b2-bag"><span data-t="b2Bag">Aft baggage</span> · <span class="b2wu">lb</span></label><input id="b2-bag" class="num" dir="ltr" type="text" inputmode="decimal" data-k="b2.bag"><span class="hint"><span id="b2-holdTot">0</span> <span class="meter" id="b2-holdMeter"><i></i></span></span></div>
             </div>
           </div>
           <div class="sec">
@@ -1472,11 +1476,11 @@ const I18N = {
     thCpt:'Compartment', thPcs:'Bag pcs', thBag:'Baggage kg', thCgo:'Cargo kg', thMail:'Mail kg', thTot:'Total / max', totDead:'Total deadload',
     fwdHold:'FWD HOLD', aftHold:'AFT HOLD',
     apTitle:'Select aircraft', apLead:'Choose the aircraft for this loadsheet.', ufAircraft:'Aircraft', acPhotoBtn:'Aircraft photo',
-    b2CfgT:'Configuration & dry operating weight', b2CfgL:'Cabin configuration', b2CrewN:'Flight crew', b2CrewWt:'Crew weight each (lb)', b2Kit:'Kit / catering (lb)',
-    b2CabinT:'Cabin & baggage', b2BagPcs:'Aft baggage pieces', b2Bag:'Aft baggage (lb)', b2Unit:'Fuel unit', b2DensT:'Density', b2Std:'Standard (OM)', b2Act:'Actual (fuel slip)',
-    b2AddLmc:'+ Change', b2Where:'Seat / hold', b2PaxSum:(n, w, b) => `${n} occupied · ${w} lb · bags ${b} lb`,
-    b2FuelLb:(b, t, tr, d) => `In pounds: block ${b} · take-off ${t} · trip ${tr} lb (density ${d} lb/US gal)`, b2FuelGal:(g, d) => `Block fuel ≈ ${g} US gal at ${d} lb/US gal`,
-    b2Banner:'5A-LEX B200 Load &amp; Trim Sheet, all weights in pounds. Save PDF to keep or share it. Print gives one sheet per page.',
+    b2CfgT:'Configuration & dry operating weight', b2CfgL:'Cabin configuration', b2CrewN:'Flight crew', b2CrewWt:'Crew weight each', b2Kit:'Kit / catering', b2WU:'Weight unit',
+    b2CabinT:'Cabin & baggage', b2BagPcs:'Aft baggage pieces', b2Bag:'Aft baggage', b2Unit:'Fuel unit', b2DensT:'Density', b2Std:'Standard (OM)', b2Act:'Actual (fuel slip)',
+    b2AddLmc:'+ Change', b2Where:'Seat / hold', b2PaxSum:(n, w, b, u) => `${n} occupied · ${w} ${u} · bags ${b} ${u}`,
+    b2FuelLb:(b, t, tr, d, u) => `In ${u}: block ${b} · take-off ${t} · trip ${tr} ${u} (density ${d} lb/US gal)`, b2FuelGal:(g, d) => `Block fuel ≈ ${g} US gal at ${d} lb/US gal`,
+    b2Banner:u => `5A-LEX B200 Load &amp; Trim Sheet, all weights in ${u === 'kg' ? 'kilograms' : 'pounds'}. Save PDF to keep or share it. Print gives one sheet per page.`,
     secFuel:'Fuel', block:'Block fuel', tof:'Takeoff fuel', trip:'Trip fuel', taxi:'Taxi fuel', rtow:'Perf. limited TOW', optional:'optional', rtowHint:'Runway / climb limit',
     wings:'Wings', center:'Center', fiTO:'Fuel index TO', fiLW:'Fuel index LDG', fuelSum:(b, l) => `Landing fuel ${l}`,
     secLmc:'Last minute changes', addPax:'+ Passenger', addLoad:'+ Baggage / cargo / mail',
@@ -1552,11 +1556,11 @@ const I18N = {
     thCpt:'العنبر', thPcs:'عدد الشنط', thBag:'شنط kg', thCgo:'شحن kg', thMail:'بريد kg', thTot:'المجموع / الأقصى', totDead:'إجمالي حمولة العنابر',
     fwdHold:'عنبر أمامي', aftHold:'عنبر خلفي',
     apTitle:'اختار الطائرة', apLead:'اختار الطائرة اللي حتجهز ليها اللود شيت.', ufAircraft:'الطائرات', acPhotoBtn:'صورة الطائرة',
-    b2CfgT:'التكوين والوزن الجاف', b2CfgL:'تكوين الكابينة', b2CrewN:'طاقم القيادة', b2CrewWt:'وزن فرد الطاقم (lb)', b2Kit:'الحقيبة والتموين (lb)',
-    b2CabinT:'الكابينة والشنط', b2BagPcs:'عدد الشنط الخلفية', b2Bag:'وزن الشنط الخلفية (lb)', b2Unit:'وحدة الوقود', b2DensT:'الكثافة', b2Std:'قياسية (OM)', b2Act:'فعلية (إيصال التزويد)',
-    b2AddLmc:'+ تعديل', b2Where:'الكرسي / العنبر', b2PaxSum:(n, w, b) => `${n} مشغول · ${w} lb · الشنط ${b} lb`,
-    b2FuelLb:(b, t, tr, d) => `بالباوند: البلوك ${b} · الإقلاع ${t} · الرحلة ${tr} lb (الكثافة ${d} lb/US gal)`, b2FuelGal:(g, d) => `وقود البلوك ≈ ${g} US gal بكثافة ${d} lb/US gal`,
-    b2Banner:'نموذج 5A-LEX B200 Load &amp; Trim، كل الأوزان بالباوند. احفظه PDF أو اطبعه، كل ورقة في صفحة.',
+    b2CfgT:'التكوين والوزن الجاف', b2CfgL:'تكوين الكابينة', b2CrewN:'طاقم القيادة', b2CrewWt:'وزن فرد الطاقم', b2Kit:'الحقيبة والتموين', b2WU:'وحدة الوزن',
+    b2CabinT:'الكابينة والشنط', b2BagPcs:'عدد الشنط الخلفية', b2Bag:'وزن الشنط الخلفية', b2Unit:'وحدة الوقود', b2DensT:'الكثافة', b2Std:'قياسية (OM)', b2Act:'فعلية (إيصال التزويد)',
+    b2AddLmc:'+ تعديل', b2Where:'الكرسي / العنبر', b2PaxSum:(n, w, b, u) => `${n} مشغول · ${w} ${u} · الشنط ${b} ${u}`,
+    b2FuelLb:(b, t, tr, d, u) => `بالـ ${u}: البلوك ${b} · الإقلاع ${t} · الرحلة ${tr} ${u} (الكثافة ${d} lb/US gal)`, b2FuelGal:(g, d) => `وقود البلوك ≈ ${g} US gal بكثافة ${d} lb/US gal`,
+    b2Banner:u => `نموذج 5A-LEX B200 Load &amp; Trim، كل الأوزان ${u === 'kg' ? 'بالكيلو' : 'بالباوند'}. احفظه PDF أو اطبعه، كل ورقة في صفحة.`,
     secFuel:'الوقود', block:'وقود البلوك', tof:'وقود الإقلاع', trip:'وقود الرحلة', taxi:'وقود التاكسي', rtow:'TOW محدود بالأداء', optional:'اختياري', rtowHint:'حد المدرج / الصعود',
     wings:'الجناحين', center:'الخزان الأوسط', fiTO:'مؤشر الوقود للإقلاع', fiLW:'مؤشر الوقود للهبوط', fuelSum:(b, l) => `وقود الهبوط ${l}`,
     secLmc:'التعديلات الأخيرة (LMC)', addPax:'+ راكب', addLoad:'+ شنط / شحن / بريد',
@@ -2287,6 +2291,11 @@ const isB2 = () => AC.kind === 'B200';
 const b2Cfg = () => AC.configs[(S.b2 && S.b2.cfg) in AC.configs ? S.b2.cfg : 'pax'];
 const b2Ix = (w, arm) => w * (arm - AC.ref) / AC.C;
 const b2IxOf = (W, M) => AC.K + (M - W * AC.ref) / AC.C;           // index from weight and moment
+const LB_KG = 0.45359237;                                          // 1 lb in kg
+const b2Kg = () => !!(S.b2 && S.b2.wu === 'kg');
+const b2U = () => b2Kg() ? 'kg' : 'lb';
+const b2D = lb => b2Kg() ? lb * LB_KG : lb;                         // pounds → display unit
+const b2In = v => b2Kg() ? num(v) / LB_KG : num(v);                 // entered value → pounds
 const b2Mac = cg => (cg - AC.lemac) / AC.mac * 100;
 function b2FuelArm(lb){
   const p = AC.fuel.arms; if (lb <= p[0][0]) return p[0][1];
@@ -2299,17 +2308,19 @@ function b2Fwd(W){
   return p[p.length - 1][1];
 }
 function b2Blank(){
+  const wu = (() => { try { return localStorage.getItem('lxx-b2wu') === 'kg' ? 'kg' : 'lb'; } catch(e){ return 'lb'; } })();
+  const k = v => wu === 'kg' ? Math.round(v * LB_KG * 10) / 10 : v;
   return {
     reg: AC.reg,
     flt:{no:'LXX', date:todayUTC(), time:'', from:'MJI', to:'', sno:'0001', ed:1, captain:'', prep:'', appr:'', si:'', n1:'', n2:''},
-    b2:{cfg:'pax', crewN:AC.crew.n, crewWt:AC.crew.std, kit:AC.kit.std, st:{}, bagPcs:0, bag:0,
-        fuel:{unit:'lb', densType:'std', dens:AC.fuel.densStd, block:0, taxi:AC.fuel.taxi, trip:0}, lmc:[]},
+    b2:{cfg:'pax', wu, crewN:AC.crew.n, crewWt:k(AC.crew.std), kit:k(AC.kit.std), st:{}, bagPcs:0, bag:0,
+        fuel:{unit:'lb', densType:'std', dens:AC.fuel.densStd, block:0, taxi:k(AC.fuel.taxi), trip:0}, lmc:[]},
     lmc:[], sample:false
   };
 }
 function b2Norm(s){
   if (!s.b2) Object.assign(s, b2Blank());
-  const b = s.b2; b.st ??= {}; b.lmc ??= []; b.fuel ??= {unit:'lb', densType:'std', dens:AC.fuel.densStd, block:0, taxi:AC.fuel.taxi, trip:0};
+  const b = s.b2; b.wu ??= 'lb'; b.st ??= {}; b.lmc ??= []; b.fuel ??= {unit:'lb', densType:'std', dens:AC.fuel.densStd, block:0, taxi:AC.fuel.taxi, trip:0};
   if (!(b.cfg in AC.configs)) b.cfg = 'pax';
   return s;
 }
@@ -2320,23 +2331,23 @@ function b2Calc(S){
   const item = (id, label, w, arm) => ({id, label, w, arm, mom: w * arm, ix: b2Ix(w, arm)});
   // dry operating weight
   r.bew = item('BEW', 'Basic empty weight', num(cfg.bew), num(cfg.bewArm));
-  r.crew = item('CREW', 'Crew', num(b.crewN) * num(b.crewWt), AC.crew.arm);
-  r.kit = item('KIT', 'Flight kit / catering', num(b.kit), AC.kit.arm);
+  r.crew = item('CREW', 'Crew', num(b.crewN) * b2In(b.crewWt), AC.crew.arm);
+  r.kit = item('KIT', 'Flight kit / catering', b2In(b.kit), AC.kit.arm);
   r.dow = r.bew.w + r.crew.w + r.kit.w;
   r.dowMom = r.bew.mom + r.crew.mom + r.kit.mom;
   r.bewIx = b2IxOf(r.bew.w, r.bew.mom);
   r.corr = r.crew.ix + r.kit.ix;
   r.doi = b2IxOf(r.dow, r.dowMom);
   // traffic load: cabin stations and the aft baggage hold
-  r.st = cfg.stations.map(s => ({...item(s.id, s.label, num(b.st[s.id]), s.arm), zone: s.zone}));
-  r.hold = {...item(AC.hold.id, AC.hold.label, num(b.bag), AC.hold.arm), pcs: num(b.bagPcs), max: AC.hold.max};
+  r.st = cfg.stations.map(s => ({...item(s.id, s.label, b2In(b.st[s.id]), s.arm), zone: s.zone}));
+  r.hold = {...item(AC.hold.id, AC.hold.label, b2In(b.bag), AC.hold.arm), pcs: num(b.bagPcs), max: AC.hold.max};
   r.pax = {n: r.st.filter(s => s.w > 0).length, w: r.st.reduce((a, s) => a + s.w, 0)};
   r.ttl = r.pax.w + r.hold.w;
   r.zones = {};
   r.st.forEach(s => { const z = r.zones[s.zone] ??= {w:0, ix:0, n:0, ids:[]}; z.w += s.w; z.ix += s.ix; z.n += s.w > 0 ? 1 : 0; z.ids.push(s.id); });
   // last minute changes
   const stArm = id => id === AC.hold.id ? AC.hold.arm : (cfg.stations.find(s => s.id === id) || {}).arm;
-  r.lmc = {rows: b.lmc.map(l => { const w = num(l.w), arm = stArm(l.st) ?? AC.ref; return {st:l.st, w, arm, mom: w * arm, ix: b2Ix(w, arm)}; })};
+  r.lmc = {rows: b.lmc.map(l => { const w = b2In(l.w), arm = stArm(l.st) ?? AC.ref; return {st:l.st, w, arm, mom: w * arm, ix: b2Ix(w, arm)}; })};
   r.lmc.net = r.lmc.rows.reduce((a, l) => a + l.w, 0);
   r.lmc.abs = r.lmc.rows.reduce((a, l) => a + Math.abs(l.w), 0);
   r.lmc.ix = r.lmc.rows.reduce((a, l) => a + l.ix, 0);
@@ -2347,7 +2358,7 @@ function b2Calc(S){
   r.zfwMom = r.dowMom + r.st.reduce((a, s) => a + s.mom, 0) + r.hold.mom + r.lmc.mom;
   // fuel: Block − Taxi = Take-off, − Trip = Landing (entered in pounds or US gallons)
   const f = b.fuel, dens = f.densType === 'act' ? num(f.dens) || AC.fuel.densStd : AC.fuel.densStd;
-  const toLb = v => f.unit === 'gal' ? num(v) * dens : num(v);
+  const toLb = v => f.unit === 'gal' ? num(v) * dens : b2In(v);
   r.fuel = {unit: f.unit, dens, densType: f.densType, block: toLb(f.block), taxi: toLb(f.taxi), trip: toLb(f.trip)};
   r.fuel.tof = r.fuel.block - r.fuel.taxi;
   r.fuel.ldg = r.fuel.tof - r.fuel.trip;
@@ -2366,19 +2377,19 @@ function b2Calc(S){
   r.atl = r.allowed - r.dow - r.fuel.tof;
   r.under = r.allowed - r.tow;
   // checks
-  const L = n => R(n).toLocaleString('en-US');
-  if (r.zfw > AC.mzfw) chk('bad', `ZFW ${L(r.zfw)} lb is above MZFW ${L(AC.mzfw)} lb.`, `الـ ZFW ${L(r.zfw)} lb أكبر من MZFW ${L(AC.mzfw)} lb.`);
-  if (r.tow > r.allowed) chk('bad', `TOW ${L(r.tow)} lb is above the allowed ${L(r.allowed)} lb (${r.limiting}).`, `الـ TOW ${L(r.tow)} lb أكبر من المسموح ${L(r.allowed)} lb (${r.limiting}).`);
-  if (r.lw > AC.mlw) chk('bad', `Landing weight ${L(r.lw)} lb is above MLW ${L(AC.mlw)} lb.`, `وزن الهبوط ${L(r.lw)} lb أكبر من MLW ${L(AC.mlw)} lb.`);
-  if (r.ramp > AC.mrw) chk('bad', `Ramp weight ${L(r.ramp)} lb is above ${L(AC.mrw)} lb.`, `وزن الرامب ${L(r.ramp)} lb أكبر من ${L(AC.mrw)} lb.`);
+  const u = b2U(), L = n => R(b2D(n)).toLocaleString('en-US');
+  if (r.zfw > AC.mzfw) chk('bad', `ZFW ${L(r.zfw)} ${u} is above MZFW ${L(AC.mzfw)} ${u}.`, `الـ ZFW ${L(r.zfw)} ${u} أكبر من MZFW ${L(AC.mzfw)} ${u}.`);
+  if (r.tow > r.allowed) chk('bad', `TOW ${L(r.tow)} ${u} is above the allowed ${L(r.allowed)} ${u} (${r.limiting}).`, `الـ TOW ${L(r.tow)} ${u} أكبر من المسموح ${L(r.allowed)} ${u} (${r.limiting}).`);
+  if (r.lw > AC.mlw) chk('bad', `Landing weight ${L(r.lw)} ${u} is above MLW ${L(AC.mlw)} ${u}.`, `وزن الهبوط ${L(r.lw)} ${u} أكبر من MLW ${L(AC.mlw)} ${u}.`);
+  if (r.ramp > AC.mrw) chk('bad', `Ramp weight ${L(r.ramp)} ${u} is above ${L(AC.mrw)} ${u}.`, `وزن الرامب ${L(r.ramp)} ${u} أكبر من ${L(AC.mrw)} ${u}.`);
   ['zfw', 'tow', 'lw'].forEach(k => { const p = r.p[k]; if (p.W > 0 && !p.ok) chk('bad', `${k.toUpperCase()} CG ${fx(p.cg)}" is outside ${fx(p.fwd, 1)}"–${fx(p.aft, 1)}".`, `مركز الثقل ${k.toUpperCase()} ${fx(p.cg)}" خارج الحدود ${fx(p.fwd, 1)}"–${fx(p.aft, 1)}".`); });
-  if (r.hold.w > AC.hold.max) chk('bad', `Aft baggage ${L(r.hold.w)} lb is above ${AC.hold.max} lb.`, `الشنط ${L(r.hold.w)} lb أكثر من ${AC.hold.max} lb.`);
+  if (r.hold.w > AC.hold.max) chk('bad', `Aft baggage ${L(r.hold.w)} ${u} is above ${L(AC.hold.max)} ${u}.`, `الشنط ${L(r.hold.w)} ${u} أكثر من ${L(AC.hold.max)} ${u}.`);
   if (r.fuel.tof < 0) chk('bad', 'Block fuel is less than taxi fuel.', 'وقود البلوك أقل من وقود التاكسي.');
   if (r.fuel.ldg < 0) chk('bad', 'Trip fuel is more than take-off fuel.', 'وقود الرحلة أكثر من وقود الإقلاع.');
-  if (r.fuel.block > AC.fuel.maxLb) chk('bad', `Fuel ${L(r.fuel.block)} lb is above capacity ${L(AC.fuel.maxLb)} lb.`, `الوقود ${L(r.fuel.block)} lb أكثر من السعة ${L(AC.fuel.maxLb)} lb.`);
-  if (r.lmc.abs > AC.lmcMax) chk('bad', `Last minute changes ${L(r.lmc.abs)} lb are above ±${AC.lmcMax} lb: prepare a new loadsheet.`, `تعديلات آخر لحظة ${L(r.lmc.abs)} lb أكثر من ±${AC.lmcMax} lb: جهّز لود شيت جديد.`);
-  if ([...r.st.map(s => s.w), r.hold.w, num(b.kit), num(b.crewN)].some(v => v < 0)) chk('bad', 'Negative values entered.', 'فيه قيم سالبة.');
-  if (r.zfw > 0 && r.zfw < AC.minW) chk('warn', `Weight below the chart (${L(AC.minW)} lb).`, `الوزن أقل من بداية الجدول (${L(AC.minW)} lb).`);
+  if (r.fuel.block > AC.fuel.maxLb) chk('bad', `Fuel ${L(r.fuel.block)} ${u} is above capacity ${L(AC.fuel.maxLb)} ${u}.`, `الوقود ${L(r.fuel.block)} ${u} أكثر من السعة ${L(AC.fuel.maxLb)} ${u}.`);
+  if (r.lmc.abs > AC.lmcMax) chk('bad', `Last minute changes ${L(r.lmc.abs)} ${u} are above ±${L(AC.lmcMax)} ${u}: prepare a new loadsheet.`, `تعديلات آخر لحظة ${L(r.lmc.abs)} ${u} أكثر من ±${L(AC.lmcMax)} ${u}: جهّز لود شيت جديد.`);
+  if ([...r.st.map(s => s.w), r.hold.w, r.kit.w, num(b.crewN)].some(v => v < 0)) chk('bad', 'Negative values entered.', 'فيه قيم سالبة.');
+  if (r.zfw > 0 && r.zfw < AC.minW) chk('warn', `Weight below the chart (${L(AC.minW)} ${u}).`, `الوزن أقل من بداية الجدول (${L(AC.minW)} ${u}).`);
   if (AC.fuel.provisional) chk('info', 'Fuel moment uses provisional arms until the POH Usable Fuel Moment table is entered.', 'عزم الوقود مؤقت لين يتدخل جدول Usable Fuel Moment من الـ POH.');
   r.ok = !r.checks.some(c => c.lvl === 'bad');
   if (!r.checks.some(c => c.lvl !== 'info')) chk('ok', 'All weight, centre of gravity and fuel limits checked.', 'كل حدود الوزن ومركز الثقل والوقود مفحوصة.');
@@ -2391,11 +2402,11 @@ function b2Calc(S){
 /* ---------- build screen ---------- */
 let B2_RENDERED = '';
 function b2RenderInputs(){
-  const cfg = b2Cfg(), key = AC.reg + '|' + S.b2.cfg + '|' + LANG;
+  const cfg = b2Cfg(), key = AC.reg + '|' + S.b2.cfg + '|' + LANG + '|' + b2U();
   if (B2_RENDERED === key) return;
   B2_RENDERED = key;
   $('b2-cfg').innerHTML = Object.entries(AC.configs).map(([k, c]) => `<option value="${k}">${esc(c.label)}</option>`).join('');
-  $('b2-seats').innerHTML = cfg.stations.map(s => `<div class="f"><label for="b2s-${s.id}"><span class="zt">${s.zone}</span> ${esc(s.label)}</label><input id="b2s-${s.id}" class="num" dir="ltr" type="text" inputmode="decimal" placeholder="0" data-k="b2.st.${s.id}"><span class="hint">${fx(s.arm, 1)}" · ${sg(b2Ix(100, s.arm), 1)} / 100 lb</span></div>`).join('');
+  $('b2-seats').innerHTML = cfg.stations.map(s => `<div class="f"><label for="b2s-${s.id}"><span class="zt">${s.zone}</span> ${esc(s.label)}</label><input id="b2s-${s.id}" class="num" dir="ltr" type="text" inputmode="decimal" placeholder="0" data-k="b2.st.${s.id}"><span class="hint">${fx(s.arm, 1)}" · ${sg(b2Ix(100 / b2D(1), s.arm), 1)} / 100 ${b2U()}</span></div>`).join('');
   $('b2-map').innerHTML = b2CabinSVG(cfg);
   b2RenderLmc();
 }
@@ -2408,7 +2419,7 @@ function b2CabinSVG(cfg){
     <path d="M18 48 Q22 14 70 12 L440 12 Q470 12 498 40 L498 56 Q470 84 440 84 L70 84 Q22 82 18 48 Z" class="hull"/>
     <rect x="${x(126) - 16}" y="26" width="30" height="44" rx="6" class="ck"/><text x="${x(126) - 1}" y="52" class="lb">CREW</text>
     ${seats.map(s => `<g class="seat" data-st="${s.id}"><rect x="${pos[s.id].x - 13}" y="${pos[s.id].y - 10}" width="${s.id === 'STR' ? 60 : 26}" height="${s.id === 'STR' ? 34 : 20}" rx="4"/><text x="${pos[s.id].x + (s.id === 'STR' ? 17 : 0)}" y="${pos[s.id].y + (s.id === 'STR' ? 11 : 4)}">${s.id === 'STR' ? 'STRETCHER' : s.id.replace('S', '')}</text></g>`).join('')}
-    <rect x="${x(325) - 26}" y="28" width="52" height="40" rx="6" class="hold"/><text x="${x(325)}" y="46" class="lb">BAGGAGE</text><text x="${x(325)}" y="58" class="lb">MAX ${AC.hold.max}</text>
+    <rect x="${x(325) - 26}" y="28" width="52" height="40" rx="6" class="hold"/><text x="${x(325)}" y="46" class="lb">BAGGAGE</text><text x="${x(325)}" y="58" class="lb">MAX ${R(b2D(AC.hold.max))}</text>
   </svg>`;
 }
 function b2RenderLmc(){
@@ -2417,7 +2428,7 @@ function b2RenderLmc(){
   if (!S.b2.lmc.length){ box.innerHTML = `<div class="empty">${t('lmcEmpty')}</div>`; return; }
   box.innerHTML = S.b2.lmc.map((l, i) => `<div class="lmc-row b2l">
     <div class="f"><label for="b2l${i}s">${t('b2Where')}</label><select id="b2l${i}s" data-b2lmc="${i}" data-f="st">${opt(opts, l.st)}</select></div>
-    <div class="f"><label for="b2l${i}w">± lb</label><input id="b2l${i}w" class="num" dir="ltr" type="text" inputmode="decimal" data-b2lmc="${i}" data-f="w" value="${esc(l.w)}"></div>
+    <div class="f"><label for="b2l${i}w">± ${b2U()}</label><input id="b2l${i}w" class="num" dir="ltr" type="text" inputmode="decimal" data-b2lmc="${i}" data-f="w" value="${esc(l.w)}"></div>
     <button class="x" data-b2del="${i}" aria-label="${t('remove')}">✕</button></div>`).join('');
 }
 document.addEventListener('input', e => {
@@ -2434,28 +2445,30 @@ document.addEventListener('click', e => {
 function b2Update(){
   b2Norm(S);
   b2RenderInputs();
-  const r = RES = b2Calc(S), F = r.fuel, gal = F.unit === 'gal', u = gal ? 'US gal' : 'lb';
-  const L = n => R(n).toLocaleString('en-US');
-  $('b2-bew').textContent = `${L(r.bew.w)} @ ${fx(r.bew.arm)}"`;
+  const r = RES = b2Calc(S), F = r.fuel, gal = F.unit === 'gal', w = b2U(), u = gal ? 'US gal' : w;
+  const L = n => R(b2D(n)).toLocaleString('en-US');
+  document.querySelectorAll('.b2wu').forEach(e => e.textContent = w);
+  $('b2-unit').options[0].textContent = w; $('b2-wu').value = w;
+  $('b2-bew').textContent = `${L(r.bew.w)} ${w} @ ${fx(r.bew.arm)}"`;
   $('b2-dow').textContent = L(r.dow); $('b2-doi').textContent = fx(r.doi, 1);
-  $('b2-dowsum').textContent = `DOW ${L(r.dow)} lb · DOI ${fx(r.doi, 1)}`;
-  $('b2-paxsum').textContent = t('b2PaxSum', r.pax.n, L(r.pax.w), L(r.hold.w));
+  $('b2-dowsum').textContent = `DOW ${L(r.dow)} ${w} · DOI ${fx(r.doi, 1)}`;
+  $('b2-paxsum').textContent = t('b2PaxSum', r.pax.n, L(r.pax.w), L(r.hold.w), w);
   const m = $('b2-holdMeter'); m.classList.toggle('over', r.hold.w > AC.hold.max); m.firstElementChild.style.width = Math.min(100, r.hold.w / AC.hold.max * 100) + '%';
-  $('b2-holdTot').textContent = `${L(r.hold.w)} / ${AC.hold.max} lb`;
+  $('b2-holdTot').textContent = `${L(r.hold.w)} / ${L(AC.hold.max)} ${w}`;
   document.querySelectorAll('#b2-map .seat').forEach(g => g.classList.toggle('on', num(S.b2.st[g.dataset.st]) > 0));
   // fuel
   document.querySelectorAll('.b2u').forEach(e => e.textContent = u);
   $('b2-dens').disabled = S.b2.fuel.densType !== 'act';
   if (S.b2.fuel.densType !== 'act') $('b2-dens').value = AC.fuel.densStd;
-  $('b2-tof').value = gal ? fx(F.tof / F.dens, 1) : R(F.tof);
-  $('b2-fuelHint').textContent = gal ? t('b2FuelLb', L(F.block), L(F.tof), L(F.trip), fx(F.dens, 2)) : t('b2FuelGal', fx(F.gal, 1), fx(F.dens, 2));
-  $('b2-fuelsum').innerHTML = `<b class="ldg-fuel">${esc(t('fuelSum', 0, L(F.ldg) + ' lb'))}</b>`;
-  $('b2-lmcsum').textContent = r.lmc.any ? `${r.lmc.net >= 0 ? '+' : '−'}${L(Math.abs(r.lmc.net))} lb · index ${sg(r.lmc.ix, 1)}` : t('lmcNone');
+  $('b2-tof').value = gal ? fx(F.tof / F.dens, 1) : fx(b2D(F.tof), b2Kg() ? 1 : 0);
+  $('b2-fuelHint').textContent = gal ? t('b2FuelLb', L(F.block), L(F.tof), L(F.trip), fx(F.dens, 2), w) : t('b2FuelGal', fx(F.gal, 1), fx(F.dens, 2));
+  $('b2-fuelsum').innerHTML = `<b class="ldg-fuel">${esc(t('fuelSum', 0, L(F.ldg) + ' ' + w))}</b>`;
+  $('b2-lmcsum').textContent = r.lmc.any ? `${r.lmc.net >= 0 ? '+' : '−'}${L(Math.abs(r.lmc.net))} ${w} · index ${sg(r.lmc.ix, 1)}` : t('lmcNone');
   $('results').innerHTML = b2ResultsHTML(r);
-  $('dock').innerHTML = `<span class="s ${r.ok ? 'ok' : 'bad'}">${r.ok ? t('dockOk') : t('dockBad')}</span><span>TOW ${L(r.tow)} lb</span><span>CG ${fx(r.p.tow.cg, 1)}"</span><span>MAC ${fx(r.p.tow.mac, 1)}%</span>`;
+  $('dock').innerHTML = `<span class="s ${r.ok ? 'ok' : 'bad'}">${r.ok ? t('dockOk') : t('dockBad')}</span><span>TOW ${L(r.tow)} ${w}</span><span>CG ${fx(r.p.tow.cg, 1)}"</span><span>MAC ${fx(r.p.tow.mac, 1)}%</span>`;
   const sh = b2Sheet(r);
   $('sheetView').innerHTML = sh; $('printRoot').innerHTML = sh;
-  const bn = document.querySelector('[data-th=sheetBanner]'); if (bn) bn.innerHTML = t('b2Banner');
+  const bn = document.querySelector('[data-th=sheetBanner]'); if (bn) bn.innerHTML = t('b2Banner', w);
   $('sheetView').classList.remove('locked'); $('sheetLock').hidden = true;
   ['btnPrint', 'btnPrint2', 'btnPdf'].forEach(id => { $(id).disabled = false; $(id).title = ''; });
   $('ldmText').textContent = b2LdmText(r);
@@ -2465,14 +2478,14 @@ function b2Update(){
   if (ME) applyAccess();
 }
 
-/* ---------- messages (weights in pounds) ---------- */
+/* ---------- messages (weights in the chosen unit) ---------- */
 function b2Ver(){ return S.b2.cfg === 'amb' ? 'AMB' : 'Y' + b2Cfg().stations.length; }
 function b2LdmText(r){
   const fl = S.flt, crew = `${num(S.b2.crewN)}/0`;
   const lines = ['LDM',
     `${U(fl.no)}/${dd(fl.date)}.${AC.reg.replace('-','')}.${b2Ver()}.${crew}`,
-    `-${U(fl.to) || 'XXX'}.${r.pax.n}/0/0.T${R(r.hold.w)}.1/${R(r.hold.w)}.PAX/${r.pax.n}.PAD/0`,
-    `SI B${R(r.hold.w)}.C0.M0 BAG ${R(r.hold.pcs)}PCS WEIGHTS IN LB`];
+    `-${U(fl.to) || 'XXX'}.${r.pax.n}/0/0.T${R(b2D(r.hold.w))}.1/${R(b2D(r.hold.w))}.PAX/${r.pax.n}.PAD/0`,
+    `SI B${R(b2D(r.hold.w))}.C0.M0 BAG ${R(r.hold.pcs)}PCS WEIGHTS IN ${b2Kg() ? 'KG' : 'LB'}`];
   if (fl.si) lines.push(...String(fl.si).toUpperCase().split(/\n+/).filter(Boolean).map(l => 'SI ' + l));
   return lines.join('\n');
 }
@@ -2480,21 +2493,21 @@ function b2EdpText(r){
   const fl = S.flt, p = r.p, ed = String(num(fl.ed) || 1).padStart(2,'0'), L = k => r.limiting === k ? 'L' : ' ';
   const crew = `${num(S.b2.crewN)}/0`, o = [];
   o.push('L O A D S H E E T      CHECKED        APPROVED       EDNO');
-  o.push('ALL WEIGHTS IN POUNDS  ' + pad(U(fl.prep),15) + pad(U(fl.appr),15) + ed);
+  o.push((b2Kg() ? 'ALL WEIGHTS IN KILOS   ' : 'ALL WEIGHTS IN POUNDS  ') + pad(U(fl.prep),15) + pad(U(fl.appr),15) + ed);
   o.push('');
   o.push('FROM/TO    FLIGHT       A/C REG  VERSION  CREW  DATE     TIME');
   o.push(pad(`${U(fl.from)} ${U(fl.to)}`,11) + pad(`${U(fl.no)}/${dd(fl.date)}`,13) + pad(AC.reg.replace('-',''),9) + pad(b2Ver(),9) + pad(crew,6) + pad(dmy(fl.date),9) + (fl.time || ''));
   o.push(pad('',26) + 'WEIGHT   DISTRIBUTION');
-  o.push(pad('LOAD IN COMPARTMENTS',26) + lpad(R(r.hold.w),6) + '   ' + `1/${R(r.hold.w)}`);
-  o.push(pad('PASSENGER/CABIN BAG',26) + lpad(R(r.pax.w),6) + '   ' + `${r.pax.n}/0/0  TTL ${r.pax.n} CAB 0`);
+  o.push(pad('LOAD IN COMPARTMENTS',26) + lpad(R(b2D(r.hold.w)),6) + '   ' + `1/${R(b2D(r.hold.w))}`);
+  o.push(pad('PASSENGER/CABIN BAG',26) + lpad(R(b2D(r.pax.w)),6) + '   ' + `${r.pax.n}/0/0  TTL ${r.pax.n} CAB 0`);
   o.push(pad('',35) + `PAX/${r.pax.n} SOC/0 BLKD 0`);
-  o.push(pad('TOTAL TRAFFIC LOAD',26) + lpad(R(r.ttl),6));
-  o.push(pad('DRY OPERATING WEIGHT',26) + lpad(R(r.dow),6));
-  o.push(pad('ZERO FUEL WEIGHT ACTUAL',26) + lpad(R(r.zfw),6) + ' MAX ' + lpad(AC.mzfw,6) + ' ' + L('A') + ' ADJ');
-  o.push(pad('TAKE OFF FUEL',26) + lpad(R(r.fuel.tof),6));
-  o.push(pad('TAKE OFF WEIGHT  ACTUAL',26) + lpad(R(r.tow),6) + ' MAX ' + lpad(R(r.allowed),6) + ' ' + L('B') + ' ADJ');
-  o.push(pad('TRIP FUEL',26) + lpad(R(r.fuel.trip),6));
-  o.push(pad('LANDING WEIGHT   ACTUAL',26) + lpad(R(r.lw),6) + ' MAX ' + lpad(AC.mlw,6) + ' ' + L('C') + ' ADJ');
+  o.push(pad('TOTAL TRAFFIC LOAD',26) + lpad(R(b2D(r.ttl)),6));
+  o.push(pad('DRY OPERATING WEIGHT',26) + lpad(R(b2D(r.dow)),6));
+  o.push(pad('ZERO FUEL WEIGHT ACTUAL',26) + lpad(R(b2D(r.zfw)),6) + ' MAX ' + lpad(R(b2D(AC.mzfw)),6) + ' ' + L('A') + ' ADJ');
+  o.push(pad('TAKE OFF FUEL',26) + lpad(R(b2D(r.fuel.tof)),6));
+  o.push(pad('TAKE OFF WEIGHT  ACTUAL',26) + lpad(R(b2D(r.tow)),6) + ' MAX ' + lpad(R(b2D(AC.mtow)),6) + ' ' + L('B') + ' ADJ');
+  o.push(pad('TRIP FUEL',26) + lpad(R(b2D(r.fuel.trip)),6));
+  o.push(pad('LANDING WEIGHT   ACTUAL',26) + lpad(R(b2D(r.lw)),6) + ' MAX ' + lpad(R(b2D(AC.mlw)),6) + ' ' + L('C') + ' ADJ');
   o.push('');
   o.push(pad('BALANCE AND SEATING CONDITIONS',38) + 'LAST MINUTE CHANGES');
   const bal = [
@@ -2504,12 +2517,12 @@ function b2EdpText(r){
     `ILAW     ${lpad(fx(p.lw.ix,1),6)}   CG ${lpad(fx(p.lw.cg),6)} MAC ${fx(p.lw.mac,1)}`,
     `SEATING ${Object.entries(r.zones).map(([z, v]) => z + '/' + v.n).join(' ')}`
   ];
-  const lm = ['DEST  SPECIFICATION  +/-  WEIGHT', ...r.lmc.rows.filter(x => x.w).map(x => pad(U(fl.to),6) + pad(x.st === AC.hold.id ? 'HOLD 1' : 'SEAT ' + x.st,15) + pad(x.w >= 0 ? '+' : '-',5) + R(Math.abs(x.w)))];
+  const lm = ['DEST  SPECIFICATION  +/-  WEIGHT', ...r.lmc.rows.filter(x => x.w).map(x => pad(U(fl.to),6) + pad(x.st === AC.hold.id ? 'HOLD 1' : 'SEAT ' + x.st,15) + pad(x.w >= 0 ? '+' : '-',5) + R(b2D(Math.abs(x.w))))];
   for (let i = 0; i < Math.max(bal.length, lm.length); i++) o.push(pad(bal[i] || '', 38) + (lm[i] || ''));
   o.push('');
-  o.push(pad(`UNDERLOAD BEFORE LMC   ${R(r.under)}`,38) + `LMC TOTAL ${r.lmc.net >= 0 ? '+' : '-'} ${R(Math.abs(r.lmc.net))}`);
+  o.push(pad(`UNDERLOAD BEFORE LMC   ${R(b2D(r.under))}`,38) + `LMC TOTAL ${r.lmc.net >= 0 ? '+' : '-'} ${R(b2D(Math.abs(r.lmc.net)))}`);
   o.push('LOADMESSAGE AND CAPTAINS INFORMATION BEFORE LMC');
-  o.push(`TAXI WEIGHT ${R(r.ramp)}  TAXI FUEL ${R(r.fuel.taxi)}  TRIP ${R(r.fuel.trip)}  FUEL ${fx(r.fuel.gal,0)} USG @ ${fx(r.fuel.dens,2)}`);
+  o.push(`TAXI WEIGHT ${R(b2D(r.ramp))}  TAXI FUEL ${R(b2D(r.fuel.taxi))}  TRIP ${R(b2D(r.fuel.trip))}  FUEL ${fx(r.fuel.gal,0)} USG @ ${fx(r.fuel.dens,2)}`);
   o.push(...b2LdmText(r).split('\n').slice(2));
   o.push(`END LOADSHEET EDNO ${ed} ${U(fl.no)}/${dd(fl.date)} ${U(fl.from)} ${U(fl.to)}`);
   return o.join('\n');
@@ -2517,17 +2530,17 @@ function b2EdpText(r){
 
 /* ---------- results ---------- */
 function b2ResultsHTML(r){
-  const L = n => R(n).toLocaleString('en-US');
+  const L = n => R(b2D(n)).toLocaleString('en-US');
   const row = (lab, act, max, k) => { const m = max - act; return `<tr><td>${lab}${k && r.limiting === k ? '<span class="lim">L</span>' : ''}</td><td>${L(act)}</td><td>${L(max)}</td><td class="${m < 0 ? 'neg' : 'pos'}">${m < 0 ? '−' : '+'}${L(Math.abs(m))}</td></tr>`; };
   const bal = (lab, p) => `<tr><td>${lab}</td><td>${fx(p.ix, 1)}</td><td>${fx(p.cg, 2)}"</td><td>${fx(p.mac, 1)}%</td><td class="${p.ok ? 'pos' : 'neg'}">${fx(p.fwd, 1)}–${fx(p.aft, 1)}</td></tr>`;
   const bad = r.checks.filter(c => c.lvl === 'bad').length;
   return `
   <div class="status ${r.ok ? 'ok' : 'bad'}"><span class="dot"></span>${r.ok ? t('within') : t('notWithin')}<small>${r.ok ? t('ready') : t('issues', bad)}</small></div>
   <div class="sec">
-    <h2>${t('weights')} <span class="aux">lb</span></h2>
+    <h2>${t('weights')} <button type="button" class="wu-tg" data-b2wu title="lb ⇄ kg"><b>${b2U()}</b> ⇄ ${b2Kg() ? 'lb' : 'kg'}</button></h2>
     <table class="w">
       <tr><th></th><th>${t('actual')}</th><th>${t('max')}</th><th>${t('margin')}</th></tr>
-      ${row('ZFW', r.zfw, AC.mzfw, 'A')}${row('TOW', r.tow, r.allowed, '')}${row('LW', r.lw, AC.mlw, 'C')}${row('Ramp', r.ramp, AC.mrw, '')}
+      ${row('ZFW', r.zfw, AC.mzfw, 'A')}${row('TOW', r.tow, AC.mtow, 'B')}${row('LW', r.lw, AC.mlw, 'C')}${row('Ramp', r.ramp, AC.mrw, '')}
     </table>
     <div class="kv"><span>${t('traffic')} <b>${L(r.ttl + r.lmc.net)}</b></span><span>${t('allowed')} <b>${L(r.atl)}</b></span>
       <span>${t('under')} <b style="color:${r.under < 0 ? 'var(--bad)' : 'var(--ok)'}">${L(r.under)}</b></span>
@@ -2541,24 +2554,25 @@ function b2ResultsHTML(r){
       ${bal('ZFW', r.p.zfw)}${bal('TOW', r.p.tow)}${bal('LW', r.p.lw)}
     </table>
   </div>
-  <div class="sec chart"><h2>${t('envelope')} <span class="aux">CG (in) × lb</span></h2>${b2Chart(r)}
+  <div class="sec chart"><h2>${t('envelope')} <span class="aux">CG (in) × ${b2U()}</span></h2>${b2Chart(r)}
     <div class="legend"><span><i style="background:var(--zfw)"></i>ZFW</span><span><i style="background:var(--tow)"></i>TOW</span><span><i style="background:var(--law)"></i>LW</span></div></div>
   <div class="sec"><h2>${t('checks')}</h2><ul class="checks">${r.checks.map(c => `<li class="${c.lvl === 'info' ? 'warn' : c.lvl}">${esc(LANG === 'ar' ? c.ar : c.en)}</li>`).join('')}</ul></div>`;
 }
 function b2Chart(r){
-  const X0 = 178, X1 = 199, Y0 = 7000, Y1 = 13000, W = 360, H = 250, l = 40, tp = 12, rw = 14, bt = 30;
-  const X = c => l + (c - X0) / (X1 - X0) * (W - l - rw), Y = w => tp + (Y1 - w) / (Y1 - Y0) * (H - tp - bt);
+  const X0 = 178, X1 = 199, Y0 = 7000, Y1 = 13000, W = 360, H = 250, l = 40, tp = 12, rw = 14, bt = 30, kg = b2Kg();
+  const X = c => l + (c - X0) / (X1 - X0) * (W - l - rw), Y = w => tp + (Y1 - w) / (Y1 - Y0) * (H - tp - bt);   // w in lb
   const f = AC.cg.fwd, env = [[AC.cg.aft, AC.minW], [AC.cg.aft, AC.mtow], ...[...f].reverse().filter(p => p[0] <= AC.mtow).map(p => [p[1], p[0]])];
   const envZ = [[AC.cg.aft, AC.minW], [AC.cg.aft, AC.mzfw], [b2Fwd(AC.mzfw), AC.mzfw], ...[...f].reverse().filter(p => p[0] < AC.mzfw).map(p => [p[1], p[0]])];
   let g = '';
   for (let c = 180; c <= 198; c += 2) g += `<line x1="${X(c)}" y1="${tp}" x2="${X(c)}" y2="${H - bt}" class="gl"/><text x="${X(c)}" y="${H - bt + 13}" class="tk">${c}</text>`;
-  for (let w = 7000; w <= 13000; w += 1000) g += `<line x1="${l}" y1="${Y(w)}" x2="${W - rw}" y2="${Y(w)}" class="gl"/><text x="${l - 5}" y="${Y(w) + 3}" class="tk" style="text-anchor:end">${w / 1000}k</text>`;
+  if (kg) for (let w = 3500; w <= 5800; w += 500) g += `<line x1="${l}" y1="${Y(w / LB_KG)}" x2="${W - rw}" y2="${Y(w / LB_KG)}" class="gl"/><text x="${l - 5}" y="${Y(w / LB_KG) + 3}" class="tk" style="text-anchor:end">${(w / 1000).toFixed(1)}k</text>`;
+  else for (let w = 7000; w <= 13000; w += 1000) g += `<line x1="${l}" y1="${Y(w)}" x2="${W - rw}" y2="${Y(w)}" class="gl"/><text x="${l - 5}" y="${Y(w) + 3}" class="tk" style="text-anchor:end">${w / 1000}k</text>`;
   const poly = p => p.map(([c, w]) => `${X(c).toFixed(1)},${Y(w).toFixed(1)}`).join(' ');
   const dot = (p, col, lab) => p.W > 0 ? `<circle cx="${X(p.cg).toFixed(1)}" cy="${Y(p.W).toFixed(1)}" r="4.2" fill="${col}" stroke="#fff" stroke-width="1.2"/><text x="${(X(p.cg) + 7).toFixed(1)}" y="${(Y(p.W) + 3).toFixed(1)}" class="pl">${lab}</text>` : '';
   return `<svg viewBox="0 0 ${W} ${H}" class="env b2env" role="img" aria-label="CG envelope">${g}
     <polygon points="${poly(env)}" class="envT"/><polygon points="${poly(envZ)}" class="envZ"/>
-    <line x1="${l}" y1="${Y(AC.mzfw)}" x2="${W - rw}" y2="${Y(AC.mzfw)}" class="lim"/><text x="${W - rw - 2}" y="${Y(AC.mzfw) - 3}" class="tk" style="text-anchor:end">MZFW ${AC.mzfw.toLocaleString('en-US')}</text>
-    <line x1="${l}" y1="${Y(AC.mtow)}" x2="${W - rw}" y2="${Y(AC.mtow)}" class="lim"/><text x="${W - rw - 2}" y="${Y(AC.mtow) - 3}" class="tk" style="text-anchor:end">MTOW ${AC.mtow.toLocaleString('en-US')}</text>
+    <line x1="${l}" y1="${Y(AC.mzfw)}" x2="${W - rw}" y2="${Y(AC.mzfw)}" class="lim"/><text x="${W - rw - 2}" y="${Y(AC.mzfw) - 3}" class="tk" style="text-anchor:end">MZFW ${R(b2D(AC.mzfw)).toLocaleString('en-US')}</text>
+    <line x1="${l}" y1="${Y(AC.mtow)}" x2="${W - rw}" y2="${Y(AC.mtow)}" class="lim"/><text x="${W - rw - 2}" y="${Y(AC.mtow) - 3}" class="tk" style="text-anchor:end">MTOW ${R(b2D(AC.mtow)).toLocaleString('en-US')}</text>
     <polyline points="${[r.p.zfw, r.p.tow].filter(p => p.W > 0).map(p => `${X(p.cg).toFixed(1)},${Y(p.W).toFixed(1)}`).join(' ')}" class="path"/>
     ${dot(r.p.zfw, 'var(--zfw)', 'ZFW')}${dot(r.p.lw, 'var(--law)', 'LW')}${dot(r.p.tow, 'var(--tow)', 'TOW')}
     <text x="${(l + W - rw) / 2}" y="${H - 4}" class="tk">CG (inches aft of datum)</text></svg>`;
@@ -2567,7 +2581,7 @@ function b2Chart(r){
 /* ---------- the B200 Load & Trim sheet (drawn; values in the preparer's hand) ---------- */
 const WHITE_BG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
 function b2Sheet(r){
-  const fl = S.flt, cfg = b2Cfg(), L = n => R(n).toLocaleString('en-US'), L1 = n => (Math.round(n * 10) / 10).toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const fl = S.flt, cfg = b2Cfg(), U2 = b2U().toUpperCase(), L = n => R(b2D(n)).toLocaleString('en-US'), L1 = n => (Math.round(b2D(n) * 10) / 10).toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
   const up = v => String(v || '').toUpperCase();
   let o = '';
   const T = (x, y, s, sz = 6.2, w = 400, a = 'start', cls = 'fm') => `<text x="${x}" y="${y}" class="${cls}" style="font-size:${sz}px;font-weight:${w}" text-anchor="${a}">${esc(s)}</text>`;
@@ -2588,12 +2602,12 @@ function b2Sheet(r){
   cols.forEach(([lab, w]) => { o += box(cx, fy, w, 26) + T(cx + 3, fy + 7, lab, 5.2, 700); cx += w; });
   cx = fx0; const fv = [AC.reg, `B200 / ${AC.sn}`, up(fl.no), dmy(fl.date), up(fl.from), up(fl.to), `${fl.time || ''} / ${fl.ed || 1}`];
   fv.forEach((v, i) => { if (i < 2) o += T(cx + 3, fy + 20, v, 7, 700); else o += P(cx + cols[i][1] / 2, fy + 21.5, v, 8, 'middle'); cx += cols[i][1]; });
-  o += T(cx + 3, fy + 20, 'POUNDS (LB)', 6.4, 700);
+  o += T(cx + 3, fy + 20, b2Kg() ? 'KILOGRAMS (KG)' : 'POUNDS (LB)', 6.4, 700);
 
   // left table
   const X0 = 28, X1 = 186, X2 = 236, X3 = 280, rh = cfg.stations.length > 5 ? 15.4 : 17;
   let y = 110;
-  o += HB(X0, y, X3 - X0, 14, 'LOADSHEET ITEM / ZONE') + T(X2 - 4, y + 9.3, 'WEIGHT (LB)', 5.6, 700, 'end', 'fm wh') + T(X3 - 4, y + 9.3, 'ARM / MAX', 5.6, 700, 'end', 'fm wh');
+  o += HB(X0, y, X3 - X0, 14, 'LOADSHEET ITEM / ZONE') + T(X2 - 4, y + 9.3, `WEIGHT (${U2})`, 5.6, 700, 'end', 'fm wh') + T(X3 - 4, y + 9.3, 'ARM / MAX', 5.6, 700, 'end', 'fm wh');
   y += 14;
   const line = (lab, w, arm, bold, shade) => {
     let s = (shade ? `<rect x="${X0}" y="${y}" width="${X3 - X0}" height="${rh}" fill="#EEF2F8"/>` : '') + box(X0, y, X3 - X0, rh, 'none', 0.4) + vl(X1, y, y + rh) + vl(X2, y, y + rh);
@@ -2603,12 +2617,12 @@ function b2Sheet(r){
     y += rh; return s;
   };
   o += line('Basic Empty Weight (BEW)', L1(r.bew.w), fx(r.bew.arm) + '"');
-  o += line(`Crew (${num(S.b2.crewN)} × ${L(num(S.b2.crewWt))} lb)`, L1(r.crew.w), fx(AC.crew.arm) + '"');
+  o += line(`Crew (${num(S.b2.crewN)} × ${fx(num(S.b2.crewWt), b2Kg() ? 1 : 0)} ${b2U()})`, L1(r.crew.w), fx(AC.crew.arm) + '"');
   o += line('Flight Kit / Catering', L1(r.kit.w), fx(AC.kit.arm) + '"');
   o += line('DRY OPERATING WEIGHT (DOW)', L1(r.dow), '', true, true) + T(X2 + 3, y - rh + 8.8, 'DOI', 5.4, 700) + P(X3 - 3, y - 3, fx(r.doi, 1), 7.6);
   o += HB(X0, y, X3 - X0, 12, 'CABIN & HOLD TRAFFIC LOAD'); y += 12;
   r.st.forEach(s => { o += line(`${s.zone}: ${s.label}`, s.w ? L1(s.w) : '', fx(s.arm, 1) + '"'); });
-  o += line(`Hold 1: Aft Baggage (${r.hold.pcs || 0} pcs)`, r.hold.w ? L1(r.hold.w) : 'NIL', `Max ${AC.hold.max}`);
+  o += line(`Hold 1: Aft Baggage (${r.hold.pcs || 0} pcs)`, r.hold.w ? L1(r.hold.w) : 'NIL', `Max ${L(AC.hold.max)}`);
   o += line(`TOTAL TRAFFIC LOAD (${r.pax.n} PAX)`, L1(r.ttl), '', true, true);
   if (r.lmc.any) o += line('LMC (net)', (r.lmc.net >= 0 ? '+' : '−') + L1(Math.abs(r.lmc.net)), '');
   o += line('ZERO FUEL WEIGHT (ZFW)', L1(r.zfw), L(AC.mzfw), true, true);
@@ -2633,7 +2647,7 @@ function b2Sheet(r){
 
   // LMC
   y += 6;
-  o += HB(X0, y, X3 - X0, 12, `LAST MINUTE CHANGES (MAX ±${AC.lmcMax} LB)`) + T(226, y + 8.5, '± LB', 5.6, 700, 'middle', 'fm wh') + T(262, y + 8.5, 'Δ INDEX', 5.6, 700, 'middle', 'fm wh'); y += 12;
+  o += HB(X0, y, X3 - X0, 12, `LAST MINUTE CHANGES (MAX ±${L(AC.lmcMax)} ${U2})`) + T(226, y + 8.5, '± ' + U2, 5.6, 700, 'middle', 'fm wh') + T(262, y + 8.5, 'Δ INDEX', 5.6, 700, 'middle', 'fm wh'); y += 12;
   const lm = r.lmc.rows.filter(l => l.w).slice(0, 3);
   for (let i = 0; i < 3; i++){
     const l = lm[i]; o += box(X0, y, X3 - X0, rh, 'none', 0.4) + vl(205, y, y + rh) + vl(245, y, y + rh);
@@ -2663,12 +2677,12 @@ function b2Sheet(r){
   o += box(RX, ry, RW, 12, '#EEF2F8', 0.4) + T(RX + 3, ry + 8.3, 'INDEX SCALE', 5.4, 700);
   for (let i = 0; i <= IX1; i += 10){ o += T(IXX(i), ry + 8.3, String(i), 5, 400, 'middle'); }
   ry += 12;
-  const zones = [...new Set(cfg.stations.map(s => s.zone))].map(z => ({lab: `ZONE ${z}`, ix: r.zones[z] ? r.zones[z].ix : 0, per: b2Ix(100, cfg.stations.find(s => s.zone === z).arm)}));
-  const lad = [...zones, {lab: 'AFT HOLD 1', ix: r.hold.ix, per: b2Ix(100, AC.hold.arm)}, ...(r.lmc.any ? [{lab: 'LMC', ix: r.lmc.ix, per: null}] : []), {lab: 'FUEL (TOF)', ix: r.p.tow.ix - r.p.zfw.ix, per: null}];
+  const zones = [...new Set(cfg.stations.map(s => s.zone))].map(z => ({lab: `ZONE ${z}`, ix: r.zones[z] ? r.zones[z].ix : 0, per: b2Ix(100 / b2D(1), cfg.stations.find(s => s.zone === z).arm)}));
+  const lad = [...zones, {lab: 'AFT HOLD 1', ix: r.hold.ix, per: b2Ix(100 / b2D(1), AC.hold.arm)}, ...(r.lmc.any ? [{lab: 'LMC', ix: r.lmc.ix, per: null}] : []), {lab: 'FUEL (TOF)', ix: r.p.tow.ix - r.p.zfw.ix, per: null}];
   const lh = 16, ladTop = ry;
   let cur = r.doi, d = `M${IXX(cur).toFixed(1)} ${ry}`;
   lad.forEach(z => {
-    o += box(RX, ry, RW, lh, 'none', 0.35) + vl(lx0 - 2, ry, ry + lh, 0.35) + T(RX + 3, ry + 7, z.lab, 5.4, 700) + (z.per != null ? T(RX + 3, ry + 13, `${sg(z.per, 1)} / 100 lb`, 4.8, 400) : '');
+    o += box(RX, ry, RW, lh, 'none', 0.35) + vl(lx0 - 2, ry, ry + lh, 0.35) + T(RX + 3, ry + 7, z.lab, 5.4, 700) + (z.per != null ? T(RX + 3, ry + 13, `${sg(z.per, 1)} / 100 ${b2U()}`, 4.8, 400) : '');
     for (let i = 10; i < IX1; i += 10) o += `<line x1="${IXX(i)}" y1="${ry}" x2="${IXX(i)}" y2="${ry + lh}" stroke="#C9D3E3" stroke-width="0.3"/>`;
     const yc = ry + lh / 2; d += ` L${IXX(cur).toFixed(1)} ${yc}`; cur += z.ix; d += ` L${IXX(cur).toFixed(1)} ${yc}`; ry += lh;
   });
@@ -2681,14 +2695,15 @@ function b2Sheet(r){
   const EX = c => ex0 + (c - C0) / (C1 - C0) * (ex1 - ex0), EY = w => ey0 + (W1 - w) / (W1 - W0) * (ey1 - ey0);
   o += box(RX, ry - 4, RW, 262, 'none', 0.5);
   for (let c = 180; c <= 198; c += 2){ o += `<line x1="${EX(c)}" y1="${ey0}" x2="${EX(c)}" y2="${ey1}" stroke="#C9D3E3" stroke-width="0.3"/>` + T(EX(c), ey1 + 8, String(c), 5, 400, 'middle'); }
-  for (let w = 7000; w <= 13000; w += 500){ o += `<line x1="${ex0}" y1="${EY(w)}" x2="${ex1}" y2="${EY(w)}" stroke="#C9D3E3" stroke-width="${w % 1000 ? 0.2 : 0.35}"/>` + (w % 1000 ? '' : T(ex0 - 3, EY(w) + 2, (w).toLocaleString('en-US'), 4.8, 400, 'end')); }
+  if (b2Kg()) for (let k = 3200; k <= 5900; k += 100){ const w = k / LB_KG; o += `<line x1="${ex0}" y1="${EY(w)}" x2="${ex1}" y2="${EY(w)}" stroke="#C9D3E3" stroke-width="${k % 500 ? 0.2 : 0.35}"/>` + (k % 500 ? '' : T(ex0 - 3, EY(w) + 2, k.toLocaleString('en-US'), 4.8, 400, 'end')); }
+  else for (let w = 7000; w <= 13000; w += 500){ o += `<line x1="${ex0}" y1="${EY(w)}" x2="${ex1}" y2="${EY(w)}" stroke="#C9D3E3" stroke-width="${w % 1000 ? 0.2 : 0.35}"/>` + (w % 1000 ? '' : T(ex0 - 3, EY(w) + 2, (w).toLocaleString('en-US'), 4.8, 400, 'end')); }
   const fw = AC.cg.fwd, envP = [[AC.cg.aft, AC.minW], [AC.cg.aft, AC.mtow], ...[...fw].reverse().filter(p => p[0] <= AC.mtow).map(p => [p[1], p[0]])];
   o += `<polygon points="${envP.map(([c, w]) => `${EX(c).toFixed(1)},${EY(w).toFixed(1)}`).join(' ')}" fill="rgba(46,125,80,.10)" stroke="#2E7D50" stroke-width="0.9"/>`;
-  o += `<line x1="${ex0}" y1="${EY(AC.mzfw)}" x2="${ex1}" y2="${EY(AC.mzfw)}" stroke="#2747A8" stroke-width="0.6" stroke-dasharray="3 2"/>` + T(ex1 - 2, EY(AC.mzfw) - 2.5, `MAX ZFW ${AC.mzfw.toLocaleString('en-US')} LB`, 4.8, 700, 'end', 'fm ac');
-  o += `<line x1="${ex0}" y1="${EY(AC.mtow)}" x2="${ex1}" y2="${EY(AC.mtow)}" stroke="#A3151B" stroke-width="0.6" stroke-dasharray="3 2"/>` + T(ex1 - 2, EY(AC.mtow) - 2.5, `MTOW / MLW ${AC.mtow.toLocaleString('en-US')} LB`, 4.8, 700, 'end', 'fm rd');
+  o += `<line x1="${ex0}" y1="${EY(AC.mzfw)}" x2="${ex1}" y2="${EY(AC.mzfw)}" stroke="#2747A8" stroke-width="0.6" stroke-dasharray="3 2"/>` + T(ex1 - 2, EY(AC.mzfw) - 2.5, `MAX ZFW ${L(AC.mzfw)} ${U2}`, 4.8, 700, 'end', 'fm ac');
+  o += `<line x1="${ex0}" y1="${EY(AC.mtow)}" x2="${ex1}" y2="${EY(AC.mtow)}" stroke="#A3151B" stroke-width="0.6" stroke-dasharray="3 2"/>` + T(ex1 - 2, EY(AC.mtow) - 2.5, `MTOW / MLW ${L(AC.mtow)} ${U2}`, 4.8, 700, 'end', 'fm rd');
   [[AC.cg.aft, 'AFT LIMIT'], [181, 'FWD 181.0']].forEach(([c, s]) => { o += T(EX(c), ey0 + 6, s, 4.6, 700, 'middle', 'fm gr'); });
   o += T((ex0 + ex1) / 2, ey1 + 16, 'CG — INCHES AFT OF DATUM   ·   MAC 70.41"  LEMAC 171.23"', 4.8, 700, 'middle');
-  o += `<text x="${RX + 8}" y="${(ey0 + ey1) / 2}" class="fm" style="font-size:5px;font-weight:700" transform="rotate(-90 ${RX + 8} ${(ey0 + ey1) / 2})" text-anchor="middle">AIRCRAFT WEIGHT (LB)</text>`;
+  o += `<text x="${RX + 8}" y="${(ey0 + ey1) / 2}" class="fm" style="font-size:5px;font-weight:700" transform="rotate(-90 ${RX + 8} ${(ey0 + ey1) / 2})" text-anchor="middle">AIRCRAFT WEIGHT (${U2})</text>`;
   const pts = [['ZFW', r.p.zfw], ['TOW', r.p.tow], ['LDW', r.p.lw]].filter(([, p]) => p.W > 0);
   if (pts.length > 1) o += `<path class="tr" d="M${EX(r.p.zfw.cg).toFixed(1)} ${EY(r.p.zfw.W).toFixed(1)} L${EX(r.p.tow.cg).toFixed(1)} ${EY(r.p.tow.W).toFixed(1)}"/>`;
   pts.forEach(([k, p], i) => { o += `<circle class="pt" cx="${EX(p.cg).toFixed(1)}" cy="${EY(p.W).toFixed(1)}" r="2.2"/>` + P(EX(p.cg) + (p.cg > 192 ? -5 : 5), EY(p.W) + (k === 'LDW' ? 9 : -2), `${k} ${fx(p.mac, 1)}%`, 6.6, p.cg > 192 ? 'end' : 'start', p.ok ? '' : 'red'); });
@@ -2713,6 +2728,22 @@ function b2Sheet(r){
   o += hl(28, 567, 793, 0.4);
   return page(WHITE_BG, o, 'B200 Load & Trim sheet');
 }
+
+/* ---------- weight unit: lb ⇄ kg (all entered weights convert, the calculation stays in pounds) ---------- */
+function b2SetWU(u){
+  if (!isB2() || (S.b2.wu || 'lb') === u) return;
+  const f = u === 'kg' ? LB_KG : 1 / LB_KG, b = S.b2;
+  const cv = v => (v === '' || v == null) ? v : +(num(v) * f).toFixed(u === 'kg' ? 2 : 1);
+  b.crewWt = cv(b.crewWt); b.kit = cv(b.kit); b.bag = cv(b.bag);
+  Object.keys(b.st).forEach(k => b.st[k] = cv(b.st[k]));
+  b.lmc.forEach(l => l.w = cv(l.w));
+  if (b.fuel.unit !== 'gal') ['block', 'taxi', 'trip'].forEach(k => b.fuel[k] = cv(b.fuel[k]));
+  b.wu = u;
+  try { localStorage.setItem('lxx-b2wu', u); } catch(e){}
+  update(); fillInputs(); update();
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-b2wu]')) b2SetWU(b2Kg() ? 'lb' : 'kg'); });
+document.addEventListener('change', e => { if (e.target.id === 'b2-wu') b2SetWU(e.target.value); });
 
 const SUPA_URL = 'https://qkquhrpqcydbvpjhsczf.supabase.co', SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcXVocnBxY3lkYnZwamhzY3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3OTExMDIsImV4cCI6MjEwOTM2NzEwMn0.dwsvVvJIlDAnLkCdZzB94RQQk3YgfWRlqSsEdMZc7p0';
 const EMAIL_DOMAIN = 'libyanexpress-ops.github.io';
@@ -2929,7 +2960,7 @@ $('btnSave').onclick = async () => {
   const r = RES, fl = S.flt, b = $('btnSave');
   const row = {
     flight_no:(fl.no || '').toUpperCase(), flight_date:fl.date || null, route:`${(fl.from || '').toUpperCase()}-${(fl.to || '').toUpperCase()}`,
-    reg:AC.reg, summary:{pax:r.fin.pax.total, zfw:R(r.f.zfw), tow:R(r.f.tow), mac:fx(r.mac.tow,1), ok:r.ok, unit:isB2() ? 'lb' : 'kg'},
+    reg:AC.reg, summary:{pax:r.fin.pax.total, zfw:R(isB2() ? b2D(r.f.zfw) : r.f.zfw), tow:R(isB2() ? b2D(r.f.tow) : r.f.tow), mac:fx(r.mac.tow,1), ok:r.ok, unit:isB2() ? b2U() : 'kg'},
     state:JSON.parse(JSON.stringify({...S, reg:AC.reg})), saved_by:ME.username, saved_at:new Date().toISOString()
   };
   b.disabled = true;
